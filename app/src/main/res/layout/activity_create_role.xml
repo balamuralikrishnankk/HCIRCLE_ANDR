@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.nganthoi.salai.tabgen.CreateRoleActivity"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    android:padding="16dp"
+    android:fillViewport="true"
+    android:background="#f6f5f5">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:focusable="true"
+        android:focusableInTouchMode="true">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="Enter  the Role Name which you want to create"
+            android:id="@+id/role_name_textView"/>
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:id="@+id/role_name"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:hint="@string/role_name"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:layout_below="@+id/role_name_textView"
+            android:layout_marginTop="30dp"
+            android:background="@drawable/edittext_style" />
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_below="@+id/role_name"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="34dp"
+            android:id="@+id/linearLayout">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/SelectOrgUnit"
+                android:id="@+id/textView" />
+
+            <Spinner
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/OrgUnitList"
+                android:spinnerMode="dropdown" />
+        </LinearLayout>
+
+        <RadioGroup
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/linearLayout"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="20dp"
+            android:orientation="vertical"
+            android:id="@+id/CanAccessOtherOU">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/can_access_other_ou"
+                android:id="@+id/textView8" />
+
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/Yes"
+                android:id="@+id/caou_Yes"
+                android:checked="true"/>
+
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/No"
+                android:id="@+id/caou_No"
+                android:checked="false"/>
+        </RadioGroup>
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/create"
+            android:id="@+id/createRole"
+            android:layout_marginTop="40dp"
+            android:layout_below="@+id/CanAccessOtherOU"
+            android:layout_centerHorizontal="true"
+            android:background="@drawable/button_background"
+            android:textColor="#eeeaea" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Response Message"
+            android:id="@+id/respMsgForCreateRole"
+            android:layout_below="@+id/createRole"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="32dp" />
+    </RelativeLayout>
+</ScrollView>
+

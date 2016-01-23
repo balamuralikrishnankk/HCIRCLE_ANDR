@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item android:id="@+id/AddAdmin"
+            android:icon="@android:drawable/ic_input_add"
+            android:title="Create an Admin account"/>
+        <item android:id="@+id/CreateOrgUnit"
+            android:icon="@android:drawable/ic_menu_add"
+            android:title="Create an Organization Unit"/>
+        <item android:id="@+id/CreateOrganisation"
+            android:icon="@android:drawable/ic_input_get"
+            android:title="Create an Organisation"/>
+        <item android:id="@+id/findByOrgName"
+            android:icon="@android:drawable/ic_search_category_default"
+            android:title="Find Organisation by name"/>
+        <item android:id="@+id/CreateRole"
+            android:icon="@android:drawable/ic_input_get"
+            android:title="Create Role"/>
+        <item android:id="@+id/CreateUser"
+            android:icon="@drawable/user"
+            android:title="Create User"/>
+        <item android:id="@+id/CreateTabTemplate"
+            android:icon="@android:drawable/ic_input_get"
+            android:title="Create Tabs Template"/>
+    </group>
+
+    <item android:title="Setting">
+        <menu>
+            <item android:icon="@android:drawable/ic_menu_edit" android:id="@+id/editProfile"
+                android:title="Edit Profile" />
+            <item android:icon="@android:drawable/ic_lock_power_off" android:id="@+id/logout"
+                android:title="Logout" />
+        </menu>
+    </item>
+
+</menu>

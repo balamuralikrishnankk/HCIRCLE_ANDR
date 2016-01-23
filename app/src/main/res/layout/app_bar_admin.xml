@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:fitsSystemWindows="true"
+    tools:context="com.nganthoi.salai.tabgen.Admin">
+
+    <android.support.design.widget.AppBarLayout
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:theme="@style/AppTheme.AppBarOverlay">
+
+        <android.support.v7.widget.Toolbar android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:popupTheme="@style/AppTheme.PopupOverlay"
+            android:background="#943705" >
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingRight="@dimen/activity_horizontal_margin">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Admin Name"
+                    android:layout_centerVertical="true"
+                    android:layout_toLeftOf="@+id/userImage"
+                    android:layout_toStartOf="@+id/userImage"
+                    android:layout_marginRight="28dp"
+                    android:layout_marginEnd="10dp"
+                    android:id="@+id/user_admin" />
+                <ImageView
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:src="@drawable/user_profile"
+                    android:layout_alignParentRight="true"
+                    android:id="@+id/userImage" />
+            </RelativeLayout>
+        </android.support.v7.widget.Toolbar>
+        <!--android:background="?attr/colorPrimary"-->
+
+    </android.support.design.widget.AppBarLayout>
+
+    <include layout="@layout/content_admin" />
+
+    <android.support.design.widget.FloatingActionButton android:id="@+id/fab_admin"
+        android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end" android:layout_margin="@dimen/fab_margin"
+        android:src="@android:drawable/ic_dialog_info" />
+
+</android.support.design.widget.CoordinatorLayout>
