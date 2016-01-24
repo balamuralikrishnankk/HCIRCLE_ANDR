@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/my_custom_tab"
-    android:textColor="#919090"
+    android:textColor="#f2efef"
     android:textSize="14sp"
     android:fontFamily="@string/font_fontFamily_medium">
 

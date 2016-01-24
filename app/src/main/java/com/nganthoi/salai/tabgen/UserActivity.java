@@ -38,14 +38,18 @@ public class UserActivity extends AppCompatActivity
     private Toolbar toolbar;
     Context _context=this;
     String role;//role of the user
-    String[] templateArray;
     SharedPreference sp;
+    List<String> list;
+    Boolean chatExist=false,refExist=false,cmeExist=false,newsExist=false;
+    String tabArray[]=new String[4];
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+
         /*
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -82,37 +86,20 @@ public class UserActivity extends AppCompatActivity
         } catch (JSONException e) {
             System.out.println("Exception :" + e.toString());
         }
-
-        /*Code for getting list of templates*/
-        ConnectServer templateList = new ConnectServer("http://188.166.210.24/getTemplateListByRole.php");
-        String jsonStr = templateList.convertInputStreamToString(templateList.putData("Role="+role));
-        if(jsonStr!=null){
-            try {
-                JSONArray jsonArray = new JSONArray(jsonStr);
-                if (templateList.responseCode == 200) {
-                    JSONObject jsonObject;
-                    for(int i=0;i<jsonArray.length();i++){
-                        jsonObject = jsonArray.getJSONObject(i);
-                        templateArray[i]=jsonObject.getString("Template_Name");
-                    }
-                }else templateArray=null;
-            }catch(Exception e){
-                System.out.print("An Exception occurs here: "+e.toString());
-            }
-        }else templateArray=null;
-        /***************************************/
-
-
+        /*Getting List of templates*/
+        list = OrganisationDetails.getListOfTemplates(role);
         mViewPager = (ViewPager) findViewById(R.id.container);
         setupViewPager(mViewPager);
 
         tabLayout = (TabLayout) findViewById(R.id.tabLayout);
         tabLayout.setupWithViewPager(mViewPager);
-        try{
+
+        /*try{
             setTabLayoutIcons(tabLayout);
         }catch(Exception e){
-            System.out.print("TabLayout Exception: "+e.toString());
-        }
+            System.out.println("Layout Exception: " + e.toString());
+        }*/
+
         /*
         tabLayout.getTabAt(0).setIcon(R.drawable.chat);
         tabLayout.getTabAt(1).setIcon(R.drawable.reference);
@@ -172,7 +159,7 @@ public class UserActivity extends AppCompatActivity
         } else if (id == R.id.logout){
             logout();
         } else if(id == R.id.showTemplates){
-            //startActivity(new Intent(_context,ShowTemplateActivity.class));
+            startActivity(new Intent(_context,ShowTemplateActivity.class));
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -182,45 +169,58 @@ public class UserActivity extends AppCompatActivity
 
     private void setupViewPager(ViewPager viewPager) {
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
-        adapter.addFragment(new ChatFragment(), "\n CHATS");
-        adapter.addFragment(new ReferenceFragment(), "\n REFERENCES");
-        adapter.addFragment(new CmeFragment(), "\n CME");
-        adapter.addFragment(new LatestNewsFragment(), "\n LATEST NEWS");
+
+        for(int i=0;i<list.size();i++){
+            /*Adding tabs and fragments according to the Templates from the server*/
+            switch(list.get(i)){
+                case "Chat Template"://check if Chat template exist
+                    chatExist=true;
+                    if(chatExist) {
+                        adapter.addFragment(new ChatFragment(), "\nCHATS");
+                    }
+                    break;
+                case "Reference Template":
+                    refExist=true;
+                    if(refExist) adapter.addFragment(new ReferenceFragment(), "\nREFERENCES");
+                    break;
+                case "CME Template":
+                    cmeExist=true;
+                    if(cmeExist) adapter.addFragment(new CmeFragment(),"\nCME");
+                    break;
+                case "Latest News Template":
+                    newsExist=true;
+                    if(newsExist) adapter.addFragment(new LatestNewsFragment(),"\nLATEST NEWS");
+                    break;
+            }
+        }
         viewPager.setAdapter(adapter);
     }
 
-    private void setTabLayoutIcons(TabLayout tabLayout) throws NullPointerException{
-        try{
-            TextView chatView = (TextView) LayoutInflater.from(this).inflate(R.layout.custom_tab,null);
-            chatView.setText("CHAT");
-            chatView.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.chat_icon, 0, 0);
-            tabLayout.getTabAt(0).setCustomView(chatView);
-        }catch(Exception e){
-            System.out.println("Unable to view chat layout: "+e.toString());
+    private void setTabLayoutIcons(TabLayout tabLayout) throws Exception{
+        TextView textView = (TextView) LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
+        if (chatExist) {
+            textView.setText("CHAT");
+            textView.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.chat_icon, 0, 0);
+            //tabLayout.getTabAt(0).setCustomView(chatView);
+            System.out.println(tabLayout.getTabAt(0).toString());
         }
-        try {
-            TextView refView = (TextView) LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
-            refView.setText("REFERENCE");
-            refView.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.refer_icon, 0, 0);
-            tabLayout.getTabAt(1).setCustomView(refView);
-        }catch(Exception e){
-            System.out.println("Unable to view reference layout: "+e.toString());
+        if(refExist) {
+            textView.setText("REFERENCE");
+            textView.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.refer_icon, 0, 0);
+            //tabLayout.getTabAt(1).setCustomView(refView);
+            System.out.println(tabLayout.getTabAt(1).toString());
         }
-        try {
-            TextView cmeView = (TextView) LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
-            cmeView.setText("CME");
-            cmeView.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.cms, 0, 0);
-            tabLayout.getTabAt(2).setCustomView(cmeView);
-        }catch(Exception e){
-            System.out.println("Unable to view CME layout: "+e.toString());
+        if(cmeExist) {
+            textView.setText("CME");
+            textView.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.cms, 0, 0);
+            //tabLayout.getTabAt(2).setCustomView(cmeView);
+            System.out.println(tabLayout.getTabAt(2).toString());
         }
-        try {
-            TextView newsView = (TextView) LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
-            newsView.setText("LATEST NEWS");
-            newsView.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.news_icon, 0, 0);
-            tabLayout.getTabAt(3).setCustomView(newsView);
-        }catch(Exception e){
-            System.out.println("Unable to view latest news Layout: "+e.toString());
+        if(newsExist){
+            textView.setText("LATEST NEWS");
+            textView.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.latest_news, 0, 0);
+            //tabLayout.getTabAt(3).setCustomView(newsView);
+            System.out.println(tabLayout.getTabAt(3).toString());
         }
         /*
         tabLayout.getTabAt(1).setIcon(R.drawable.reference);
@@ -280,7 +280,4 @@ public class UserActivity extends AppCompatActivity
         alertDialog.show();
     }
 
-    public void displayTemplates(){
-
-    }
 }
