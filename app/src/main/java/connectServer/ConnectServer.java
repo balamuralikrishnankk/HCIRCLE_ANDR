@@ -2,6 +2,8 @@ package connectServer;
 
 import android.os.StrictMode;
 
+import com.nganthoi.salai.tabgen.MainActivity;
+
 import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
@@ -14,6 +16,10 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.List;
+import java.util.Map;
+
+import sharePreference.SharedPreference;
 
 /**
  * Created by Lenovo on 30-Nov-15.
@@ -22,7 +28,7 @@ public class ConnectServer {
     //String API_URL="";
     InputStream isr=null;
     public int responseCode;
-    public String responseMessage, errorMessage;
+    public String responseMessage, errorMessage,TokenId=null;
     URL api_url=null;
     HttpURLConnection conn=null;
     public ConnectServer(String web_api){
@@ -46,7 +52,7 @@ public class ConnectServer {
             conn.connect();
             responseCode = conn.getResponseCode();
             responseMessage = conn.getResponseMessage();
-            System.out.println("Response Code: "+responseCode+"\nResponse message: "+responseMessage);
+            System.out.println("Response Code: " + responseCode + "\nResponse message: " + responseMessage);
             if(responseCode == 200/*HttpURLConnection.HTTP_OK*/){
                 isr = new BufferedInputStream(conn.getInputStream());
             }
@@ -120,6 +126,18 @@ public class ConnectServer {
             responseMessage = conn.getResponseMessage();
             System.out.println("Response Code: "+responseCode+"\nResponse message: "+responseMessage);
             if(responseCode == 200) {
+                //get all headers
+                Map<String, List<String>> map = conn.getHeaderFields();
+                for (Map.Entry<String, List<String>> entry : map.entrySet()) {
+                    System.out.println("Key : " + entry.getKey() +
+                            " ,Value : " + entry.getValue());
+                    if(entry.getKey()=="Token"){
+                        TokenId=entry.getValue().toString();
+                    }
+                }
+                //get header by 'key'
+                //String server = conn.getHeaderField("Server");
+
                 isr = new BufferedInputStream(conn.getInputStream());
             }
             else{

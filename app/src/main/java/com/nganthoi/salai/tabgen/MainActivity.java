@@ -18,6 +18,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.InputStream;
+import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -148,6 +149,7 @@ public class MainActivity extends Activity {
                     if(cs.responseCode==200){
                         progressDialog.dismiss();
                         sp.savePreference(context, json);
+                        sp.savePreference(context,"TOKEN",cs.TokenId);
                         switch(jObj.getString("roles")){
                             case "system_admin":
                                 intent = new Intent(context,SuperAdminActivity.class);

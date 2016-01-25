@@ -22,11 +22,28 @@ public class SharedPreference {
         editor.commit();
     }
 
+    public void savePreference(Context context,String key,String value){
+        SharedPreferences sharedPreferences;
+        SharedPreferences.Editor editor;
+        sharedPreferences = context.getSharedPreferences(PREFERENCE_NAME,Context.MODE_PRIVATE);
+        editor = sharedPreferences.edit();
+        editor.putString(key,value);
+        editor.commit();
+    }
+
     public String getPreference(Context context){
         String text;
         SharedPreferences sharedPreferences;
         sharedPreferences = context.getSharedPreferences(PREFERENCE_NAME,Context.MODE_PRIVATE);
         text = sharedPreferences.getString(PREFERENCE_KEY,null);
+        return text;
+    }
+
+    public String getPreference(Context context,String key){
+        String text;
+        SharedPreferences sharedPreferences;
+        sharedPreferences = context.getSharedPreferences(PREFERENCE_NAME,Context.MODE_PRIVATE);
+        text = sharedPreferences.getString(key,null);
         return text;
     }
 
