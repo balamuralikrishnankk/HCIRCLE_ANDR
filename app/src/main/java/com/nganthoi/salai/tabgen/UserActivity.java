@@ -21,14 +21,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import connectServer.ConnectServer;
 import sharePreference.SharedPreference;
 
 public class UserActivity extends AppCompatActivity
@@ -94,11 +92,11 @@ public class UserActivity extends AppCompatActivity
         tabLayout = (TabLayout) findViewById(R.id.tabLayout);
         tabLayout.setupWithViewPager(mViewPager);
 
-        /*try{
+        try{
             setTabLayoutIcons(tabLayout);
         }catch(Exception e){
             System.out.println("Layout Exception: " + e.toString());
-        }*/
+        }
 
         /*
         tabLayout.getTabAt(0).setIcon(R.drawable.chat);
@@ -174,22 +172,16 @@ public class UserActivity extends AppCompatActivity
             /*Adding tabs and fragments according to the Templates from the server*/
             switch(list.get(i)){
                 case "Chat Template"://check if Chat template exist
-                    chatExist=true;
-                    if(chatExist) {
-                        adapter.addFragment(new ChatFragment(), "\nCHATS");
-                    }
+                    adapter.addFragment(new ChatFragment(), "");
                     break;
                 case "Reference Template":
-                    refExist=true;
-                    if(refExist) adapter.addFragment(new ReferenceFragment(), "\nREFERENCES");
+                    adapter.addFragment(new ReferenceFragment(), "");
                     break;
                 case "CME Template":
-                    cmeExist=true;
-                    if(cmeExist) adapter.addFragment(new CmeFragment(),"\nCME");
+                    adapter.addFragment(new CmeFragment(),"");
                     break;
                 case "Latest News Template":
-                    newsExist=true;
-                    if(newsExist) adapter.addFragment(new LatestNewsFragment(),"\nLATEST NEWS");
+                    adapter.addFragment(new LatestNewsFragment(),"");
                     break;
             }
         }
@@ -197,31 +189,37 @@ public class UserActivity extends AppCompatActivity
     }
 
     private void setTabLayoutIcons(TabLayout tabLayout) throws Exception{
-        TextView textView = (TextView) LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
-        if (chatExist) {
-            textView.setText("CHAT");
-            textView.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.chat_icon, 0, 0);
-            //tabLayout.getTabAt(0).setCustomView(chatView);
-            System.out.println(tabLayout.getTabAt(0).toString());
+
+        for(int i=0;i<list.size();i++){
+            /*Adding tabs and fragments according to the Templates from the server*/
+            switch(list.get(i)){
+                case "Chat Template"://check if Chat template exist
+                    TextView chatView = (TextView) LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
+                    chatView.setText("CHAT");
+                    chatView.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.chat_icon, 0, 0);
+                    tabLayout.getTabAt(i).setCustomView(chatView);
+                    break;
+                case "Reference Template":
+                    TextView refView = (TextView) LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
+                    refView.setText("REFERENCE");
+                    refView.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.refer_icon, 0, 0);
+                    tabLayout.getTabAt(i).setCustomView(refView);
+                    break;
+                case "CME Template":
+                    TextView cmeView = (TextView) LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
+                    cmeView.setText("CME");
+                    cmeView.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.cms, 0, 0);
+                    tabLayout.getTabAt(i).setCustomView(cmeView);
+                    break;
+                case "Latest News Template":
+                    TextView newsView = (TextView) LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
+                    newsView.setText("LATEST NEWS");
+                    newsView.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.news_icon, 0, 0);
+                    tabLayout.getTabAt(i).setCustomView(newsView);
+                    break;
+            }
         }
-        if(refExist) {
-            textView.setText("REFERENCE");
-            textView.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.refer_icon, 0, 0);
-            //tabLayout.getTabAt(1).setCustomView(refView);
-            System.out.println(tabLayout.getTabAt(1).toString());
-        }
-        if(cmeExist) {
-            textView.setText("CME");
-            textView.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.cms, 0, 0);
-            //tabLayout.getTabAt(2).setCustomView(cmeView);
-            System.out.println(tabLayout.getTabAt(2).toString());
-        }
-        if(newsExist){
-            textView.setText("LATEST NEWS");
-            textView.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.latest_news, 0, 0);
-            //tabLayout.getTabAt(3).setCustomView(newsView);
-            System.out.println(tabLayout.getTabAt(3).toString());
-        }
+
         /*
         tabLayout.getTabAt(1).setIcon(R.drawable.reference);
         tabLayout.getTabAt(2).setIcon(R.drawable.cme);
