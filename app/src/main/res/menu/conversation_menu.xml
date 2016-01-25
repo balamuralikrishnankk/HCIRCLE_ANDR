@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:id="@+id/alarm" android:title=""
+        android:orderInCategory="100" app:showAsAction="always"
+        android:icon="@drawable/alarm"/>
+    <item android:id="@+id/search" android:title="Search"
+        android:orderInCategory="100" app:showAsAction="never" />
+    <item android:id="@+id/clear_history" android:title="Clear History"
+        android:orderInCategory="100" app:showAsAction="never" />
+    <item android:id="@+id/exit_group" android:title="Exit Group"
+        android:orderInCategory="100" app:showAsAction="never" />
+    <item android:id="@+id/mute_notifications" android:title="Mute Notifications"
+        android:orderInCategory="100" app:showAsAction="never" />
+</menu>

@@ -9,10 +9,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 public class ConversationActivity extends AppCompatActivity {
-    ImageButton sendMessage,backButton;
+    ImageButton sendMessage;
+    ImageView backButton,conv_Icon;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -23,7 +25,8 @@ public class ConversationActivity extends AppCompatActivity {
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         */
-        backButton = (ImageButton) toolbar.findViewById(R.id.back_button);
+        backButton = (ImageView) toolbar.findViewById(R.id.back_button);
+
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -32,9 +35,14 @@ public class ConversationActivity extends AppCompatActivity {
         });
         Intent intent = getIntent();
         String title = intent.getStringExtra(ChatFragment.TITLE);
-
         TextView conversationLabel = (TextView) toolbar.findViewById(R.id.conversation_Label);
         conversationLabel.setText(title);
+        conv_Icon = (ImageView) toolbar.findViewById(R.id.conv_icon);
+        if(title.equals("Laboratory Group")){
+            conv_Icon.setImageResource(R.drawable.laboratory_group);
+        }else if(title.equals("Cardiology Dept")){
+            conv_Icon.setImageResource(R.drawable.cardiology_dept);
+        }
         /*
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -56,7 +64,7 @@ public class ConversationActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.user, menu);
+        getMenuInflater().inflate(R.menu.conversation_menu, menu);
         return true;
     }
 
