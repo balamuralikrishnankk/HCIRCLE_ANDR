@@ -132,7 +132,7 @@ public class ConnectServer {
                     System.out.println("Key : " + entry.getKey() +
                             " ,Value : " + entry.getValue());
                     if(entry.getKey()=="Token"){
-                        TokenId=entry.getValue().toString();
+                        TokenId=conn.getHeaderField("Server");
                     }
                 }
                 //get header by 'key'

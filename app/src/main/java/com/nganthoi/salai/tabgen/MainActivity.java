@@ -149,7 +149,11 @@ public class MainActivity extends Activity {
                     if(cs.responseCode==200){
                         progressDialog.dismiss();
                         sp.savePreference(context, json);
-                        sp.savePreference(context,"TOKEN",cs.TokenId);
+                        if(cs.TokenId==null) System.out.println("Token is null");
+                        else {
+                            System.out.println("Token ID: "+cs.TokenId);
+                            sp.savePreference(context,"TOKEN",cs.TokenId);
+                        }
                         switch(jObj.getString("roles")){
                             case "system_admin":
                                 intent = new Intent(context,SuperAdminActivity.class);
