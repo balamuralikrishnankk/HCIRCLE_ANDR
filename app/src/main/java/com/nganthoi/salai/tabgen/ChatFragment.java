@@ -62,7 +62,7 @@ public class ChatFragment extends Fragment {
          expandableListView.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
             @Override
             public void onGroupExpand(int groupPosition) {
-                //expandableIndex.setText("-");
+                expandableIndex.setText("-");
               /*
                 Toast.makeText(chatView.getContext(),
                         expandableListTitle.get(groupPosition) + " List Expanded "+expandableIndex.getText().toString(),
@@ -74,7 +74,7 @@ public class ChatFragment extends Fragment {
 
             @Override
             public void onGroupCollapse(int groupPosition) {
-                //expandableIndex.setText("+");
+                expandableIndex.setText("+");
                 /*Toast.makeText(chatView.getContext(),
                         expandableListTitle.get(groupPosition) + " List Collapsed: "+expandableButton.getText().toString(),
                         Toast.LENGTH_SHORT).show();*/

@@ -129,9 +129,9 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         TextView expandableIndicator = (TextView) convertView.findViewById(R.id.expandableIndicator);
 
         if(group_status[listPosition]==0)
-            expandableIndicator.setText("-");
-        else
             expandableIndicator.setText("+");
+        else
+            expandableIndicator.setText("-");
         return convertView;
     }
 

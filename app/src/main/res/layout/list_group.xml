@@ -32,7 +32,7 @@
         android:layout_width="60dp"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="-"
+        android:text="+"
         android:layout_alignParentRight="true"
         android:id="@+id/expandableIndicator"
         android:layout_gravity="center_vertical"
