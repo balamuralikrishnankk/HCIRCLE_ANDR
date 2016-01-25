@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <TextView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
+    android:layout_width="wrap_content"
     android:layout_height="match_parent"
     android:id="@+id/my_custom_tab"
     android:textColor="#f2efef"
-    android:textSize="14sp"
+    android:textSize="16sp"
     android:fontFamily="@string/font_fontFamily_medium">
 
 </TextView>

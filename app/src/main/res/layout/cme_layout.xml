@@ -1,13 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" android:layout_height="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="CME"
-        android:id="@+id/textView9"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true" />
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="250dp"
+        android:id="@+id/imageView3"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:src="@drawable/cme1" />
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/imageView3"
+        android:layout_centerHorizontal="true">
+
+        <ImageView
+            android:layout_width="180dp"
+            android:layout_height="250dp"
+            android:id="@+id/imageView4"
+            android:src="@drawable/cme2" />
+
+        <ImageView
+            android:layout_width="180dp"
+            android:layout_height="250dp"
+            android:id="@+id/imageView5"
+            android:src="@drawable/cme3" />
+    </LinearLayout>
 </RelativeLayout>

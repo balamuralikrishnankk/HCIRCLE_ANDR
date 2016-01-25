@@ -1,13 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" android:layout_height="match_parent">
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="Latest News "
-        android:id="@+id/latestNews"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true" />
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="250dp"
+        android:id="@+id/imageView6"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:src="@drawable/news1" />
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/imageView6"
+        android:layout_centerHorizontal="true">
+
+        <ImageView
+            android:layout_width="180dp"
+            android:layout_height="250dp"
+            android:id="@+id/imageView7"
+            android:src="@drawable/news2" />
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="180dp"
+            android:layout_height="250dp">
+
+            <ImageView
+                android:layout_width="180dp"
+                android:layout_height="125dp"
+                android:id="@+id/imageView8"
+                android:src="@drawable/news3" />
+
+            <ImageView
+                android:layout_width="180dp"
+                android:layout_height="125dp"
+                android:id="@+id/imageView9"
+                android:src="@drawable/news4" />
+        </LinearLayout>
+    </LinearLayout>
 </RelativeLayout>
