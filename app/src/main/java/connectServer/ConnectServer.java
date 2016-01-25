@@ -2,8 +2,6 @@ package connectServer;
 
 import android.os.StrictMode;
 
-import com.nganthoi.salai.tabgen.MainActivity;
-
 import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
@@ -18,8 +16,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
-
-import sharePreference.SharedPreference;
 
 /**
  * Created by Lenovo on 30-Nov-15.
@@ -132,7 +128,7 @@ public class ConnectServer {
                     System.out.println("Key : " + entry.getKey() +
                             " ,Value : " + entry.getValue());
                     if(entry.getKey()=="Token"){
-                        TokenId=conn.getHeaderField("Server");
+                        TokenId=""+entry.getValue();
                     }
                 }
                 //get header by 'key'
