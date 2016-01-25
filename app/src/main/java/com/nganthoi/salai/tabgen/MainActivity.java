@@ -152,6 +152,7 @@ public class MainActivity extends Activity {
                         if(cs.TokenId==null) System.out.println("Token is null");
                         else {
                             System.out.println("Token ID: "+cs.TokenId);
+                            Toast.makeText(MainActivity.this,"Token ID: "+cs.TokenId,Toast.LENGTH_SHORT).show();
                             sp.savePreference(context,"TOKEN",cs.TokenId);
                         }
                         switch(jObj.getString("roles")){
