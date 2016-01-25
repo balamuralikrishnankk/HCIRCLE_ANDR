@@ -86,13 +86,9 @@
             android:theme="@style/AppTheme.NoActionBar"></activity>
         <activity
             android:name=".ConversationActivity"
-            android:label=" "
-            android:parentActivityName=".UserActivity"
+            android:label=""
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".UserActivity" />
         </activity>
         <activity
             android:name=".ShowTemplateActivity"

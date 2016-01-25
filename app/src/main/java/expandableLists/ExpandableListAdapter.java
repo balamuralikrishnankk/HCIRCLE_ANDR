@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.ExpandableListView;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.nganthoi.salai.tabgen.R;
@@ -72,7 +73,14 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         }
         TextView expandedListTextView = (TextView) convertView
                 .findViewById(R.id.expandedListItem);
+        ImageView imageList = (ImageView) convertView.findViewById(R.id.imageView2);
         expandedListTextView.setText(expandedListText);
+        if(expandedListText=="Laboratory Group"){
+            imageList.setImageResource(R.drawable.laboratory_group);
+        }
+        else if(expandedListText=="Cardiology Dept"){
+            imageList.setImageResource(R.drawable.cardiology_dept);
+        }
         return convertView;
     }
 
@@ -108,8 +116,15 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         }
         TextView listTitleTextView = (TextView) convertView
                 .findViewById(R.id.listTitle);
+        ImageView imageTitleView = (ImageView) convertView.findViewById(R.id.imageView1);
         listTitleTextView.setTypeface(null, Typeface.BOLD);
         listTitleTextView.setText(listTitle);
+        if(listTitle=="Hiranandani Hospital"){
+            imageTitleView.setImageResource(R.drawable.hiranandani_hospital);
+        }
+        else if(listTitle=="Lilavati Hospital"){
+            imageTitleView.setImageResource(R.drawable.lilavati_hospital);
+        }
 
         TextView expandableIndicator = (TextView) convertView.findViewById(R.id.expandableIndicator);
 

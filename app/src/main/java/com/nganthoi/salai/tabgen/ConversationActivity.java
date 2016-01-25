@@ -12,16 +12,24 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 public class ConversationActivity extends AppCompatActivity {
-    ImageButton sendMessage;
+    ImageButton sendMessage,backButton;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_conversation);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbarConversation);
         setSupportActionBar(toolbar);
+        /*
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
+        */
+        backButton = (ImageButton) toolbar.findViewById(R.id.back_button);
+        backButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
+            }
+        });
         Intent intent = getIntent();
         String title = intent.getStringExtra(ChatFragment.TITLE);
 
