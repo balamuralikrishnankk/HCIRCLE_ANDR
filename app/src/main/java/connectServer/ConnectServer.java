@@ -72,7 +72,7 @@ public class ConnectServer {
         try{
             conn = (HttpURLConnection) api_url.openConnection();
             conn.setRequestProperty("Content-Type", "application/json");
-            //conn.setRequestProperty("Accept", "application/json");
+            conn.setRequestProperty("Accept", "application/json");
             conn.setRequestMethod("POST");
             conn.setDoInput(true);
             conn.setDoOutput(true);
@@ -127,10 +127,14 @@ public class ConnectServer {
                 for (Map.Entry<String, List<String>> entry : map.entrySet()) {
                     System.out.println("Key : " + entry.getKey() +
                             " ,Value : " + entry.getValue());
-                    if(entry.getKey()=="Token"){
+                    /*if(entry.getKey()=="Token"){
                         TokenId=""+entry.getValue();
-                    }
+                    }*/
+
                 }
+                TokenId = conn.getContent()+"";
+
+
                 //get header by 'key'
                 //String server = conn.getHeaderField("Server");
 
