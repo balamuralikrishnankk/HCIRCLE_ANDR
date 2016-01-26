@@ -14,8 +14,6 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Created by Lenovo on 30-Nov-15.
@@ -24,7 +22,7 @@ public class ConnectServer {
     //String API_URL="";
     InputStream isr=null;
     public int responseCode;
-    public String responseMessage, errorMessage;
+    public String responseMessage, errorMessage,TokenId=null;
     URL api_url=null;
     public HttpURLConnection conn=null;
     public ConnectServer(String web_api){
@@ -89,14 +87,15 @@ public class ConnectServer {
                 // here I am reading the http header contents using  method getHeaderFields()
                 //Map<String, List<String>> map = conn.getHeaderFields();
                 //let's execute this code
-                /*for (Map.Entry<String, List<String>> entry : map.entrySet()) {
-                    System.out.println("" + entry.getKey() + " -----> " + entry.getValue());
-                    if(entry.getKey()+""=="Token"){
-                        TokenId=""+entry.getValue().toString();
+                /*
+                for (Map.Entry<String, List<String>> entry : map.entrySet()) {
+                    System.out.println("Key : " + entry.getKey() +
+                            " ,Value : " + entry.getValue());
+                    if(entry.getKey()=="Token"){
+                        TokenId=""+entry.getValue();
                         break;
                     }
                 }*/
-                //TokenId = conn.getHeaderField("Token");
             }
             else{
                 isr = new BufferedInputStream(conn.getErrorStream());

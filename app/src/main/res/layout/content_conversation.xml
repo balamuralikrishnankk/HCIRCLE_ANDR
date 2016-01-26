@@ -50,7 +50,7 @@
             android:id="@+id/messageEditText"
             android:hint="Type Your Message"
             android:paddingLeft="10dp"
-            android:paddingRight="10dp"
+            android:paddingRight="60dp"
             android:background="@drawable/write_msg_bg"
             android:layout_alignParentBottom="true"
             android:layout_alignParentLeft="true"
