@@ -10,22 +10,45 @@
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:showIn="@layout/activity_conversation"
     tools:context="com.nganthoi.salai.tabgen.ConversationActivity">
+    <!--
+    <TextView
+        android:id="@+id/meLbl"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="left|center_vertical"
+        android:text="MySelf"
+        android:singleLine="false"
+        android:textSize="20dp" />
 
+    <TextView
+        android:id="@+id/friendLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:text="Friend"
+        android:textSize="20dp" />-->
+
+    <ListView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/chatListView"
+        android:layout_above="@+id/messageLayout"
+        android:layout_centerHorizontal="true" />
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/messageLayout"
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="40dp">
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true">
 
         <EditText
             android:layout_width="wrap_content"
             android:layout_height="60dp"
             android:inputType="textMultiLine"
             android:ems="10"
-            android:id="@+id/messageText"
+            android:id="@+id/messageEditText"
             android:hint="Type Your Message"
             android:paddingLeft="10dp"
             android:paddingRight="10dp"
@@ -33,19 +56,11 @@
             android:background="@drawable/edittext_style" />
 
         <ImageButton
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:id="@+id/sendMsg"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:id="@+id/chatSendButton"
             android:src="@android:drawable/ic_menu_send"
             android:background="@drawable/round_button_background"/>
     </LinearLayout>
-
-    <ListView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/chatListView"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true" />
-
 
 </RelativeLayout>
