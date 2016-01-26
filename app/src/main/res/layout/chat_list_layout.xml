@@ -1,24 +1,20 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:padding="10dp">
     <LinearLayout
         android:id="@+id/content"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
-        android:paddingRight="10dp"
         android:orientation="vertical">
 
         <LinearLayout
             android:id="@+id/contentWithBackground"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="right"
-            android:paddingLeft="50dp"
-            android:paddingBottom="15dp"
-            android:paddingRight="16dp"
-            android:background="@drawable/receive_msg_bg"
-            android:paddingTop="40dp"
+            android:layout_gravity="right|center_vertical"
+            android:background="@drawable/msg_bg"
             android:orientation="vertical">
             <!--android:background="@drawable/in_message_bg"-->
             <TextView
@@ -30,14 +26,13 @@
                 android:typeface="sans"
                 android:textStyle="normal"
                 android:textSize="20sp"
-                android:gravity="center_vertical"
-                android:paddingLeft="5dp" />
+                android:gravity="center_vertical"/>
 
         </LinearLayout>
         <TextView
             android:id="@+id/txtInfo"
             android:layout_width="wrap_content"
-            android:layout_height="30sp"
+            android:layout_height="wrap_content"
             android:layout_gravity="right"
             android:textSize="12sp"
             android:text="textInfo"

@@ -10,23 +10,6 @@
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:showIn="@layout/activity_conversation"
     tools:context="com.nganthoi.salai.tabgen.ConversationActivity">
-    <!--
-    <TextView
-        android:id="@+id/meLbl"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="left|center_vertical"
-        android:text="MySelf"
-        android:singleLine="false"
-        android:textSize="20dp" />
-
-    <TextView
-        android:id="@+id/friendLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:text="Friend"
-        android:textSize="20dp" />-->
 
     <ListView
         android:layout_width="wrap_content"
@@ -47,12 +30,13 @@
             android:layout_height="45dp"
             android:inputType="textMultiLine"
             android:ems="10"
+            android:gravity="center_vertical"
             android:id="@+id/messageEditText"
             android:hint="Type Your Message"
             android:paddingLeft="10dp"
             android:paddingRight="60dp"
-            android:background="@drawable/write_msg_bg"
-            android:layout_alignParentBottom="true"
+            android:background="@drawable/msg_write_bg"
+
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:layout_toLeftOf="@+id/chatSendButton"

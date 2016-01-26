@@ -69,6 +69,8 @@ public class ChatAdapter extends BaseAdapter {
         //to simulate whether it me or other sender
         setAlignment(holder, myMsg);
         holder.txtMessage.setText(chatMessage.getMessage());
+        holder.txtMessage.setPadding(10, 5, 10, 5);
+        holder.txtMessage.setGravity(Gravity.CENTER_VERTICAL);
         holder.txtInfo.setText(chatMessage.getDate());
 
         return convertView;
@@ -84,41 +86,45 @@ public class ChatAdapter extends BaseAdapter {
 
     private void setAlignment(ViewHolder holder, boolean isMe) {
         if (isMe) {
-            holder.contentWithBG.setBackgroundResource(R.drawable.sent_msg_bg);
+            holder.contentWithBG.setBackgroundResource(R.drawable.msg_bg);
 
             LinearLayout.LayoutParams layoutParams =
                     (LinearLayout.LayoutParams) holder.contentWithBG.getLayoutParams();
             layoutParams.gravity = Gravity.RIGHT;
             holder.contentWithBG.setLayoutParams(layoutParams);
+            holder.contentWithBG.setGravity(Gravity.CENTER_VERTICAL);
+            holder.txtMessage.setPadding(10,5,20,5);
 
             RelativeLayout.LayoutParams lp =
                     (RelativeLayout.LayoutParams) holder.content.getLayoutParams();
-            lp.addRule(RelativeLayout.ALIGN_PARENT_LEFT, 20);
-            lp.addRule(RelativeLayout.ALIGN_PARENT_RIGHT,10);
+            lp.addRule(RelativeLayout.ALIGN_PARENT_LEFT,0);
+            lp.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
             holder.content.setLayoutParams(lp);
             layoutParams = (LinearLayout.LayoutParams) holder.txtMessage.getLayoutParams();
-            layoutParams.gravity = Gravity.RIGHT|Gravity.CENTER_VERTICAL;
+            layoutParams.gravity = Gravity.RIGHT;
             holder.txtMessage.setLayoutParams(layoutParams);
             layoutParams = (LinearLayout.LayoutParams) holder.txtInfo.getLayoutParams();
-            layoutParams.gravity = Gravity.RIGHT|Gravity.CENTER_VERTICAL;
+            layoutParams.gravity = Gravity.RIGHT;
             holder.txtInfo.setLayoutParams(layoutParams);
         } else {
-            holder.contentWithBG.setBackgroundResource(R.drawable.receive_msg_bg);
+            holder.contentWithBG.setBackgroundResource(R.drawable.msg_reply_bg);
             LinearLayout.LayoutParams layoutParams =
                     (LinearLayout.LayoutParams) holder.contentWithBG.getLayoutParams();
             layoutParams.gravity = Gravity.LEFT;
             holder.contentWithBG.setLayoutParams(layoutParams);
+            holder.contentWithBG.setGravity(Gravity.CENTER_VERTICAL);
+            holder.txtMessage.setPadding(20, 5, 10, 5);
 
             RelativeLayout.LayoutParams lp =
                     (RelativeLayout.LayoutParams) holder.content.getLayoutParams();
-            lp.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, 20);
-            lp.addRule(RelativeLayout.ALIGN_PARENT_LEFT, 10);
+            lp.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, 0);
+            lp.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
             holder.content.setLayoutParams(lp);
             layoutParams = (LinearLayout.LayoutParams) holder.txtMessage.getLayoutParams();
-            layoutParams.gravity = Gravity.LEFT|Gravity.CENTER_VERTICAL;
+            layoutParams.gravity = Gravity.LEFT;
             holder.txtMessage.setLayoutParams(layoutParams);
             layoutParams = (LinearLayout.LayoutParams) holder.txtInfo.getLayoutParams();
-            layoutParams.gravity = Gravity.LEFT|Gravity.CENTER_VERTICAL;
+            layoutParams.gravity = Gravity.LEFT;
             holder.txtInfo.setLayoutParams(layoutParams);
         }
     }
