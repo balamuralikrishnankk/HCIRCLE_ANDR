@@ -93,8 +93,8 @@ public class ChatAdapter extends BaseAdapter {
             layoutParams.gravity = Gravity.RIGHT;
             holder.contentWithBG.setLayoutParams(layoutParams);
             holder.contentWithBG.setGravity(Gravity.CENTER_VERTICAL);
-            holder.contentWithBG.setPadding(10,5,10,5);
-            holder.txtMessage.setPadding(10,0,20,5);
+            holder.contentWithBG.setPadding(10,0,30,0);
+            holder.txtMessage.setPadding(20,0,20,0);
 
             RelativeLayout.LayoutParams lp =
                     (RelativeLayout.LayoutParams) holder.content.getLayoutParams();
@@ -114,7 +114,8 @@ public class ChatAdapter extends BaseAdapter {
             layoutParams.gravity = Gravity.LEFT;
             holder.contentWithBG.setLayoutParams(layoutParams);
             holder.contentWithBG.setGravity(Gravity.CENTER_VERTICAL);
-            holder.txtMessage.setPadding(20, 5, 10, 5);
+            holder.contentWithBG.setPadding(30,0,10,0);
+            holder.txtMessage.setPadding(20, 0, 20, 0);
 
             RelativeLayout.LayoutParams lp =
                     (RelativeLayout.LayoutParams) holder.content.getLayoutParams();

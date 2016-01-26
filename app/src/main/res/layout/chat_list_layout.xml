@@ -27,16 +27,16 @@
                 android:textStyle="normal"
                 android:textSize="20sp"
                 android:gravity="center_vertical"/>
-            <TextView
-                android:id="@+id/txtInfo"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="right"
-                android:textSize="12sp"
-                android:text="textInfo"
-                android:textColor="#414040" />
 
         </LinearLayout>
+        <TextView
+            android:id="@+id/txtInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:textSize="12sp"
+            android:text="textInfo"
+            android:textColor="#414040" />
 
     </LinearLayout>
 </RelativeLayout>
