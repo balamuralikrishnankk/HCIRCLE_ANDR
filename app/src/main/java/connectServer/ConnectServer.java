@@ -86,7 +86,7 @@ public class ConnectServer {
             System.out.println("Response Code: "+responseCode+"\nResponse message: "+responseMessage);
             if(responseCode == 200) {
                 isr = new BufferedInputStream(conn.getInputStream());
-                // here I am reading the http header contents using  method
+                // here I am reading the http header contents using  method getHeaderFields()
                 Map<String, List<String>> map = conn.getHeaderFields();
                 //let's execute this code
                 for (Map.Entry<String, List<String>> entry : map.entrySet()) {
