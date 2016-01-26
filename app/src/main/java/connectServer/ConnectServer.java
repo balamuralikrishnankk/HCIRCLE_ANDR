@@ -81,11 +81,22 @@ public class ConnectServer {
             osw = new OutputStreamWriter(os);
             osw.write(parameters.toString());
             osw.flush();
-            responseCode = conn.getResponseCode();
-            responseMessage = conn.getResponseMessage();
+            responseCode = conn.getResponseCode(); //it only the code 200
+            responseMessage = conn.getResponseMessage();// it is the json response from the mattermost api
             System.out.println("Response Code: "+responseCode+"\nResponse message: "+responseMessage);
             if(responseCode == 200) {
                 isr = new BufferedInputStream(conn.getInputStream());
+                // here I am reading the http header contents using  method
+                Map<String, List<String>> map = conn.getHeaderFields();
+                //let's execute this code
+                for (Map.Entry<String, List<String>> entry : map.entrySet()) {
+                    System.out.println("Key : " + entry.getKey() +
+                            " ,Value : " + entry.getValue());
+                    if(entry.getKey()=="Token"){
+                        TokenId=""+entry.getValue();
+                        break;
+                    }
+                }
             }
             else{
                 isr = new BufferedInputStream(conn.getErrorStream());
@@ -122,22 +133,6 @@ public class ConnectServer {
             responseMessage = conn.getResponseMessage();
             System.out.println("Response Code: "+responseCode+"\nResponse message: "+responseMessage);
             if(responseCode == 200) {
-                //get all headers
-                Map<String, List<String>> map = conn.getHeaderFields();
-                for (Map.Entry<String, List<String>> entry : map.entrySet()) {
-                    System.out.println("Key : " + entry.getKey() +
-                            " ,Value : " + entry.getValue());
-                    /*if(entry.getKey()=="Token"){
-                        TokenId=""+entry.getValue();
-                    }*/
-
-                }
-                TokenId = conn.getContent()+"";
-
-
-                //get header by 'key'
-                //String server = conn.getHeaderField("Server");
-
                 isr = new BufferedInputStream(conn.getInputStream());
             }
             else{
