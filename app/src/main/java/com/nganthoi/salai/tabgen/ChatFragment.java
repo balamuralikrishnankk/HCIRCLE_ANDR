@@ -29,7 +29,7 @@ public class ChatFragment extends Fragment {
     List<String> expandableListTitle;
     HashMap<String, List<String>> expandableListDetail;
     View chatView,layoutGroupHeader;
-    TextView expandableIndex;
+
 
     public final static String TITLE = "com.nganthoi.salai.tabgen.MESSAGE";
     //Context _context=this;
@@ -46,8 +46,6 @@ public class ChatFragment extends Fragment {
         expandableListView = (ExpandableListView) chatView.findViewById(R.id.chatExpandableListView);
 
         layoutGroupHeader = layoutInflater.inflate(R.layout.list_group,null);
-        expandableIndex = (TextView) layoutGroupHeader.findViewById(R.id.expandableIndicator);
-
         showChatLists();
         return chatView;
     }
@@ -62,7 +60,7 @@ public class ChatFragment extends Fragment {
          expandableListView.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
             @Override
             public void onGroupExpand(int groupPosition) {
-                expandableIndex.setText("-");
+
               /*
                 Toast.makeText(chatView.getContext(),
                         expandableListTitle.get(groupPosition) + " List Expanded "+expandableIndex.getText().toString(),
@@ -74,7 +72,7 @@ public class ChatFragment extends Fragment {
 
             @Override
             public void onGroupCollapse(int groupPosition) {
-                expandableIndex.setText("+");
+
                 /*Toast.makeText(chatView.getContext(),
                         expandableListTitle.get(groupPosition) + " List Collapsed: "+expandableButton.getText().toString(),
                         Toast.LENGTH_SHORT).show();*/

@@ -24,12 +24,14 @@
             android:layout_width="180dp"
             android:layout_height="250dp"
             android:id="@+id/imageView4"
-            android:src="@drawable/cme2" />
+            android:src="@drawable/cme2"
+            android:layout_centerHorizontal="true"/>
 
         <ImageView
             android:layout_width="180dp"
             android:layout_height="250dp"
             android:id="@+id/imageView5"
-            android:src="@drawable/cme3" />
+            android:src="@drawable/cme3"
+            android:layout_centerHorizontal="true"/>
     </LinearLayout>
 </RelativeLayout>

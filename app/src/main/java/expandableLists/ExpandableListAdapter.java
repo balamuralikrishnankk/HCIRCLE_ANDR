@@ -21,7 +21,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
     private ExpandableListView expandableListView;
     private List<String> expandableListTitle;
     private HashMap<String, List<String>> expandableListDetail;
-    private int[] group_status;
+
 
     public ExpandableListAdapter(Context context, ExpandableListView expListView,List<String> expandableListTitle,
                                  HashMap<String, List<String>> expandableListDetail) {
@@ -29,26 +29,8 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         this.expandableListView = expListView;
         this.expandableListTitle = expandableListTitle;
         this.expandableListDetail = expandableListDetail;
-        group_status = new int[expandableListDetail.size()];
-        setListEvent();
     }
 
-    public void setListEvent(){
-
-        expandableListView.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
-            @Override
-            public void onGroupExpand(int groupPosition) {
-                group_status[groupPosition]=0;
-            }
-        });
-        expandableListView.setOnGroupCollapseListener(new ExpandableListView.OnGroupCollapseListener() {
-            @Override
-            public void onGroupCollapse(int groupPosition) {
-                group_status[groupPosition]=1;
-            }
-        });
-
-    }
 
     @Override
     public Object getChild(int listPosition, int expandedListPosition) {
@@ -86,8 +68,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
     @Override
     public int getChildrenCount(int listPosition) {
-        return this.expandableListDetail.get(this.expandableListTitle.get(listPosition))
-                .size();
+        return this.expandableListDetail.get(this.expandableListTitle.get(listPosition)).size();
     }
 
     @Override
@@ -106,16 +87,14 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
     }
 
     @Override
-    public View getGroupView(int listPosition, boolean isExpanded,
-                             View convertView, ViewGroup parent) {
+    public View getGroupView(int listPosition, boolean isExpanded, View convertView, ViewGroup parent) {
         String listTitle = (String) getGroup(listPosition);
         if (convertView == null) {
             LayoutInflater layoutInflater = (LayoutInflater) this.context.
                     getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = layoutInflater.inflate(R.layout.list_group, null);
         }
-        TextView listTitleTextView = (TextView) convertView
-                .findViewById(R.id.listTitle);
+        TextView listTitleTextView = (TextView) convertView.findViewById(R.id.listTitle);
         ImageView imageTitleView = (ImageView) convertView.findViewById(R.id.imageView1);
         listTitleTextView.setTypeface(null, Typeface.BOLD);
         listTitleTextView.setText(listTitle);
@@ -125,13 +104,6 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         else if(listTitle=="Lilavati Hospital"){
             imageTitleView.setImageResource(R.drawable.lilavati_hospital);
         }
-
-        TextView expandableIndicator = (TextView) convertView.findViewById(R.id.expandableIndicator);
-
-        if(group_status[listPosition]==0)
-            expandableIndicator.setText("+");
-        else
-            expandableIndicator.setText("-");
         return convertView;
     }
 
@@ -144,4 +116,5 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
     public boolean isChildSelectable(int listPosition, int expandedListPosition) {
         return true;
     }
+
 }

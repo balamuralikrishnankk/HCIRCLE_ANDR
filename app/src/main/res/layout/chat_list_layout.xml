@@ -29,8 +29,12 @@
                 android:id="@+id/txtMessage"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@android:color/black"
-                android:maxWidth="240dp" />
+                android:textColor="#494949"
+                android:text="test"
+                android:typeface="sans"
+                android:maxWidth="240dp"
+                android:textStyle="normal"
+                android:textSize="20sp" />
 
         </LinearLayout>
 
