@@ -24,9 +24,9 @@ public class ConnectServer {
     //String API_URL="";
     InputStream isr=null;
     public int responseCode;
-    public String responseMessage, errorMessage,TokenId=null;
+    public String responseMessage, errorMessage;
     URL api_url=null;
-    HttpURLConnection conn=null;
+    public HttpURLConnection conn=null;
     public ConnectServer(String web_api){
         try{
             api_url =new URL(web_api);
@@ -87,16 +87,16 @@ public class ConnectServer {
             if(responseCode == 200) {
                 isr = new BufferedInputStream(conn.getInputStream());
                 // here I am reading the http header contents using  method getHeaderFields()
-                Map<String, List<String>> map = conn.getHeaderFields();
+                //Map<String, List<String>> map = conn.getHeaderFields();
                 //let's execute this code
-                for (Map.Entry<String, List<String>> entry : map.entrySet()) {
-                    System.out.println("Key : " + entry.getKey() +
-                            " ,Value : " + entry.getValue());
-                    if(entry.getKey()=="Token"){
-                        TokenId=""+entry.getValue();
+                /*for (Map.Entry<String, List<String>> entry : map.entrySet()) {
+                    System.out.println("" + entry.getKey() + " -----> " + entry.getValue());
+                    if(entry.getKey()+""=="Token"){
+                        TokenId=""+entry.getValue().toString();
                         break;
                     }
-                }
+                }*/
+                //TokenId = conn.getHeaderField("Token");
             }
             else{
                 isr = new BufferedInputStream(conn.getErrorStream());

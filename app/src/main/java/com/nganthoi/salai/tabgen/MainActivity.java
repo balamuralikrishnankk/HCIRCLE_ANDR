@@ -149,11 +149,13 @@ public class MainActivity extends Activity {
                     if(cs.responseCode==200){
                         progressDialog.dismiss();
                         sp.savePreference(context, json);
-                        if(cs.TokenId==null) System.out.println("Token is null");
+                        //Getting Token Id
+                        String TokenId = cs.conn.getHeaderField("Token");
+                        if(TokenId==null) System.out.println("Token is null");
                         else {
-                            System.out.println("Token ID: "+cs.TokenId);
-                            Toast.makeText(MainActivity.this,"Token ID: "+cs.TokenId,Toast.LENGTH_SHORT).show();
-                            sp.savePreference(context,"TOKEN",cs.TokenId);
+                            System.out.println("Token ID: "+TokenId);
+                            Toast.makeText(MainActivity.this,"Token ID: "+TokenId,Toast.LENGTH_SHORT).show();
+                            sp.savePreference(context,"TOKEN",TokenId);
                         }
                         switch(jObj.getString("roles")){
                             case "system_admin":
