@@ -110,4 +110,35 @@ public class OrganisationDetails {
         return list;
         /**********************************************************/
     }
+
+    public static List<String> getListOfChannel(String user_id){
+        //Getting list of Organisation for a particular user
+        List<String> list = new ArrayList<String>();
+        try {
+            ConnectServer channelIdList = new ConnectServer("http://188.166.210.24/getChannelsID.php");
+            String jsonStr = channelIdList.convertInputStreamToString(channelIdList.putData("user_id="+user_id));
+            //System.out.println(jsonStr);
+            if(jsonStr!=null){
+                try {
+                    JSONArray jsonArray = new JSONArray(jsonStr);
+                    if (channelIdList.responseCode == 200) {
+                        JSONObject jsonObject;
+                        for(int i=0;i<jsonArray.length();i++){
+                            jsonObject = jsonArray.getJSONObject(i);
+                            list.add(jsonObject.getString("Channel_name"));
+                        }
+                    }
+                    else list.add(" ");
+                }catch(Exception e){
+                    System.out.print("An Exception occurs here: "+e.toString());
+                }
+            }else list.add(" ");
+        }
+        catch(Exception e){
+            System.out.println("Exception here: "+e.toString());
+            list.add(" ");
+        }
+        return list;
+        /**********************************************************/
+    }
 }

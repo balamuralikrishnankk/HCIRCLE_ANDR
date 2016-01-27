@@ -1,21 +1,22 @@
 package com.nganthoi.salai.tabgen;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -23,16 +24,19 @@ import java.util.Date;
 
 import chattingEngine.ChatAdapter;
 import chattingEngine.ChatMessage;
+import sharePreference.SharedPreference;
 
 public class ConversationActivity extends AppCompatActivity {
-    ImageButton sendMessage;
+    //ImageButton sendMessage;
     ImageView backButton,conv_Icon;
     ListView messagesContainer;
     EditText messageEditText;
     ImageButton sendBtn;
     private ChatAdapter adapter;
     private ArrayList<ChatMessage> chatHistory;
-
+    SharedPreference sp;
+    Context context=this;
+    String channel_id="";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,6 +83,22 @@ public class ConversationActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });*/
+        sp = new SharedPreference();
+        String channelDetails = sp.getPreference(context,"CHANNEL_DETAILS");
+        try{
+            JSONArray jsonArray = new JSONArray(channelDetails);
+            JSONObject jsonObject;
+            for(int i=0;i<jsonArray.length();i++){
+               jsonObject = jsonArray.getJSONObject(i);
+               if(title==jsonObject.getString("Channel_name")) {
+                   channel_id = jsonObject.getString("Channel_ID");// setting channel id
+                   break;
+               }
+            }
+
+        }catch(Exception e){
+
+        }
         initControls();
     }
     @Override

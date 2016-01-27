@@ -11,8 +11,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ExpandableListView;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,7 +50,7 @@ public class ChatFragment extends Fragment {
 
     public void showChatLists(){
         /*Setting chat list View*/
-        expandableListDetail = ExpandableListDataPump.getData();
+        expandableListDetail = ExpandableListDataPump.getData(chatView.getContext());
         expandableListTitle = new ArrayList<String>(expandableListDetail.keySet());
         expandableListAdapter= new ExpandableListAdapter(chatView.getContext(),expandableListView,expandableListTitle,expandableListDetail);
         expandableListView.setAdapter(expandableListAdapter);
