@@ -1,9 +1,11 @@
 package com.nganthoi.salai.tabgen;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
@@ -35,6 +37,7 @@ public class UserActivity extends AppCompatActivity
     private TabLayout tabLayout;
     private Toolbar toolbar;
     Context _context=this;
+    ProgressDialog progressDialog;
     String role;//role of the user
     SharedPreference sp;
     List<String> list;
@@ -82,25 +85,12 @@ public class UserActivity extends AppCompatActivity
         } catch (JSONException e) {
             System.out.println("Exception :" + e.toString());
         }
-        /*Getting List of templates*/
-        list = OrganisationDetails.getListOfTemplates(role);
-        mViewPager = (ViewPager) findViewById(R.id.container);
-        setupViewPager(mViewPager);
-
-        tabLayout = (TabLayout) findViewById(R.id.tabLayout);
-        tabLayout.setupWithViewPager(mViewPager);
-
-        try{
-            setTabLayoutIcons(tabLayout);
-        }catch(Exception e){
-            System.out.println("Layout Exception: " + e.toString());
-        }
-
-        /*
-        tabLayout.getTabAt(0).setIcon(R.drawable.chat);
-        tabLayout.getTabAt(1).setIcon(R.drawable.reference);
-        tabLayout.getTabAt(2).setIcon(R.drawable.cme);
-        tabLayout.getTabAt(3).setIcon(R.drawable.latest_news);*/
+        progressDialog = new ProgressDialog(_context);
+        progressDialog.setMessage("Wait,loading Your Templates....");
+        progressDialog.setIndeterminate(true);
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        GetTabList getTabList = new GetTabList();
+        getTabList.execute(role);
     }
 
     @Override
@@ -135,7 +125,6 @@ public class UserActivity extends AppCompatActivity
 
         return super.onOptionsItemSelected(item);
     }
-
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
@@ -161,6 +150,43 @@ public class UserActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+    class GetTabList extends AsyncTask<String,Void,List<String>> {
+        @Override
+        protected void onPreExecute(){
+            progressDialog.show();
+        }
+        @Override
+        protected List<String> doInBackground(String... userRole){
+            /*Getting list of Templates for a particular role */
+            list=OrganisationDetails.getListOfTemplates(userRole[0]);
+            onProgressUpdate();
+            return list;
+        }
+
+        protected void onProgressUpdate(){
+            progressDialog.show();
+        }
+        @Override
+        protected void onPostExecute(List<String> list){
+            mViewPager = (ViewPager) findViewById(R.id.container);
+            setupViewPager(mViewPager);
+
+            tabLayout = (TabLayout) findViewById(R.id.tabLayout);
+            tabLayout.setupWithViewPager(mViewPager);
+
+            try{
+                setTabLayoutIcons(tabLayout);
+            }catch(Exception e){
+                System.out.println("Layout Exception: " + e.toString());
+            }
+            progressDialog.dismiss();
+             /*
+            tabLayout.getTabAt(0).setIcon(R.drawable.chat);
+            tabLayout.getTabAt(1).setIcon(R.drawable.reference);
+            tabLayout.getTabAt(2).setIcon(R.drawable.cme);
+            tabLayout.getTabAt(3).setIcon(R.drawable.latest_news);*/
+        }
     }
 
     private void setupViewPager(ViewPager viewPager) {
@@ -275,5 +301,6 @@ public class UserActivity extends AppCompatActivity
         AlertDialog alertDialog = alertDialogBuilder.create();
         alertDialog.show();
     }
+
 
 }

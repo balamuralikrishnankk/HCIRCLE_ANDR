@@ -18,7 +18,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.InputStream;
-import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -83,7 +82,8 @@ public class MainActivity extends Activity {
         forgotPassword.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Uri forgotPassword = Uri.parse("http://188.166.210.24:8065/org2/reset_password");
+                Uri forgotPassword = Uri.parse("http://188.166.210.24:8065/"+team_name.getText().toString()+
+                        ""+"/reset_password");
                 intent = new Intent(Intent.ACTION_VIEW, forgotPassword);
                 startActivity(intent);
             }
