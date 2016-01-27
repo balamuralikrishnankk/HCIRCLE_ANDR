@@ -96,13 +96,14 @@ public class ConversationActivity extends AppCompatActivity {
             JSONObject jsonObject;
             for(int i=0;i<jsonArray.length();i++){
                jsonObject = jsonArray.getJSONObject(i);
+                System.out.println("Title: "+title+"------->Channel name: "+jsonObject.getString("Channel_name"));
                if(title==jsonObject.getString("Channel_name")) {
                    channel_id = jsonObject.getString("Channel_ID");// setting channel id
                    break;
                }
                 channel_id = jsonObject.getString("Channel_ID");
             }
-            System.out.println("Channel Id: "+channel_id+"\nToken Id: "+token);
+            System.out.println("Title: "+title+"Channel Id: "+channel_id+"\nToken Id: "+token);
 
         }catch(Exception e){
             System.out.println(e.toString());
@@ -154,8 +155,8 @@ public class ConversationActivity extends AppCompatActivity {
                 System.out.println("Token_id: "+token);
 
                 try{
-                    sendMsg = new ConnectServer("http://188.166.210.24:8065:8065/api/v1/channels/"+channel_id+"/create");
-                    sendMsg.conn.setRequestProperty("Authorization Bearer", token);
+                    sendMsg = new ConnectServer("http://188.166.210.24:8065/api/v1/channels/"+channel_id+"/create");
+                    sendMsg.conn.setRequestProperty("Authorization", "Bearer "+token);
 
                     JSONObject jsonObject = new JSONObject();
                     jsonObject.put("channel_id",channel_id);
