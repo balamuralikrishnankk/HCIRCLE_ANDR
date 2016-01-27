@@ -155,7 +155,7 @@ public class MainActivity extends Activity {
                         else {
                             System.out.println("Token ID: "+TokenId);
                             Toast.makeText(MainActivity.this,"Token ID: "+TokenId,Toast.LENGTH_SHORT).show();
-                            sp.savePreference(context,"TOKEN",TokenId);
+                            sp.saveTokenPreference(context,TokenId);
                         }
                         switch(jObj.getString("roles")){
                             case "system_admin":

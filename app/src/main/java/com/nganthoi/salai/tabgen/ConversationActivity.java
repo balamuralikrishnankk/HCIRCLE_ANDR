@@ -14,6 +14,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -24,6 +25,7 @@ import java.util.Date;
 
 import chattingEngine.ChatAdapter;
 import chattingEngine.ChatMessage;
+import connectServer.ConnectServer;
 import sharePreference.SharedPreference;
 
 public class ConversationActivity extends AppCompatActivity {
@@ -36,7 +38,9 @@ public class ConversationActivity extends AppCompatActivity {
     private ArrayList<ChatMessage> chatHistory;
     SharedPreference sp;
     Context context=this;
-    String channel_id="";
+    String channel_id="",user_id,token;
+    String channelDetails=null;
+    ConnectServer sendMsg;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,7 +88,9 @@ public class ConversationActivity extends AppCompatActivity {
             }
         });*/
         sp = new SharedPreference();
-        String channelDetails = sp.getPreference(context,"CHANNEL_DETAILS");
+        channelDetails = sp.getChannelPreference(context);
+        token=sp.getTokenPreference(context);
+        if(channelDetails!=null) System.out.println("Channel is not null: "+channelDetails);
         try{
             JSONArray jsonArray = new JSONArray(channelDetails);
             JSONObject jsonObject;
@@ -94,10 +100,19 @@ public class ConversationActivity extends AppCompatActivity {
                    channel_id = jsonObject.getString("Channel_ID");// setting channel id
                    break;
                }
+                channel_id = jsonObject.getString("Channel_ID");
             }
+            System.out.println("Channel Id: "+channel_id+"\nToken Id: "+token);
 
         }catch(Exception e){
-
+            System.out.println(e.toString());
+        }
+        String user_details=sp.getPreference(context);
+        try{
+            JSONObject jObj = new JSONObject(user_details);
+            user_id=jObj.getString("id");
+        }catch(Exception e){
+            System.out.println("Unable to read user ID: "+e.toString());
         }
         initControls();
     }
@@ -135,14 +150,33 @@ public class ConversationActivity extends AppCompatActivity {
                 if (TextUtils.isEmpty(messageText)) {
                     return;
                 }
+                //token=sp.getTokenPreference(context);
+                System.out.println("Token_id: "+token);
 
-                ChatMessage chatMessage = new ChatMessage();
-                chatMessage.setId(122);//dummy
-                chatMessage.setMessage(messageText);
-                chatMessage.setDate(DateFormat.getDateTimeInstance().format(new Date()));
-                chatMessage.setMe(true);
-                messageEditText.setText("");
-                displayMessage(chatMessage);
+                try{
+                    sendMsg = new ConnectServer("http://188.166.210.24:8065:8065/api/v1/channels/"+channel_id+"/create");
+                    sendMsg.conn.setRequestProperty("Authorization Bearer", token);
+
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put("channel_id",channel_id);
+                    jsonObject.put("root_id","");
+                    jsonObject.put("parent_id","");
+                    jsonObject.put("Message", messageText);
+                    if(sendMsg.convertInputStreamToString(sendMsg.putData(jsonObject))!=null){
+
+                    }else
+                        Toast.makeText(context,"Unable to send message",Toast.LENGTH_LONG).show();
+                    ChatMessage chatMessage = new ChatMessage();
+                    chatMessage.setId(122);//dummy
+                    chatMessage.setMessage(messageText);
+                    chatMessage.setDate(DateFormat.getDateTimeInstance().format(new Date()));
+                    chatMessage.setMe(true);
+                    messageEditText.setText("");
+                    displayMessage(chatMessage);
+                }catch(Exception e){
+                    System.out.println("Sending error: "+e.toString());
+                }
+
             }
         });
     }
