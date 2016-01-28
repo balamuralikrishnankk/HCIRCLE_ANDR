@@ -8,8 +8,12 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Html;
+import android.text.method.HideReturnsTransformationMethod;
+import android.text.method.PasswordTransformationMethod;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -32,6 +36,7 @@ public class MainActivity extends Activity {
     Context context=this;
     String msg,uname, passwd, team;
     EditText username,password,team_name;
+    CheckBox show_password;
     ProgressDialog progressDialog;
     TextView forgotPassword;
     InputStream is;
@@ -46,6 +51,7 @@ public class MainActivity extends Activity {
         username = (EditText) findViewById(R.id.username);
         password = (EditText) findViewById(R.id.password);
         team_name = (EditText) findViewById(R.id.team_name);
+        show_password = (CheckBox) findViewById(R.id.show_password);
         forgotPassword = (TextView) findViewById(R.id.forgotPassword);
         //forgotPassword.setPaintFlags(forgotPassword.getPaintFlags()| Paint.UNDERLINE_TEXT_FLAG);
         forgotPassword.setText(Html.fromHtml("<u><i>Forgot Password ?</i></u>"));
@@ -88,8 +94,18 @@ public class MainActivity extends Activity {
                 startActivity(intent);
             }
         });
+        show_password.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked){
+                    password.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
+                }
+                else{
+                    password.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                }
+            }
+        });
     }
-
 
     @Override
     public void onBackPressed(){

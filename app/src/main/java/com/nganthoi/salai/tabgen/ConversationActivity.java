@@ -22,6 +22,7 @@ import org.json.JSONObject;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import chattingEngine.ChatAdapter;
 import chattingEngine.ChatMessage;
@@ -103,7 +104,7 @@ public class ConversationActivity extends AppCompatActivity {
                }
                 channel_id = jsonObject.getString("Channel_ID");
             }
-            System.out.println("Title: "+title+"Channel Id: "+channel_id+"\nToken Id: "+token);
+            System.out.println("Title: "+title+" Channel Id: "+channel_id+"\nToken Id: "+token);
 
         }catch(Exception e){
             System.out.println(e.toString());
@@ -156,24 +157,36 @@ public class ConversationActivity extends AppCompatActivity {
 
                 try{
                     sendMsg = new ConnectServer("http://188.166.210.24:8065/api/v1/channels/"+channel_id+"/create");
-                    sendMsg.conn.setRequestProperty("Authorization", "Bearer "+token);
+                    sendMsg.conn.setRequestProperty("Authorization","Bearer "+token);
 
                     JSONObject jsonObject = new JSONObject();
                     jsonObject.put("channel_id",channel_id);
                     jsonObject.put("root_id","");
                     jsonObject.put("parent_id","");
                     jsonObject.put("Message", messageText);
-                    if(sendMsg.convertInputStreamToString(sendMsg.putData(jsonObject))!=null){
+                    String response=sendMsg.convertInputStreamToString(sendMsg.putData(jsonObject));
+                    if(response!=null){
+                        if(sendMsg.responseCode==200){
+                            //Toast.makeTest(context,"Your message has been sent",Toast.LENGTH_SHORT).show();
+                            ChatMessage chatMessage = new ChatMessage();
+                            chatMessage.setId(122);//dummy
+                            chatMessage.setMessage(messageText);
+                            chatMessage.setDate(DateFormat.getDateTimeInstance().format(new Date()));
+                            chatMessage.setMe(true);
+                            messageEditText.setText("");
+                            displayMessage(chatMessage);
+                        }else{
+                            try{
+                                JSONObject json_obj= new JSONObject(response);
+                                Toast.makeText(context,""+json_obj.get("message"),Toast.LENGTH_LONG).show();
+                            }catch(Exception e){
+                                System.out.print("Chat Exception: "+e.toString());
+                            }
+                        }
 
                     }else
-                        Toast.makeText(context,"Unable to send message",Toast.LENGTH_LONG).show();
-                    ChatMessage chatMessage = new ChatMessage();
-                    chatMessage.setId(122);//dummy
-                    chatMessage.setMessage(messageText);
-                    chatMessage.setDate(DateFormat.getDateTimeInstance().format(new Date()));
-                    chatMessage.setMe(true);
-                    messageEditText.setText("");
-                    displayMessage(chatMessage);
+                        Toast.makeText(context,"You are not connected to the network",Toast.LENGTH_LONG).show();
+
                 }catch(Exception e){
                     System.out.println("Sending error: "+e.toString());
                 }
@@ -193,9 +206,7 @@ public class ConversationActivity extends AppCompatActivity {
     }
 
     private void loadDummyHistory(){
-
         chatHistory = new ArrayList<ChatMessage>();
-
         ChatMessage msg = new ChatMessage();
         msg.setId(1);
         msg.setMe(false);
