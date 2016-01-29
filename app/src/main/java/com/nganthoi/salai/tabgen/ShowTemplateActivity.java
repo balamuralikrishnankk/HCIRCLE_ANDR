@@ -37,7 +37,7 @@ public class ShowTemplateActivity extends AppCompatActivity {
         String user_details = sp.getPreference(this);
         try {
             JSONObject jsonObject = new JSONObject(user_details);
-            list = OrganisationDetails.getListOfTemplates(jsonObject.getString("roles"));
+            list = OrganisationDetails.getListOfTemplates(this,jsonObject.getString("roles"));
         } catch (JSONException e) {
             System.out.println("Exception :" + e.toString());
         }

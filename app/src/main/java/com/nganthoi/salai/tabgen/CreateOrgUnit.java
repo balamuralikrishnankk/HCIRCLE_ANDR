@@ -147,7 +147,8 @@ public class CreateOrgUnit extends AppCompatActivity {
     }
     /* function for creating team and organisation unit */
     public void createTeamAndOrgUnit(JSONObject teamObj,JSONObject org_unitObject){
-        ConnectServer conn = new ConnectServer("http://188.166.210.24:8065/api/v1/teams/create");
+        SharedPreference sp = new SharedPreference();
+        ConnectServer conn = new ConnectServer("http://"+sp.getServerIP_Preference(context)+":8065/api/v1/teams/create");
         String res = conn.convertInputStreamToString(conn.putData(teamObj));
         if(res!=null){
             try{

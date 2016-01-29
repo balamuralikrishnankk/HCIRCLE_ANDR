@@ -156,7 +156,8 @@ public class ConversationActivity extends AppCompatActivity {
                 System.out.println("Token_id: "+token);
 
                 try{
-                    sendMsg = new ConnectServer("http://188.166.210.24:8065/api/v1/channels/"+channel_id+"/create");
+                    String ip = sp.getServerIP_Preference(context);
+                    sendMsg = new ConnectServer("http://"+ip+":8065/api/v1/channels/"+channel_id+"/create");
                     sendMsg.conn.setRequestProperty("Authorization","Bearer "+token);
 
                     JSONObject jsonObject = new JSONObject();

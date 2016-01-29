@@ -13,6 +13,8 @@ public class SharedPreference {
     public static final String CHANNEL_KEY="CHANNEL_DETAILS";
     public static final String TOKEN="TOKEN";
     public static final String TOKEN_KEY="TOKEN_KEY";
+    public static final String SERVER_IP="SERVER_IP";
+    public static final String IP_KEY="IP_KEY";
     public SharedPreference(){
         super();
     }
@@ -34,11 +36,19 @@ public class SharedPreference {
         editor.putString(CHANNEL_KEY,text);
         editor.commit();
     }
+    public void saveServerIP_Preference(Context context,String text){
+        SharedPreferences sharedPreferences;
+        SharedPreferences.Editor editor;
+        sharedPreferences = context.getSharedPreferences(SERVER_IP,Context.MODE_PRIVATE);
+        editor = sharedPreferences.edit();
+        editor.putString(IP_KEY,text);
+        editor.commit();
+    }
 
     public void savePreference(Context context,String key,String value){
         SharedPreferences sharedPreferences;
         SharedPreferences.Editor editor;
-        sharedPreferences = context.getSharedPreferences(PREFERENCE_NAME,Context.MODE_PRIVATE);
+        sharedPreferences = context.getSharedPreferences(PREFERENCE_NAME,Context.MODE_APPEND);
         editor = sharedPreferences.edit();
         editor.putString(key,value);
         editor.commit();
@@ -61,10 +71,18 @@ public class SharedPreference {
         return text;
     }
 
+    public String getServerIP_Preference(Context context){
+        String text;
+        SharedPreferences sharedPreferences;
+        sharedPreferences = context.getSharedPreferences(SERVER_IP,Context.MODE_PRIVATE);
+        text = sharedPreferences.getString(IP_KEY,null);
+        return text;
+    }
+
     public String getPreference(Context context){
         String text;
         SharedPreferences sharedPreferences;
-        sharedPreferences = context.getSharedPreferences(PREFERENCE_NAME,Context.MODE_PRIVATE);
+        sharedPreferences = context.getSharedPreferences(PREFERENCE_NAME,Context.MODE_APPEND);
         text = sharedPreferences.getString(PREFERENCE_KEY,null);
         return text;
     }

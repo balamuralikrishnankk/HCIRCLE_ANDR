@@ -28,7 +28,8 @@ public class CreateOrg extends AppCompatActivity {
     Button createOrg;/* Button for creating organisation */
     Context _context=this;
     /* Creating an object for connecting the API at the url http://188.166.210.24:8065/api/v1/organisation/create */
-    ConnectServer connectServer=new ConnectServer("http://188.166.210.24:8065/api/v1/organisation/create");
+    SharedPreference sp = new SharedPreference();
+    ConnectServer connectServer=new ConnectServer("http://"+sp.getServerIP_Preference(_context)+":8065/api/v1/organisation/create");
 
     ProgressDialog progDialog;
     /* Creating SharedPreference object for getting the user details saved at the time of login */

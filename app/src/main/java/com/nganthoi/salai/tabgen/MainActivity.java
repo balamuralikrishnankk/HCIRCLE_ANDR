@@ -35,7 +35,7 @@ public class MainActivity extends Activity {
     Intent intent;
     Context context=this;
     String msg,uname, passwd, team;
-    EditText username,password,team_name;
+    EditText username,password,team_name,server_ip;
     CheckBox show_password;
     ProgressDialog progressDialog;
     TextView forgotPassword;
@@ -53,6 +53,7 @@ public class MainActivity extends Activity {
         team_name = (EditText) findViewById(R.id.team_name);
         show_password = (CheckBox) findViewById(R.id.show_password);
         forgotPassword = (TextView) findViewById(R.id.forgotPassword);
+        server_ip = (EditText) findViewById(R.id.ip);
         //forgotPassword.setPaintFlags(forgotPassword.getPaintFlags()| Paint.UNDERLINE_TEXT_FLAG);
         forgotPassword.setText(Html.fromHtml("<u><i>Forgot Password ?</i></u>"));
 
@@ -67,6 +68,7 @@ public class MainActivity extends Activity {
                         uname = username.getText().toString().trim();
                         passwd = password.getText().toString().trim();
                         team = team_name.getText().toString()+"";
+                        sp.saveServerIP_Preference(context,server_ip.getText().toString());
                         if(team=="")
                             team="myteam";
                         JSONObject jsonObject= new JSONObject();
@@ -134,6 +136,12 @@ public class MainActivity extends Activity {
             cdm.showCustomDialog();
             return false;
         }
+        else if(server_ip.getText().toString().trim().length()==0){
+            msg="Please setup your server IP";
+            cdm =  new CustomDialogManager(MainActivity.this,"Set Up server IP",msg,false);
+            cdm.showCustomDialog();
+            return false;
+        }
         return true;
     }
 
@@ -145,7 +153,8 @@ public class MainActivity extends Activity {
 
         @Override
         protected String doInBackground(JSONObject... jObj){
-            cs = new ConnectServer("http://188.166.210.24:8065/api/v1/users/login");
+            String ip = sp.getServerIP_Preference(context);
+            cs = new ConnectServer("http://"+ip+":8065/api/v1/users/login");
             String result=null;
             is = cs.putData(jObj[0]);
             result = cs.convertInputStreamToString(is);
@@ -170,7 +179,7 @@ public class MainActivity extends Activity {
                         if(TokenId==null) System.out.println("Token is null");
                         else {
                             System.out.println("Token ID: "+TokenId);
-                            Toast.makeText(MainActivity.this,"Token ID: "+TokenId,Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(MainActivity.this,"Token ID: "+TokenId,Toast.LENGTH_SHORT).show();
                             sp.saveTokenPreference(context,TokenId);
                         }
                         switch(jObj.getString("roles")){

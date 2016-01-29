@@ -174,7 +174,8 @@ public class CreateRoleActivity extends AppCompatActivity {
 
         @Override
         protected String doInBackground(JSONObject... jobj){
-            cs = new ConnectServer("http://188.166.210.24:8065/api/v1/organisationRole/create");
+            SharedPreference sp = new SharedPreference();
+            cs = new ConnectServer("http://"+sp.getServerIP_Preference(_context)+":8065/api/v1/organisationRole/create");
             return cs.convertInputStreamToString(cs.putData(jobj[0]));
         }
 

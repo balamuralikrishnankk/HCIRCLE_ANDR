@@ -159,7 +159,7 @@ public class UserActivity extends AppCompatActivity
         @Override
         protected List<String> doInBackground(String... userRole){
             /*Getting list of Templates for a particular role */
-            list=OrganisationDetails.getListOfTemplates(userRole[0]);
+            list=OrganisationDetails.getListOfTemplates(_context,userRole[0]);
             onProgressUpdate();
             return list;
         }

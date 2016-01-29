@@ -225,7 +225,8 @@ public class CreateUserActivity extends AppCompatActivity {
 
         @Override
         protected String doInBackground(String... data){
-            connServ = new ConnectServer("http://188.166.210.24/createUsers.php");
+            SharedPreference sp = new SharedPreference();
+            connServ = new ConnectServer("http://"+sp.getServerIP_Preference(_context)+"/createUsers.php");
             onProgressUpdate();
             return connServ.convertInputStreamToString(connServ.putData(data[0]));
         }

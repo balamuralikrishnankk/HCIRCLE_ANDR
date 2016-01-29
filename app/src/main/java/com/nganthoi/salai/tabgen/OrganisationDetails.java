@@ -1,5 +1,7 @@
 package com.nganthoi.salai.tabgen;
 
+import android.content.Context;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -7,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import connectServer.ConnectServer;
+import sharePreference.SharedPreference;
 
 /**
  * Created by Lenovo on 28-Dec-15.
@@ -80,11 +83,13 @@ public class OrganisationDetails {
         /**********************************************************/
     }
 
-    public static List<String> getListOfTemplates(String role){
+    public static List<String> getListOfTemplates(Context context,String role){
         //Getting list of Organisation for a particular user
+        SharedPreference sp = new SharedPreference();
+        String ip = sp.getServerIP_Preference(context);
         List<String> list = new ArrayList<String>();
         try {
-            ConnectServer templateList = new ConnectServer("http://188.166.210.24/getTemplateListByRole.php");
+            ConnectServer templateList = new ConnectServer("http://"+ip+"/getTemplateListByRole.php");
             String jsonStr = templateList.convertInputStreamToString(templateList.putData("Role="+role));
             //System.out.println(jsonStr);
             if(jsonStr!=null){
