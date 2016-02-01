@@ -52,7 +52,7 @@ public class ChatFragment extends Fragment {
         /*Setting chat list View*/
         expandableListDetail = ExpandableListDataPump.getData(chatView.getContext());
         expandableListTitle = new ArrayList<String>(expandableListDetail.keySet());
-        expandableListAdapter= new ExpandableListAdapter(chatView.getContext(),expandableListView,expandableListTitle,expandableListDetail);
+        expandableListAdapter= new ExpandableListAdapter(chatView.getContext(),expandableListTitle,expandableListDetail);
         expandableListView.setAdapter(expandableListAdapter);
 
          expandableListView.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {

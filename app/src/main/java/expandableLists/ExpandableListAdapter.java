@@ -18,15 +18,15 @@ import java.util.List;
 public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
     private Context context;
-    private ExpandableListView expandableListView;
+    //private ExpandableListView expandableListView;
     private List<String> expandableListTitle;
     private HashMap<String, List<String>> expandableListDetail;
 
 
-    public ExpandableListAdapter(Context context, ExpandableListView expListView,List<String> expandableListTitle,
+    public ExpandableListAdapter(Context context,List<String> expandableListTitle,
                                  HashMap<String, List<String>> expandableListDetail) {
         this.context = context;
-        this.expandableListView = expListView;
+        //this.expandableListView = expListView;
         this.expandableListTitle = expandableListTitle;
         this.expandableListDetail = expandableListDetail;
     }

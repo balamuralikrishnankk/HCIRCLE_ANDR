@@ -71,7 +71,7 @@ public class CreateRoleActivity extends AppCompatActivity {
         try {
             JSONObject user_data = new JSONObject(sharedPrefData);
             username = user_data.getString("username");
-            list = OrganisationDetails.getListOfOrganisationUnits(username);
+            list = OrganisationDetails.getListOfOrganisationUnits(username,_context);
         }
         catch(Exception e){
             System.out.println("Exception here: "+e.toString());

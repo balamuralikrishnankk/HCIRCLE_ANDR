@@ -34,8 +34,8 @@ public class MainActivity extends Activity {
     Button signin;
     Intent intent;
     Context context=this;
-    String msg,uname, passwd, team;
-    EditText username,password,team_name,server_ip;
+    String msg,uname, passwd, team,server_ip;
+    EditText username,password,team_name;
     CheckBox show_password;
     ProgressDialog progressDialog;
     TextView forgotPassword;
@@ -53,7 +53,7 @@ public class MainActivity extends Activity {
         team_name = (EditText) findViewById(R.id.team_name);
         show_password = (CheckBox) findViewById(R.id.show_password);
         forgotPassword = (TextView) findViewById(R.id.forgotPassword);
-        server_ip = (EditText) findViewById(R.id.ip);
+        server_ip="128.199.111.18";
         //forgotPassword.setPaintFlags(forgotPassword.getPaintFlags()| Paint.UNDERLINE_TEXT_FLAG);
         forgotPassword.setText(Html.fromHtml("<u><i>Forgot Password ?</i></u>"));
 
@@ -68,7 +68,7 @@ public class MainActivity extends Activity {
                         uname = username.getText().toString().trim();
                         passwd = password.getText().toString().trim();
                         team = team_name.getText().toString()+"";
-                        sp.saveServerIP_Preference(context,server_ip.getText().toString());
+                        sp.saveServerIP_Preference(context,server_ip);
                         if(team=="")
                             team="myteam";
                         JSONObject jsonObject= new JSONObject();
@@ -136,7 +136,7 @@ public class MainActivity extends Activity {
             cdm.showCustomDialog();
             return false;
         }
-        else if(server_ip.getText().toString().trim().length()==0){
+        else if(server_ip.trim().length()==0){
             msg="Please setup your server IP";
             cdm =  new CustomDialogManager(MainActivity.this,"Set Up server IP",msg,false);
             cdm.showCustomDialog();

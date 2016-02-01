@@ -170,13 +170,13 @@ public class UserActivity extends AppCompatActivity
         @Override
         protected void onPostExecute(List<String> list){
             mViewPager = (ViewPager) findViewById(R.id.container);
-            setupViewPager(mViewPager);
+            setupViewPager(mViewPager,list);
 
             tabLayout = (TabLayout) findViewById(R.id.tabLayout);
             tabLayout.setupWithViewPager(mViewPager);
 
             try{
-                setTabLayoutIcons(tabLayout);
+                setTabLayoutIcons(tabLayout,list);
             }catch(Exception e){
                 System.out.println("Layout Exception: " + e.toString());
             }
@@ -189,7 +189,7 @@ public class UserActivity extends AppCompatActivity
         }
     }
 
-    private void setupViewPager(ViewPager viewPager) {
+    private void setupViewPager(ViewPager viewPager,List<String> list) {
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
 
         for(int i=0;i<list.size();i++){
@@ -212,7 +212,7 @@ public class UserActivity extends AppCompatActivity
         viewPager.setAdapter(adapter);
     }
 
-    private void setTabLayoutIcons(TabLayout tabLayout) throws Exception{
+    private void setTabLayoutIcons(TabLayout tabLayout,List<String> list) throws Exception{
 
         for(int i=0;i<list.size();i++){
             /*Adding tabs and fragments according to the Templates from the server*/

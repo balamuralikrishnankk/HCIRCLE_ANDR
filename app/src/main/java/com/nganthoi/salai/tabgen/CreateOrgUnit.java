@@ -62,7 +62,7 @@ public class CreateOrgUnit extends AppCompatActivity {
         }
         /* Getting list of organisation */
         orgList = new ArrayList<String>();
-        orgList = OrganisationDetails.getListOfOrganisations(username);
+        orgList = OrganisationDetails.getListOfOrganisations(username,context);
         ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item,orgList);
         //Setting drop down layout styles
         dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);

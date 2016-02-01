@@ -40,7 +40,7 @@ public class OrganisationUnitListFragment extends Fragment {
         String user_details = sp.getPreference(org_unit_layout.getContext());
         try {
             JSONObject jsonObject = new JSONObject(user_details);
-            list = OrganisationDetails.getListOfOrganisationUnits(jsonObject.getString("username"));
+            list = OrganisationDetails.getListOfOrganisationUnits(jsonObject.getString("username"),org_unit_layout.getContext());
         } catch (JSONException e) {
             System.out.println("Exception :" + e.toString());
         }

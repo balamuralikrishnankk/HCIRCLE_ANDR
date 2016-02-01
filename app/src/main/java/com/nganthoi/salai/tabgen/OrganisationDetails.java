@@ -15,13 +15,14 @@ import sharePreference.SharedPreference;
  * Created by Lenovo on 28-Dec-15.
  */
 public class OrganisationDetails {
-    public static List<String> getListOfOrganisationUnits(String username){
+    public static List<String> getListOfOrganisationUnits(String username,Context context){
         //Getting list of Organisation Units for a particular user
         List<String> list = new ArrayList<String>();
+        SharedPreference sp = new SharedPreference();
         try {
             JSONObject jObj = new JSONObject();
             jObj.put("createdBy", username);
-            ConnectServer orgUnitList = new ConnectServer("http://188.166.210.24:8065/api/v1/organisationUnit/track");
+            ConnectServer orgUnitList = new ConnectServer("http://"+sp.getServerIP_Preference(context)+":8065/api/v1/organisationUnit/track");
             String jsonStr = orgUnitList.convertInputStreamToString(orgUnitList.putData(jObj));
             //System.out.println(jsonStr);
             if(jsonStr!=null){
@@ -49,13 +50,14 @@ public class OrganisationDetails {
         /**********************************************************/
     }
 
-    public static List<String> getListOfOrganisations(String username){
+    public static List<String> getListOfOrganisations(String username,Context context){
         //Getting list of Organisation for a particular user
         List<String> list = new ArrayList<String>();
+        SharedPreference sp = new SharedPreference();
         try {
             JSONObject jObj = new JSONObject();
             jObj.put("createdBy", username);
-            ConnectServer orgUnitList = new ConnectServer("http://188.166.210.24:8065/api/v1/organisation/track");
+            ConnectServer orgUnitList = new ConnectServer("http://"+sp.getServerIP_Preference(context)+":8065/api/v1/organisation/track");
             String jsonStr = orgUnitList.convertInputStreamToString(orgUnitList.putData(jObj));
             //System.out.println(jsonStr);
             if(jsonStr!=null){
@@ -87,9 +89,10 @@ public class OrganisationDetails {
         //Getting list of Organisation for a particular user
         SharedPreference sp = new SharedPreference();
         String ip = sp.getServerIP_Preference(context);
+        System.out.println(ip);
         List<String> list = new ArrayList<String>();
         try {
-            ConnectServer templateList = new ConnectServer("http://"+ip+"/getTemplateListByRole.php");
+            ConnectServer templateList = new ConnectServer("http://"+ip+"/TabGen/getTemplateListByRole.php");
             String jsonStr = templateList.convertInputStreamToString(templateList.putData("Role="+role));
             //System.out.println(jsonStr);
             if(jsonStr!=null){
@@ -120,7 +123,7 @@ public class OrganisationDetails {
         //Getting list of Organisation for a particular user
         List<String> list = new ArrayList<String>();
         try {
-            ConnectServer channelIdList = new ConnectServer("http://188.166.210.24/getChannelsID.php");
+            ConnectServer channelIdList = new ConnectServer("http://128.199.111.18/TabGen/getChannelsID.php");
             String jsonStr = channelIdList.convertInputStreamToString(channelIdList.putData("user_id="+user_id));
             //System.out.println(jsonStr);
             if(jsonStr!=null){

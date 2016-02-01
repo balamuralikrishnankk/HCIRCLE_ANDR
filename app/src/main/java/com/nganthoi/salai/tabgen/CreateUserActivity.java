@@ -53,7 +53,7 @@ public class CreateUserActivity extends AppCompatActivity {
         sp = new SharedPreference();
         try{
             JSONObject jObj = new JSONObject(sp.getPreference(_context));
-            org_unit_list = OrganisationDetails.getListOfOrganisationUnits(jObj.getString("username"));
+            org_unit_list = OrganisationDetails.getListOfOrganisationUnits(jObj.getString("username"),_context);
         }catch(Exception e){
             System.out.println("Exception, unable to read shared preference data: "+e.toString());
         }
@@ -226,7 +226,7 @@ public class CreateUserActivity extends AppCompatActivity {
         @Override
         protected String doInBackground(String... data){
             SharedPreference sp = new SharedPreference();
-            connServ = new ConnectServer("http://"+sp.getServerIP_Preference(_context)+"/createUsers.php");
+            connServ = new ConnectServer("http://"+sp.getServerIP_Preference(_context)+"TabGen/createUsers.php");
             onProgressUpdate();
             return connServ.convertInputStreamToString(connServ.putData(data[0]));
         }

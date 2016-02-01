@@ -36,7 +36,7 @@ public class ExpandableListDataPump {
 
         channelList = new ArrayList<String>();
         try {
-            ConnectServer channelIdList = new ConnectServer("http://188.166.210.24/getChannelsID.php");
+            ConnectServer channelIdList = new ConnectServer("http://128.199.111.18/TabGen/getChannelsID.php");
             String jsonStr = channelIdList.convertInputStreamToString(channelIdList.putData("user_id="+user_id));
             //sp.savePreference(context,"CHANNEL_DETAILS",jsonStr);
             sp.saveChannelPreference(context,jsonStr);
