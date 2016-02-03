@@ -28,9 +28,9 @@
                     android:layout_gravity="center_vertical"
                 android:layout_marginTop="23dp"
                     android:textColor="#c1bebe"
-            android:layout_below="@+id/team_name"
             android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true" />
+            android:layout_alignParentEnd="true"
+            android:layout_below="@+id/imageView" />
 
                 <EditText
                     android:layout_width="match_parent"
@@ -116,28 +116,14 @@
             android:layout_below="@+id/signIn"
             android:layout_centerHorizontal="true" />
 
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:id="@+id/team_name"
-            android:background="@drawable/edittext_style"
-            android:paddingLeft="5dp"
-            android:paddingRight="5dp"
-            android:hint="@string/team_name"
-            android:layout_below="@+id/imageView"
-            android:layout_alignRight="@+id/user_email"
-            android:layout_alignEnd="@+id/user_email"
-            android:layout_marginTop="20dp"
-            android:gravity="center_vertical|center_horizontal" />
-
         <ImageView
             android:layout_width="180dp"
             android:layout_height="160dp"
             android:id="@+id/imageView"
             android:src="@drawable/logo"
             android:layout_alignParentTop="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true" />
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="31dp" />
 
 
     </RelativeLayout>

@@ -89,8 +89,7 @@ public class UserActivity extends AppCompatActivity
         progressDialog.setMessage("Wait,loading Your Templates....");
         progressDialog.setIndeterminate(true);
         progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        GetTabList getTabList = new GetTabList();
-        getTabList.execute(role);
+        new GetTabList().execute(role);
     }
 
     @Override
@@ -178,7 +177,7 @@ public class UserActivity extends AppCompatActivity
             try{
                 setTabLayoutIcons(tabLayout,list);
             }catch(Exception e){
-                System.out.println("Layout Exception: " + e.toString());
+                System.out.println("Layout Exception: "+e.toString());
             }
             progressDialog.dismiss();
              /*
@@ -194,18 +193,19 @@ public class UserActivity extends AppCompatActivity
 
         for(int i=0;i<list.size();i++){
             /*Adding tabs and fragments according to the Templates from the server*/
+            //System.out.println(list.get(i));
             switch(list.get(i)){
                 case "Chat Template"://check if Chat template exist
-                    adapter.addFragment(new ChatFragment(), "");
+                    adapter.addFragment(new ChatFragment(), "CHAT");
                     break;
                 case "Reference Template":
-                    adapter.addFragment(new ReferenceFragment(), "");
+                    adapter.addFragment(new ReferenceFragment(), "REFERENCE");
                     break;
                 case "CME Template":
-                    adapter.addFragment(new CmeFragment(),"");
+                    adapter.addFragment(new CmeFragment(),"CME");
                     break;
                 case "Latest News Template":
-                    adapter.addFragment(new LatestNewsFragment(),"");
+                    adapter.addFragment(new LatestNewsFragment(),"LATEST NEWS");
                     break;
             }
         }

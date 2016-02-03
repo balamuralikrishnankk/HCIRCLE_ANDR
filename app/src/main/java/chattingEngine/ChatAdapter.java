@@ -68,6 +68,7 @@ public class ChatAdapter extends BaseAdapter {
         boolean myMsg = chatMessage.getIsme() ;//Just a dummy check
         //to simulate whether it me or other sender
         setAlignment(holder, myMsg);
+        holder.sender_name.setText(chatMessage.getSenderName());
         holder.txtMessage.setText(chatMessage.getMessage());
         holder.txtMessage.setPadding(10, 5, 10, 5);
         holder.txtMessage.setGravity(Gravity.CENTER_VERTICAL);
@@ -134,6 +135,7 @@ public class ChatAdapter extends BaseAdapter {
     private ViewHolder createViewHolder(View v) {
         ViewHolder holder = new ViewHolder();
         holder.txtMessage = (TextView) v.findViewById(R.id.txtMessage);
+        holder.sender_name = (TextView) v.findViewById(R.id.sender);
         holder.content = (LinearLayout) v.findViewById(R.id.content);
         holder.contentWithBG = (LinearLayout) v.findViewById(R.id.contentWithBackground);
         holder.txtInfo = (TextView) v.findViewById(R.id.txtInfo);
@@ -142,6 +144,7 @@ public class ChatAdapter extends BaseAdapter {
 
     private static class ViewHolder {
         public TextView txtMessage;
+        public TextView sender_name;
         public TextView txtInfo;
         public LinearLayout content;
         public LinearLayout contentWithBG;

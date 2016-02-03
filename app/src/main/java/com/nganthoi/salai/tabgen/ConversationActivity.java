@@ -52,10 +52,11 @@ public class ConversationActivity extends AppCompatActivity {
     String channel_id="",user_id,token;
     String channelDetails=null;
     ConnectServer connMessage;
-    int responseCode=0;
+    int sender_responseCode=0,receiver_responseCode;
     String ip,responseMessage,errorMessage;
     HttpURLConnection conn=null;
     URL api_url=null;
+    Thread thread;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,15 +66,17 @@ public class ConversationActivity extends AppCompatActivity {
 
         messagesContainer = (ListView) findViewById(R.id.chatListView);
         messageEditText = (EditText) findViewById(R.id.messageEditText);
-        /*
-        getSupportActionBar().setHomeButtonEnabled(true);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        */
-        backButton = (ImageView) toolbar.findViewById(R.id.back_button);
 
+        backButton = (ImageView) toolbar.findViewById(R.id.back_button);
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                try{
+                    if(thread!=null)
+                        thread.interrupt();
+                }catch(Exception e){
+                    System.out.println("Interrupt Exception: "+e.toString());
+                }
                 onBackPressed();
             }
         });
@@ -105,12 +108,12 @@ public class ConversationActivity extends AppCompatActivity {
             JSONObject jsonObject;
             for(int i=0;i<jsonArray.length();i++){
                jsonObject = jsonArray.getJSONObject(i);
-                System.out.println("Title: "+title+"------->Channel name: "+jsonObject.getString("Channel_name"));
-               if(title==jsonObject.getString("Channel_name")) {
+                System.out.println("Title: "+title+"------->Channel name: "+jsonObject.getString("Channel_name")+" ---->ID: "+
+                        jsonObject.getString("Channel_ID"));
+               if(title.equals(jsonObject.getString("Channel_name"))) {
                    channel_id = jsonObject.getString("Channel_ID");// setting channel id
                    break;
-               }
-                channel_id = jsonObject.getString("Channel_ID");
+               }//channel_id = jsonObject.getString("Channel_ID");
             }
             System.out.println("Title: "+title+" Channel Id: "+channel_id+"\nToken Id: "+token);
 
@@ -125,26 +128,44 @@ public class ConversationActivity extends AppCompatActivity {
             System.out.println("Unable to read user ID: "+e.toString());
         }
         ip = sp.getServerIP_Preference(context);//getting ip
-        loadDummyHistory();
-        sendMessage = (ImageButton) findViewById(R.id.chatSendButton);
-        sendMessage.setOnClickListener(new View.OnClickListener() {
+        loadHistory();
+        thread = new Thread(){
             @Override
-            public void onClick(View v) {
-                /*Snackbar.make(v, "No action is implemented with this button", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();*/
+            public void run(){
                 try{
-                    System.out.println(ip);
-                    initControls("http://"+ip+":8065/api/v1/channels/"+channel_id+"/create");
-                }catch(Exception e){
-                    System.out.print("Message Sending failed: "+e.toString());
-                    Snackbar.make(v, "Message Sending failed", Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
+                    while(!isInterrupted()){
+                        Thread.sleep(5000);
+                        runOnUiThread(new Runnable(){
+                            @Override
+                            public void run(){
+                                loadHistory();
+                            }
+                        });
+                    }
+                }catch(InterruptedException e){
+                    System.out.println("Interrupted Exception: "+e.toString());
                 }
             }
-        });
+        };
+        thread.start();
+        sendMessage = (ImageButton) findViewById(R.id.chatSendButton);
+        sendMessage.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
 
+                    try {
+                        //System.out.println(ip);
+                        sendMyMessage("http://" + ip + ":8065/api/v1/channels/" + channel_id + "/create");
+                    } catch (Exception e) {
+                        System.out.print("Message Sending failed: " + e.toString());
+                        Snackbar.make(v, "Message Sending failed", Snackbar.LENGTH_LONG)
+                                .setAction("Action", null).show();
+                    }
+                }
+            });
+        }
         //initControls();
-    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -166,13 +187,13 @@ public class ConversationActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
-    private void initControls(String link) {
+    private void sendMyMessage(String link) {
         String messageText = messageEditText.getText().toString();
         if (TextUtils.isEmpty(messageText)) {
             return;
         }
         //token=sp.getTokenPreference(context);
-        System.out.println("Token_id: "+token);
+        System.out.println("Token_id: " + token);
         try{
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("channel_id",channel_id);
@@ -181,7 +202,7 @@ public class ConversationActivity extends AppCompatActivity {
             jsonObject.put("Message", messageText);
             String response=convertInputStreamToString(sendData(jsonObject,link));
             if(response!=null){
-                if(responseCode==200){
+                if(sender_responseCode==200){
                 //Toast.makeTest(context,"Your message has been sent",Toast.LENGTH_SHORT).show();
                     ChatMessage chatMessage = new ChatMessage();
                     chatMessage.setId(122);//dummy
@@ -190,6 +211,7 @@ public class ConversationActivity extends AppCompatActivity {
                     chatMessage.setMe(true);
                     messageEditText.setText("");
                     displayMessage(chatMessage);
+                    System.out.println("Sending result: "+response);
                     try{
                         JSONObject json_obj= new JSONObject(response);
                         Toast.makeText(context,"Message sent..."+json_obj.get("id"),Toast.LENGTH_LONG).show();
@@ -211,6 +233,9 @@ public class ConversationActivity extends AppCompatActivity {
             System.out.println("Sending error: "+e.toString());
         }
     }
+    public void getMessage(){
+        loadHistory();
+    }
     public void displayMessage(ChatMessage message) {
         adapter.add(message);
         adapter.notifyDataSetChanged();
@@ -221,27 +246,43 @@ public class ConversationActivity extends AppCompatActivity {
         messagesContainer.setSelection(messagesContainer.getCount() - 1);
     }
 
-    private void loadDummyHistory(){
+    private void loadHistory(){
+        InputStream inputStream = getData("http://"+ip+"/TabGen/getPost.php?channel_id="+channel_id+
+                "&type=all");
+        String res = convertInputStreamToString(inputStream);
         chatHistory = new ArrayList<ChatMessage>();
-        ChatMessage msg = new ChatMessage();
-        msg.setId(1);
-        msg.setMe(false);
-        msg.setMessage("Hi");
-        msg.setDate(DateFormat.getDateTimeInstance().format(new Date()));
-        chatHistory.add(msg);
-        ChatMessage msg1 = new ChatMessage();
-        msg1.setId(2);
-        msg1.setMe(false);
-        msg1.setMessage("How r u doing???");
-        msg1.setDate(DateFormat.getDateTimeInstance().format(new Date()));
-        chatHistory.add(msg1);
-
+        //ChatMessage[] msg=new ChatMessage[100];
+        try{
+            JSONArray jsonArray= new JSONArray(res);
+            JSONObject jsonObject;
+            int i;
+            for(i=0;i<jsonArray.length();i++){
+                jsonObject = jsonArray.getJSONObject(i);
+                ChatMessage msg=new ChatMessage();
+                msg.setId(i);
+                if(user_id.equals(jsonObject.getString("UserId"))){
+                    msg.setMe(true);
+                }
+                else{
+                    msg.setMe(false);
+                    msg.setSenderName(jsonObject.getString("messaged_by"));
+                }
+                msg.setMessage(jsonObject.getString("Message"));
+                //System.out.println("Message" + i + ": " + jsonObject.getString("Message"));
+                msg.setDate(DateFormat.getDateTimeInstance().format(new Date()));
+                chatHistory.add(msg);
+            }
+        }catch(Exception e){
+            System.out.println("Error: "+e.toString());
+        }
         adapter = new ChatAdapter(ConversationActivity.this, new ArrayList<ChatMessage>());
         messagesContainer.setAdapter(adapter);
 
         for(int i=0; i<chatHistory.size(); i++) {
             ChatMessage message = chatHistory.get(i);
-            displayMessage(message);
+            adapter.add(message);
+            adapter.notifyDataSetChanged();
+            scroll();
         }
     }
 
@@ -265,10 +306,10 @@ public class ConversationActivity extends AppCompatActivity {
             osw = new OutputStreamWriter(os);
             osw.write(parameters.toString());
             osw.flush();
-            responseCode = conn.getResponseCode(); //it only the code 200
+            sender_responseCode = conn.getResponseCode(); //it only the code 200
             responseMessage = conn.getResponseMessage();// it is the json response from the mattermost api
-            System.out.println("Response Code: "+responseCode+"\nResponse message: "+responseMessage);
-            if(responseCode == 200) {
+            System.out.println("Response Code: "+sender_responseCode+"\nResponse message: "+responseMessage);
+            if(sender_responseCode == 200) {
                 isr = new BufferedInputStream(conn.getInputStream());
             }
             else{
@@ -278,9 +319,41 @@ public class ConversationActivity extends AppCompatActivity {
         }catch(Exception e){
             e.printStackTrace();
             errorMessage = e.toString();
-            responseCode=-1;
+            sender_responseCode=-1;
             System.out.println("Server Not Found Exception occurs here: " + e.toString());
             isr = null;
+        }
+        return isr;
+    }
+
+    public InputStream getData(String api_link){
+        InputStream isr=null;
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
+        try{
+            api_url = new URL(api_link);
+            conn = (HttpURLConnection) api_url.openConnection();
+            //conn.setRequestProperty("Content-Type", "application/json");
+            //conn.setRequestProperty("Authorization", "Bearer "+token);
+            conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+            conn.setRequestMethod("GET");
+            conn.setDoInput(true);
+            conn.setDoOutput(true);
+            conn.connect();
+            receiver_responseCode = conn.getResponseCode();
+            responseMessage = conn.getResponseMessage();
+            System.out.println("Response Code: " + receiver_responseCode + "\nResponse message: " + responseMessage);
+            if(receiver_responseCode == 200/*HttpURLConnection.HTTP_OK*/){
+                isr = new BufferedInputStream(conn.getInputStream());
+            }
+            else {
+                isr = new BufferedInputStream(conn.getErrorStream());
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+            errorMessage = e.toString();
+            receiver_responseCode=-1;
+            System.out.println("Exception occurs here: " + e.toString());
         }
         return isr;
     }

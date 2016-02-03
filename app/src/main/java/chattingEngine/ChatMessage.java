@@ -9,6 +9,7 @@ public class ChatMessage {
     private String message;
     private Long userId;
     private String dateTime;
+    private String sender_name;
 
     public long getId() {
         return id;
@@ -28,6 +29,8 @@ public class ChatMessage {
     public void setMessage(String message) {
         this.message = message;
     }
+    public void setSenderName(String sender){this.sender_name=sender;}
+    public String getSenderName(){return this.sender_name;}
     public long getUserId() {
         return userId;
     }

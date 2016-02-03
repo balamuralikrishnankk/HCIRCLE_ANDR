@@ -50,7 +50,6 @@ public class MainActivity extends Activity {
         signin = (Button) findViewById(R.id.signIn);
         username = (EditText) findViewById(R.id.username);
         password = (EditText) findViewById(R.id.password);
-        team_name = (EditText) findViewById(R.id.team_name);
         show_password = (CheckBox) findViewById(R.id.show_password);
         forgotPassword = (TextView) findViewById(R.id.forgotPassword);
         server_ip="128.199.111.18";
@@ -67,7 +66,7 @@ public class MainActivity extends Activity {
                     try {
                         uname = username.getText().toString().trim();
                         passwd = password.getText().toString().trim();
-                        team = team_name.getText().toString()+"";
+                        team = "neworgunit";
                         sp.saveServerIP_Preference(context,server_ip);
                         if(team=="")
                             team="myteam";
@@ -90,7 +89,8 @@ public class MainActivity extends Activity {
         forgotPassword.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Uri forgotPassword = Uri.parse("http://188.166.210.24:8065/"+team_name.getText().toString()+
+                Uri forgotPassword = Uri.parse("http://"+sp.getServerIP_Preference(context)+
+                        ":8065/"+team_name.getText().toString()+
                         ""+"/reset_password");
                 intent = new Intent(Intent.ACTION_VIEW, forgotPassword);
                 startActivity(intent);

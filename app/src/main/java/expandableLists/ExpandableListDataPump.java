@@ -22,6 +22,7 @@ public class ExpandableListDataPump {
         HashMap<String, List<String>> expandableListDetail = new HashMap<String, List<String>>();
         SharedPreference sp = new SharedPreference();
         String user_details = sp.getPreference(context);
+
         try{
             JSONObject jObj = new JSONObject(user_details);
             user_id=jObj.getString("id");
@@ -36,7 +37,7 @@ public class ExpandableListDataPump {
 
         channelList = new ArrayList<String>();
         try {
-            ConnectServer channelIdList = new ConnectServer("http://128.199.111.18/TabGen/getChannelsID.php");
+            ConnectServer channelIdList = new ConnectServer("http://"+sp.getServerIP_Preference(context)+"/TabGen/getChannelsID.php");
             String jsonStr = channelIdList.convertInputStreamToString(channelIdList.putData("user_id="+user_id));
             //sp.savePreference(context,"CHANNEL_DETAILS",jsonStr);
             sp.saveChannelPreference(context,jsonStr);
