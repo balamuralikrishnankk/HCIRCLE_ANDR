@@ -20,7 +20,6 @@ import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -29,11 +28,9 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
-
 import chattingEngine.ChatAdapter;
 import chattingEngine.ChatMessage;
 import connectServer.ConnectServer;
@@ -49,7 +46,7 @@ public class ConversationActivity extends AppCompatActivity {
     private ArrayList<ChatMessage> chatHistory;
     SharedPreference sp;
     Context context=this;
-    String channel_id="",user_id,token;
+    String channel_id="",user_id,token,last_timetamp="";
     String channelDetails=null;
     ConnectServer connMessage;
     int sender_responseCode=0,receiver_responseCode;
@@ -57,6 +54,7 @@ public class ConversationActivity extends AppCompatActivity {
     HttpURLConnection conn=null;
     URL api_url=null;
     Thread thread;
+    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy' 'HH:mm:ss:S");
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -155,7 +153,7 @@ public class ConversationActivity extends AppCompatActivity {
 
                     try {
                         //System.out.println(ip);
-                        sendMyMessage("http://" + ip + ":8065/api/v1/channels/" + channel_id + "/create");
+                        sendMyMessage("http://"+ip+":8065/api/v1/channels/"+channel_id+"/create");
                     } catch (Exception e) {
                         System.out.print("Message Sending failed: " + e.toString());
                         Snackbar.make(v, "Message Sending failed", Snackbar.LENGTH_LONG)
@@ -207,14 +205,20 @@ public class ConversationActivity extends AppCompatActivity {
                     ChatMessage chatMessage = new ChatMessage();
                     chatMessage.setId(122);//dummy
                     chatMessage.setMessage(messageText);
-                    chatMessage.setDate(DateFormat.getDateTimeInstance().format(new Date()));
+                    //chatMessage.setDate(DateFormat.getDateTimeInstance().format(new Date()));
                     chatMessage.setMe(true);
                     messageEditText.setText("");
-                    displayMessage(chatMessage);
+
                     System.out.println("Sending result: "+response);
                     try{
                         JSONObject json_obj= new JSONObject(response);
-                        Toast.makeText(context,"Message sent..."+json_obj.get("id"),Toast.LENGTH_LONG).show();
+                        last_timetamp = json_obj.getString("create_at");
+                        Long timestamp = Long.parseLong(last_timetamp);
+                        Date date = new Date(timestamp);
+                        chatMessage.setDate(simpleDateFormat.format(date));
+                        Toast.makeText(context,"Message sent...",Toast.LENGTH_LONG).show();
+                        //+json_obj.get("id")
+                        displayMessage(chatMessage);
                     }catch(Exception e){
                         System.out.print("Chat Exception: "+e.toString());
                     }
@@ -247,8 +251,7 @@ public class ConversationActivity extends AppCompatActivity {
     }
 
     private void loadHistory(){
-        InputStream inputStream = getData("http://"+ip+"/TabGen/getPost.php?channel_id="+channel_id+
-                "&type=all");
+        InputStream inputStream = getData("http://"+ip+"/TabGen/getPost.php?channel_id="+channel_id);
         String res = convertInputStreamToString(inputStream);
         chatHistory = new ArrayList<ChatMessage>();
         //ChatMessage[] msg=new ChatMessage[100];
@@ -262,6 +265,7 @@ public class ConversationActivity extends AppCompatActivity {
                 msg.setId(i);
                 if(user_id.equals(jsonObject.getString("UserId"))){
                     msg.setMe(true);
+                    msg.setSenderName(null);
                 }
                 else{
                     msg.setMe(false);
@@ -269,7 +273,10 @@ public class ConversationActivity extends AppCompatActivity {
                 }
                 msg.setMessage(jsonObject.getString("Message"));
                 //System.out.println("Message" + i + ": " + jsonObject.getString("Message"));
-                msg.setDate(DateFormat.getDateTimeInstance().format(new Date()));
+                Long chatTime = Long.parseLong(jsonObject.getString("CreateAt"));
+                Date date = new Date(chatTime);
+                msg.setDate(simpleDateFormat.format(date));
+                //msg.setDate(DateFormat.getDateTimeInstance().format(new Date()));
                 chatHistory.add(msg);
             }
         }catch(Exception e){
