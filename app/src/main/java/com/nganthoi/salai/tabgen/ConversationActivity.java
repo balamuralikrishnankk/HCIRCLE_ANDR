@@ -137,6 +137,7 @@ public class ConversationActivity extends AppCompatActivity {
                             @Override
                             public void run(){
                                 loadHistory();
+                                //getMessage();
                             }
                         });
                     }
@@ -195,7 +196,7 @@ public class ConversationActivity extends AppCompatActivity {
         try{
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("channel_id",channel_id);
-            jsonObject.put("root_id","");
+            jsonObject.put("root_id", "");
             jsonObject.put("parent_id","");
             jsonObject.put("Message", messageText);
             String response=convertInputStreamToString(sendData(jsonObject,link));
@@ -238,7 +239,55 @@ public class ConversationActivity extends AppCompatActivity {
         }
     }
     public void getMessage(){
-        loadHistory();
+        //loadHistory();
+        InputStream isr=null;
+        int responseCode=-1;
+        String respMsg;
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
+        System.out.println("Last Timestamp: "+last_timetamp);
+        try{
+            api_url = new URL("http://"+ip+":8065/api/v1/channels/"+channel_id+"/posts/"+last_timetamp);
+            conn = (HttpURLConnection) api_url.openConnection();
+            conn.setRequestProperty("Content-Type", "application/json");
+            conn.setRequestProperty("Authorization", "Bearer " + token);
+            conn.setRequestMethod("POST");
+            conn.setDoInput(true);
+            conn.setDoOutput(true);
+            conn.connect();
+            responseCode = conn.getResponseCode();
+            respMsg = conn.getResponseMessage();
+            System.out.println("Response Code: " + responseCode + "\nResponse message: " + respMsg);
+            if(responseCode == 200)/*HttpURLConnection.HTTP_OK*/{
+                isr = new BufferedInputStream(conn.getInputStream());
+            }
+            else {
+                isr = new BufferedInputStream(conn.getErrorStream());
+            }
+            String resp = convertInputStreamToString(isr);
+            System.out.println(resp);/*
+            if(responseCode==200){
+                try{
+                    JSONArray jsonArray; ;
+                    JSONObject obj0 = new JSONObject(resp);
+                    jsonArray = obj0.getJSONArray("order");
+                    JSONObject obj1;
+                    int i=0;
+                    while(i<jsonArray.length()){
+                        i++;
+                    }
+                    System.out.println("Size of order i: "+i);
+                }catch(Exception e){
+                    System.out.println("Error in parsing JSON: " + e.toString());
+                }
+            }
+            */
+        }catch(Exception e){
+            e.printStackTrace();
+            errorMessage = e.toString();
+            responseCode=-1;
+            System.out.println("Exception in getMessage(): " + e.toString());
+        }
     }
     public void displayMessage(ChatMessage message) {
         adapter.add(message);
@@ -277,6 +326,7 @@ public class ConversationActivity extends AppCompatActivity {
                 Date date = new Date(chatTime);
                 msg.setDate(simpleDateFormat.format(date));
                 //msg.setDate(DateFormat.getDateTimeInstance().format(new Date()));
+                last_timetamp = jsonObject.getString("LastPostAt");
                 chatHistory.add(msg);
             }
         }catch(Exception e){
