@@ -2,6 +2,8 @@ package com.nganthoi.salai.tabgen;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.support.design.widget.Snackbar;
@@ -22,10 +24,14 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
@@ -34,6 +40,7 @@ import java.util.Date;
 import chattingEngine.ChatAdapter;
 import chattingEngine.ChatMessage;
 import connectServer.ConnectServer;
+import readData.ReadFile;
 import sharePreference.SharedPreference;
 
 public class ConversationActivity extends AppCompatActivity {
@@ -47,7 +54,7 @@ public class ConversationActivity extends AppCompatActivity {
     SharedPreference sp;
     Context context=this;
     String channel_id="",user_id,token,last_timetamp=null;
-    String channelDetails=null;
+    String channelDetails=null,file_path=null;
     ConnectServer connMessage;
     int sender_responseCode=0,receiver_responseCode;
     String ip,responseMessage,errorMessage;
@@ -137,14 +144,18 @@ public class ConversationActivity extends AppCompatActivity {
             public void run(){
                 try{
                     while(!isInterrupted()){
-                        Thread.sleep(7000);
+                        Thread.sleep(3000);
                         runOnUiThread(new Runnable(){
                             @Override
                             public void run(){
                                 //loadHistory();
                                 if(last_timetamp!=null) {
-                                    getMessage();
-                                }else System.out.println("latest timestamp is null, no chat history for this channel");
+                                    //getMessage();
+                                    new GetCurrentMessageTask().execute("http://"+ip+
+                                            ":8065//api/v1/channels/"+channel_id+
+                                            "/posts/"+last_timetamp);
+                                }else
+                                    System.out.println("latest timestamp is null, no chat history for this channel");
                             }
                         });
                     }
@@ -190,7 +201,12 @@ public class ConversationActivity extends AppCompatActivity {
         if (id == R.id.action_settings) {
             return true;
         }
-
+        if (id == R.id.attach_file){
+            Intent intent = new Intent();
+            intent.setType("*/*");
+            intent.setAction(Intent.ACTION_GET_CONTENT);
+            startActivityForResult(Intent.createChooser(intent,"Select a file from the gallary"),1);
+        }
         return super.onOptionsItemSelected(item);
     }
     private void sendMyMessage(String link) {
@@ -244,82 +260,7 @@ public class ConversationActivity extends AppCompatActivity {
             System.out.println("Sending error: "+e.toString());
         }
     }
-    public void getMessage(){
-        //loadHistory();
-        //HttpURLConnection conn;
-        InputStream isr=null;
-        int responseCode=-1;
-        String respMsg;
-        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-        StrictMode.setThreadPolicy(policy);
-        try{
-            //String tempSite = "http://128.199.111.18:8065/api/v1/channels/tws3kgoqcfdtfjpgq5ash3zdqo/posts/1454579256871";
-            api_url = new URL("http://"+ip+":8065/api/v1/channels/"+channel_id+"/posts/"+last_timetamp);
-            conn = (HttpURLConnection) api_url.openConnection();
-            conn.setRequestProperty("Content-Type", "application/json");
-            conn.setRequestProperty("Authorization", "Bearer " + token);
-            conn.setRequestMethod("GET");
-            conn.setDoInput(true);
-            conn.setDoOutput(true);
-            conn.connect();
-            responseCode = conn.getResponseCode();
-            respMsg = conn.getResponseMessage();
-            System.out.println("Response Code: " + responseCode + "\nResponse message: " + respMsg);
-            if(responseCode == 200)/*HttpURLConnection.HTTP_OK*/{
-                isr = new BufferedInputStream(conn.getInputStream());
-                try{
-                    String resp = convertInputStreamToString(isr);
-                    System.out.println(resp);
-                    JSONObject jObj1 = new JSONObject(resp);
-                    JSONArray jsonArray = jObj1.getJSONArray("order");
-                    JSONObject jObj2 = new JSONObject();
-                    if(jsonArray.length()>0) {
-                        jObj2 = jObj1.getJSONObject("posts");
-                        int i=0;
-                        String messageDate=null;
-                        while(i<jsonArray.length()){
-                            //System.out.println(jsonArray.getString(i));
-                            JSONObject jObj3 = jObj2.getJSONObject(jsonArray.getString(i));
-                            System.out.println("Id: " + jObj3.getString("id") + " Message: " + jObj3.getString("message"));
-                            messageDate = ""+jObj3.getString("create_at");
-                            System.out.println("Message Date: "+messageDate);
-                            ChatMessage currentMsg = new ChatMessage();
-                            //currentMsg.setId(777);
-                            currentMsg.setMessage(""+jObj3.getString("message"));
-                            Long timeStamp = Long.parseLong(messageDate);
-                            Date date = new Date(timeStamp);
-                            currentMsg.setDate(simpleDateFormat.format(date));
 
-                            if(user_id.equals(""+jObj3.getString("user_id"))){
-                                currentMsg.setMe(true);
-                            }
-                            else{
-                                currentMsg.setMe(false);
-                            }
-                            currentMsg.setSenderName(""+jObj3.getString("user_id"));
-                            displayMessage(currentMsg);
-                            i++;
-                        }
-                        if(messageDate!=null)
-                            last_timetamp = messageDate;
-                    }
-                    //System.out.println("Size of order i: "+i);
-                }catch(Exception e){
-                    System.out.println("Error in parsing JSON: " + e.toString());
-                }
-            }
-            else {
-                isr = new BufferedInputStream(conn.getErrorStream());
-                String resp = convertInputStreamToString(isr);
-                System.out.println(resp);
-            }
-
-        }catch(Exception e){
-            e.printStackTrace();
-            errorMessage = e.toString();
-            System.out.println("Exception in getMessage(): " + e.toString());
-        }
-    }
     public void displayMessage(ChatMessage message) {
         adapter.add(message);
         adapter.notifyDataSetChanged();
@@ -466,5 +407,196 @@ public class ConversationActivity extends AppCompatActivity {
         }
         return result;
     }
+    public void onActivityResult(int requestCode, int resultCode, Intent data){
+        if(resultCode!=RESULT_OK || data==null) return;
+        Uri fileUri = data.getData();
+        ReadFile readFile = new ReadFile();
+        switch(requestCode){
+            case 1: file_path = readFile.getFilePath(fileUri,context);
+                    if(file_path!=null){
+
+                        new Thread(new Runnable(){
+                            public void run(){
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        System.out.println("Uploading your file....: "+file_path);
+                                        Toast.makeText(context,"Uploading your file...",Toast.LENGTH_LONG).show();
+                                        UploadFile uploadFile = new UploadFile(file_path,"http://"+ip+":8065/api/v1/files/upload");
+                                        uploadFile.uploadFile();
+                                    }
+                                });
+                            }
+                        }).start();
+                    }
+                    break;
+            default:
+                Toast.makeText(context, "Invalid request code. You haven't selected any file", Toast.LENGTH_SHORT).show();
+        }
+    }
+    private class UploadFile {
+        URL connectURL;
+        String serverRespMsg,server_URI=null;
+        HttpURLConnection httpURLConn = null;
+        DataOutputStream dos = null;
+        String lineEnd = "\r\n";
+        String twoHyphens = "--";
+        String boundary = "*****";
+        int bytesRead, bytesAvailable, bufferSize;
+        int serverRespCode;
+        byte[] buffer;
+        int maxBufferSize = 1*1024*1024;
+        String fileLocation=null;
+        public UploadFile(String sourceFileUri,String serverUploadPath){
+            fileLocation = sourceFileUri;
+            server_URI = serverUploadPath;
+
+        }
+        public void uploadFile(){
+            //InputStream is=null;
+            //String result =null;
+            File sourceFile = new File(fileLocation);
+            if(!sourceFile.isFile()){
+                Toast.makeText(context, "Source file does not exist", Toast.LENGTH_SHORT).show();
+              return;
+            }
+            try{
+                FileInputStream fis = new FileInputStream(sourceFile);
+                connectURL = new URL(server_URI);
+                httpURLConn = (HttpURLConnection) connectURL.openConnection();
+                httpURLConn.setDoInput(true);
+                httpURLConn.setDoOutput(true);
+                httpURLConn.setRequestMethod("POST");
+                //httpURLConn.setRequestProperty("Connection", "Keep-Alive");
+                httpURLConn.setRequestProperty("ENCTYPE", "multipart/form-data");
+                httpURLConn.setRequestProperty("Content-Type", "multipart/form-data;boundary=" +boundary);
+                httpURLConn.setRequestProperty("Authorization", "Bearer " + token);
+                httpURLConn.setRequestProperty("files", fileLocation);
+                httpURLConn.setRequestProperty("channel_id", channel_id);
+                //httpURLConn.connect();
+                dos = new DataOutputStream(httpURLConn.getOutputStream());
+                dos.writeBytes(twoHyphens+boundary+lineEnd);
+                dos.writeBytes("Content-Description: form-data; name=\"files\";filename=\""+fileLocation+"\""+lineEnd);
+                dos.writeBytes(lineEnd);
+                //create a buffer of maximum size
+                bytesAvailable = fis.available();
+                bufferSize = Math.min(bytesAvailable,maxBufferSize);
+                buffer=new byte[bufferSize];
+
+                bytesRead = fis.read(buffer,0,bufferSize);
+                while(bytesRead>0){
+                    dos.write(buffer,0,bufferSize);
+                    bytesAvailable = fis.available();
+                    bufferSize = Math.min(bytesAvailable, maxBufferSize);
+                    bytesRead = fis.read(buffer,0,bufferSize);
+                }
+
+                dos.writeBytes(lineEnd);
+                dos.writeBytes(twoHyphens+boundary+twoHyphens+lineEnd);
+
+                serverRespCode = httpURLConn.getResponseCode();
+                serverRespMsg = httpURLConn.getResponseMessage();
+                System.out.println("File Upload Response: " + serverRespMsg);
+                if(serverRespCode==200){
+                    Toast.makeText(context,"Your file upload is successfully completed",Toast.LENGTH_LONG).show();
+                    System.out.println("Your file upload is successfully completed");
+                }
+                else{
+                    Toast.makeText(context,"Oops! Your file upload is failed",Toast.LENGTH_LONG).show();
+                    System.out.println("Oops! Your file upload is failed");
+                }
+                fis.close();
+                dos.flush();
+                dos.close();
+            }catch(Exception e){
+                e.printStackTrace();
+                System.out.println("Exception here: "+e.toString());
+            }
+        }//end of function uploadFile
+    }//end of class UploadFile
+
+    class GetCurrentMessageTask extends AsyncTask<String,Void,String>{
+        InputStream isr=null;
+        HttpURLConnection conn;
+        URL api_url;
+        int responseCode=-1;
+        String respMsg;
+        String resp=null;
+        @Override
+        protected String doInBackground(String... messageUrl){
+            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+            StrictMode.setThreadPolicy(policy);
+            try{
+                api_url = new URL(messageUrl[0]);
+                conn = (HttpURLConnection) api_url.openConnection();
+                conn.setRequestProperty("Content-Type", "application/json");
+                conn.setRequestProperty("Authorization", "Bearer " + token);
+                conn.setRequestMethod("POST");
+                conn.setDoInput(true);
+                conn.setDoOutput(true);
+                conn.connect();
+                responseCode = conn.getResponseCode();
+                respMsg = conn.getResponseMessage();
+                System.out.println("Response Code: " + responseCode + "\nResponse message: " + respMsg);
+                if(responseCode == 200)/*HttpURLConnection.HTTP_OK*/{
+                    isr = new BufferedInputStream(conn.getInputStream());
+                }
+                else {
+                    isr = new BufferedInputStream(conn.getErrorStream());
+                }
+                resp = convertInputStreamToString(isr);
+            }catch(Exception e){
+                e.printStackTrace();
+                errorMessage = e.toString();
+                System.out.println("Exception in getMessage(): " + e.toString());
+                return null;
+            }
+            System.out.println(resp);
+            return resp;
+        }
+        @Override
+        protected void onPostExecute(String resp){
+            if(resp!=null && responseCode==200) {
+                try {
+
+                    JSONObject jObj1 = new JSONObject(resp);
+                    JSONArray jsonArray = jObj1.getJSONArray("order");
+                    JSONObject jObj2;
+                    if (jsonArray.length() > 0) {
+                        jObj2 = jObj1.getJSONObject("posts");
+                        int i = 0;
+                        String messageDate = null;
+                        while (i < jsonArray.length()) {
+                            //System.out.println(jsonArray.getString(i));
+                            JSONObject jObj3 = jObj2.getJSONObject(jsonArray.getString(i));
+                            System.out.println("Id: " + jObj3.getString("id") + " Message: " + jObj3.getString("message"));
+                            messageDate = "" + jObj3.getString("create_at");
+                            System.out.println("Message Date: " + messageDate);
+                            ChatMessage currentMsg = new ChatMessage();
+                            //currentMsg.setId(777);
+                            currentMsg.setMessage("" + jObj3.getString("message"));
+                            Long timeStamp = Long.parseLong(messageDate);
+                            Date date = new Date(timeStamp);
+                            currentMsg.setDate(simpleDateFormat.format(date));
+
+                            if (user_id.equals("" + jObj3.getString("user_id"))) {
+                                currentMsg.setMe(true);
+                            } else {
+                                currentMsg.setMe(false);
+                            }
+                            currentMsg.setSenderName("" + jObj3.getString("user_id"));
+                            displayMessage(currentMsg);
+                            i++;
+                        }
+                        if (messageDate != null)
+                            last_timetamp = messageDate;
+                    }
+                    //System.out.println("Size of order i: "+i);
+                } catch (Exception e) {
+                    System.out.println("Error in parsing JSON: " + e.toString());
+                }
+            }//end if
+        }//end on post execution
+    }//end of GetCurrentMessageTask class
 }
 
