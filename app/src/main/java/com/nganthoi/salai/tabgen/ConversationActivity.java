@@ -254,11 +254,11 @@ public class ConversationActivity extends AppCompatActivity {
         StrictMode.setThreadPolicy(policy);
         try{
             //String tempSite = "http://128.199.111.18:8065/api/v1/channels/tws3kgoqcfdtfjpgq5ash3zdqo/posts/1454579256871";
-            api_url = new URL("http://"+ip+":8065//api/v1/channels/"+channel_id+"/posts/"+last_timetamp);
+            api_url = new URL("http://"+ip+":8065/api/v1/channels/"+channel_id+"/posts/"+last_timetamp);
             conn = (HttpURLConnection) api_url.openConnection();
             conn.setRequestProperty("Content-Type", "application/json");
             conn.setRequestProperty("Authorization", "Bearer " + token);
-            conn.setRequestMethod("POST");
+            conn.setRequestMethod("GET");
             conn.setDoInput(true);
             conn.setDoOutput(true);
             conn.connect();
