@@ -46,7 +46,7 @@ public class ConversationActivity extends AppCompatActivity {
     private ArrayList<ChatMessage> chatHistory;
     SharedPreference sp;
     Context context=this;
-    String channel_id="",user_id,token,last_timetamp="";
+    String channel_id="",user_id,token,last_timetamp=null;
     String channelDetails=null;
     ConnectServer connMessage;
     int sender_responseCode=0,receiver_responseCode;
@@ -54,7 +54,7 @@ public class ConversationActivity extends AppCompatActivity {
     HttpURLConnection conn=null;
     URL api_url=null;
     Thread thread;
-    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy' 'HH:mm:ss:S");
+    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy' 'HH:mm:ss a");
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,6 +64,11 @@ public class ConversationActivity extends AppCompatActivity {
 
         messagesContainer = (ListView) findViewById(R.id.chatListView);
         messageEditText = (EditText) findViewById(R.id.messageEditText);
+
+        //setting Chat adapter
+        adapter = new ChatAdapter(ConversationActivity.this, new ArrayList<ChatMessage>());
+        messagesContainer.setAdapter(adapter);
+        /********************************************/
 
         backButton = (ImageView) toolbar.findViewById(R.id.back_button);
         backButton.setOnClickListener(new View.OnClickListener() {
@@ -132,12 +137,14 @@ public class ConversationActivity extends AppCompatActivity {
             public void run(){
                 try{
                     while(!isInterrupted()){
-                        Thread.sleep(5000);
+                        Thread.sleep(7000);
                         runOnUiThread(new Runnable(){
                             @Override
                             public void run(){
-                                loadHistory();
-                                //getMessage();
+                                //loadHistory();
+                                if(last_timetamp!=null) {
+                                    getMessage();
+                                }else System.out.println("latest timestamp is null, no chat history for this channel");
                             }
                         });
                     }
@@ -191,11 +198,9 @@ public class ConversationActivity extends AppCompatActivity {
         if (TextUtils.isEmpty(messageText)) {
             return;
         }
-        //token=sp.getTokenPreference(context);
-        System.out.println("Token_id: " + token);
         try{
             JSONObject jsonObject = new JSONObject();
-            jsonObject.put("channel_id",channel_id);
+            jsonObject.put("channel_id", channel_id);
             jsonObject.put("root_id", "");
             jsonObject.put("parent_id","");
             jsonObject.put("Message", messageText);
@@ -208,9 +213,10 @@ public class ConversationActivity extends AppCompatActivity {
                     chatMessage.setMessage(messageText);
                     //chatMessage.setDate(DateFormat.getDateTimeInstance().format(new Date()));
                     chatMessage.setMe(true);
+                    chatMessage.setSenderName("Me");
                     messageEditText.setText("");
-
                     System.out.println("Sending result: "+response);
+
                     try{
                         JSONObject json_obj= new JSONObject(response);
                         last_timetamp = json_obj.getString("create_at");
@@ -240,14 +246,15 @@ public class ConversationActivity extends AppCompatActivity {
     }
     public void getMessage(){
         //loadHistory();
+        //HttpURLConnection conn;
         InputStream isr=null;
         int responseCode=-1;
         String respMsg;
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
-        System.out.println("Last Timestamp: "+last_timetamp);
         try{
-            api_url = new URL("http://"+ip+":8065/api/v1/channels/"+channel_id+"/posts/"+last_timetamp);
+            //String tempSite = "http://128.199.111.18:8065/api/v1/channels/tws3kgoqcfdtfjpgq5ash3zdqo/posts/1454579256871";
+            api_url = new URL("http://"+ip+":8065//api/v1/channels/"+channel_id+"/posts/"+last_timetamp);
             conn = (HttpURLConnection) api_url.openConnection();
             conn.setRequestProperty("Content-Type", "application/json");
             conn.setRequestProperty("Authorization", "Bearer " + token);
@@ -260,32 +267,56 @@ public class ConversationActivity extends AppCompatActivity {
             System.out.println("Response Code: " + responseCode + "\nResponse message: " + respMsg);
             if(responseCode == 200)/*HttpURLConnection.HTTP_OK*/{
                 isr = new BufferedInputStream(conn.getInputStream());
-            }
-            else {
-                isr = new BufferedInputStream(conn.getErrorStream());
-            }
-            String resp = convertInputStreamToString(isr);
-            System.out.println(resp);/*
-            if(responseCode==200){
                 try{
-                    JSONArray jsonArray; ;
-                    JSONObject obj0 = new JSONObject(resp);
-                    jsonArray = obj0.getJSONArray("order");
-                    JSONObject obj1;
-                    int i=0;
-                    while(i<jsonArray.length()){
-                        i++;
+                    String resp = convertInputStreamToString(isr);
+                    System.out.println(resp);
+                    JSONObject jObj1 = new JSONObject(resp);
+                    JSONArray jsonArray = jObj1.getJSONArray("order");
+                    JSONObject jObj2 = new JSONObject();
+                    if(jsonArray.length()>0) {
+                        jObj2 = jObj1.getJSONObject("posts");
+                        int i=0;
+                        String messageDate=null;
+                        while(i<jsonArray.length()){
+                            //System.out.println(jsonArray.getString(i));
+                            JSONObject jObj3 = jObj2.getJSONObject(jsonArray.getString(i));
+                            System.out.println("Id: " + jObj3.getString("id") + " Message: " + jObj3.getString("message"));
+                            messageDate = ""+jObj3.getString("create_at");
+                            System.out.println("Message Date: "+messageDate);
+                            ChatMessage currentMsg = new ChatMessage();
+                            //currentMsg.setId(777);
+                            currentMsg.setMessage(""+jObj3.getString("message"));
+                            Long timeStamp = Long.parseLong(messageDate);
+                            Date date = new Date(timeStamp);
+                            currentMsg.setDate(simpleDateFormat.format(date));
+
+                            if(user_id.equals(""+jObj3.getString("user_id"))){
+                                currentMsg.setMe(true);
+                            }
+                            else{
+                                currentMsg.setMe(false);
+                            }
+                            currentMsg.setSenderName(""+jObj3.getString("user_id"));
+                            displayMessage(currentMsg);
+                            i++;
+                        }
+                        if(messageDate!=null)
+                            last_timetamp = messageDate;
                     }
-                    System.out.println("Size of order i: "+i);
+                    //System.out.println("Size of order i: "+i);
                 }catch(Exception e){
                     System.out.println("Error in parsing JSON: " + e.toString());
                 }
             }
-            */
+            else {
+                isr = new BufferedInputStream(conn.getErrorStream());
+                String resp = convertInputStreamToString(isr);
+                System.out.println(resp);
+            }
+
         }catch(Exception e){
             e.printStackTrace();
             errorMessage = e.toString();
-            responseCode=-1;
             System.out.println("Exception in getMessage(): " + e.toString());
         }
     }
@@ -302,44 +333,44 @@ public class ConversationActivity extends AppCompatActivity {
     private void loadHistory(){
         InputStream inputStream = getData("http://"+ip+"/TabGen/getPost.php?channel_id="+channel_id);
         String res = convertInputStreamToString(inputStream);
-        chatHistory = new ArrayList<ChatMessage>();
-        //ChatMessage[] msg=new ChatMessage[100];
-        try{
-            JSONArray jsonArray= new JSONArray(res);
-            JSONObject jsonObject;
-            int i;
-            for(i=0;i<jsonArray.length();i++){
-                jsonObject = jsonArray.getJSONObject(i);
-                ChatMessage msg=new ChatMessage();
-                msg.setId(i);
-                if(user_id.equals(jsonObject.getString("UserId"))){
-                    msg.setMe(true);
-                    msg.setSenderName(null);
+        if(receiver_responseCode==200 && res!=null) {
+            chatHistory = new ArrayList<ChatMessage>();
+            //ChatMessage[] msg=new ChatMessage[100];
+            try {
+                JSONArray jsonArray = new JSONArray(res);
+                JSONObject jsonObject;
+                int i;
+                for (i = 0; i < jsonArray.length(); i++) {
+                    jsonObject = jsonArray.getJSONObject(i);
+                    ChatMessage msg = new ChatMessage();
+                    msg.setId(i);
+                    if (user_id.equals(jsonObject.getString("UserId"))) {
+                        msg.setMe(true);
+                        msg.setSenderName("Me");
+                    } else {
+                        msg.setMe(false);
+                        msg.setSenderName(jsonObject.getString("messaged_by"));
+                    }
+                    msg.setMessage(jsonObject.getString("Message"));
+                    //System.out.println("Message" + i + ": " + jsonObject.getString("Message"));
+                    Long chatTime = Long.parseLong(jsonObject.getString("CreateAt"));
+                    Date date = new Date(chatTime);
+                    msg.setDate(simpleDateFormat.format(date));
+                    //msg.setDate(DateFormat.getDateTimeInstance().format(new Date()));
+                    last_timetamp = jsonObject.getString("LastPostAt");
+                    chatHistory.add(msg);
                 }
-                else{
-                    msg.setMe(false);
-                    msg.setSenderName(jsonObject.getString("messaged_by"));
-                }
-                msg.setMessage(jsonObject.getString("Message"));
-                //System.out.println("Message" + i + ": " + jsonObject.getString("Message"));
-                Long chatTime = Long.parseLong(jsonObject.getString("CreateAt"));
-                Date date = new Date(chatTime);
-                msg.setDate(simpleDateFormat.format(date));
-                //msg.setDate(DateFormat.getDateTimeInstance().format(new Date()));
-                last_timetamp = jsonObject.getString("LastPostAt");
-                chatHistory.add(msg);
+            } catch (Exception e) {
+                System.out.println("Error: " + e.toString());
             }
-        }catch(Exception e){
-            System.out.println("Error: "+e.toString());
-        }
-        adapter = new ChatAdapter(ConversationActivity.this, new ArrayList<ChatMessage>());
-        messagesContainer.setAdapter(adapter);
 
-        for(int i=0; i<chatHistory.size(); i++) {
-            ChatMessage message = chatHistory.get(i);
-            adapter.add(message);
-            adapter.notifyDataSetChanged();
-            scroll();
+
+            for (int i = 0; i < chatHistory.size(); i++) {
+                ChatMessage message = chatHistory.get(i);
+                adapter.add(message);
+                adapter.notifyDataSetChanged();
+                scroll();
+            }
         }
     }
 

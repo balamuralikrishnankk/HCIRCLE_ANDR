@@ -2,6 +2,7 @@ package chattingEngine;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Color;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -94,8 +95,10 @@ public class ChatAdapter extends BaseAdapter {
             layoutParams.gravity = Gravity.RIGHT;
             holder.contentWithBG.setLayoutParams(layoutParams);
             holder.contentWithBG.setGravity(Gravity.CENTER_VERTICAL);
-            holder.contentWithBG.setPadding(10,0,50,0);
-            holder.txtMessage.setPadding(20,0,20,0);
+            holder.contentWithBG.setPadding(10, 0, 40, 0);
+            holder.txtMessage.setPadding(15,0,20,0);
+            holder.sender_name.setGravity(Gravity.RIGHT);
+            //holder.sender_name.setTextColor(Color.GREEN);
 
             RelativeLayout.LayoutParams lp =
                     (RelativeLayout.LayoutParams) holder.content.getLayoutParams();
@@ -108,15 +111,18 @@ public class ChatAdapter extends BaseAdapter {
             layoutParams = (LinearLayout.LayoutParams) holder.txtInfo.getLayoutParams();
             layoutParams.gravity = Gravity.RIGHT;
             holder.txtInfo.setLayoutParams(layoutParams);
-        } else {
+        }
+        else {
             holder.contentWithBG.setBackgroundResource(R.drawable.msg_reply_bg);
             LinearLayout.LayoutParams layoutParams =
                     (LinearLayout.LayoutParams) holder.contentWithBG.getLayoutParams();
             layoutParams.gravity = Gravity.LEFT;
             holder.contentWithBG.setLayoutParams(layoutParams);
             holder.contentWithBG.setGravity(Gravity.CENTER_VERTICAL);
-            holder.contentWithBG.setPadding(50,0,10,0);
-            holder.txtMessage.setPadding(20, 0, 20, 0);
+            holder.contentWithBG.setPadding(40, 0, 10, 0);
+            holder.txtMessage.setPadding(20, 0, 15, 0);
+            holder.sender_name.setGravity(Gravity.LEFT);
+            //holder.sender_name.setTextColor(Color.RED);
 
             RelativeLayout.LayoutParams lp =
                     (RelativeLayout.LayoutParams) holder.content.getLayoutParams();
