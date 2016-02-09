@@ -48,20 +48,19 @@ public class ConversationActivity extends AppCompatActivity {
     ImageView backButton,conv_Icon;
     ListView messagesContainer;
     EditText messageEditText;
-    ImageButton sendBtn,sendMessage;
+    ImageButton sendMessage;
     private ChatAdapter adapter;
     private ArrayList<ChatMessage> chatHistory;
     SharedPreference sp;
     Context context=this;
     String channel_id="",user_id,token,last_timetamp=null;
     String channelDetails=null,file_path=null;
-    ConnectServer connMessage;
     int sender_responseCode=0,receiver_responseCode;
     String ip,responseMessage,errorMessage;
     HttpURLConnection conn=null;
     URL api_url=null;
     Thread thread;
-    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy' 'HH:mm:ss a");
+    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy' at 'h:mm:ss a");
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -144,13 +143,17 @@ public class ConversationActivity extends AppCompatActivity {
             public void run(){
                 try{
                     while(!isInterrupted()){
-                        Thread.sleep(3000);
+                        Thread.sleep(4000);
                         runOnUiThread(new Runnable(){
                             @Override
                             public void run(){
-                                //loadHistory();
+                                Date dNow = new Date( );
+                                /*SimpleDateFormat ft =
+                                        new SimpleDateFormat ("E yyyy.MM.dd 'at' hh:mm:ss a zzz");*/
+                                System.out.println("Current Date: " + simpleDateFormat.format(dNow));
+
                                 if(last_timetamp!=null) {
-                                    //getMessage();
+                                    System.out.println("Last timestamp: "+last_timetamp);
                                     new GetCurrentMessageTask().execute("http://"+ip+
                                             ":8065//api/v1/channels/"+channel_id+
                                             "/posts/"+last_timetamp);
@@ -239,7 +242,6 @@ public class ConversationActivity extends AppCompatActivity {
                         Long timestamp = Long.parseLong(last_timetamp);
                         Date date = new Date(timestamp);
                         chatMessage.setDate(simpleDateFormat.format(date));
-                        Toast.makeText(context,"Message sent...",Toast.LENGTH_LONG).show();
                         //+json_obj.get("id")
                         displayMessage(chatMessage);
                     }catch(Exception e){
@@ -467,7 +469,7 @@ public class ConversationActivity extends AppCompatActivity {
                 httpURLConn.setDoInput(true);
                 httpURLConn.setDoOutput(true);
                 httpURLConn.setRequestMethod("POST");
-                //httpURLConn.setRequestProperty("Connection", "Keep-Alive");
+                httpURLConn.setRequestProperty("Connection", "Keep-Alive");
                 httpURLConn.setRequestProperty("ENCTYPE", "multipart/form-data");
                 httpURLConn.setRequestProperty("Content-Type", "multipart/form-data;boundary=" +boundary);
                 httpURLConn.setRequestProperty("Authorization", "Bearer " + token);
@@ -547,7 +549,6 @@ public class ConversationActivity extends AppCompatActivity {
                 resp = convertInputStreamToString(isr);
             }catch(Exception e){
                 e.printStackTrace();
-                errorMessage = e.toString();
                 System.out.println("Exception in getMessage(): " + e.toString());
                 return null;
             }
@@ -581,17 +582,18 @@ public class ConversationActivity extends AppCompatActivity {
 
                             if (user_id.equals("" + jObj3.getString("user_id"))) {
                                 currentMsg.setMe(true);
+                                currentMsg.setSenderName("Me");
                             } else {
                                 currentMsg.setMe(false);
+                                currentMsg.setSenderName(""+jObj3.getString("user_id"));
                             }
-                            currentMsg.setSenderName("" + jObj3.getString("user_id"));
-                            displayMessage(currentMsg);
+                            if(!messageDate.equals(last_timetamp))
+                                displayMessage(currentMsg);
+                            if (messageDate != null)
+                                last_timetamp = messageDate;
                             i++;
-                        }
-                        if (messageDate != null)
-                            last_timetamp = messageDate;
+                        }//end while loop
                     }
-                    //System.out.println("Size of order i: "+i);
                 } catch (Exception e) {
                     System.out.println("Error in parsing JSON: " + e.toString());
                 }

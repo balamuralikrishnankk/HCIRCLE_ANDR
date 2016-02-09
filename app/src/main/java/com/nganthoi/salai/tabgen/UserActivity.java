@@ -86,7 +86,7 @@ public class UserActivity extends AppCompatActivity
             System.out.println("Exception :" + e.toString());
         }
         progressDialog = new ProgressDialog(_context);
-        progressDialog.setMessage("Wait,loading Your Templates....");
+        progressDialog.setMessage("Loading Your Templates....");
         progressDialog.setIndeterminate(true);
         progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         new GetTabList().execute(role);
