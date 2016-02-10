@@ -143,14 +143,14 @@ public class ConversationActivity extends AppCompatActivity {
             public void run(){
                 try{
                     while(!isInterrupted()){
-                        Thread.sleep(4000);
+                        Thread.sleep(3000);
                         runOnUiThread(new Runnable(){
                             @Override
                             public void run(){
-                                Date dNow = new Date( );
+                                //Date dNow = new Date( );
                                 /*SimpleDateFormat ft =
                                         new SimpleDateFormat ("E yyyy.MM.dd 'at' hh:mm:ss a zzz");*/
-                                System.out.println("Current Date: " + simpleDateFormat.format(dNow));
+                                //System.out.println("Current Date: " + simpleDateFormat.format(dNow));
 
                                 if(last_timetamp!=null) {
                                     System.out.println("Last timestamp: "+last_timetamp);
@@ -205,12 +205,42 @@ public class ConversationActivity extends AppCompatActivity {
             return true;
         }
         if (id == R.id.attach_file){
-            Intent intent = new Intent();
+            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
             intent.setType("*/*");
-            intent.setAction(Intent.ACTION_GET_CONTENT);
+            //intent.setAction(Intent.ACTION_GET_CONTENT);
             startActivityForResult(Intent.createChooser(intent,"Select a file from the gallary"),1);
         }
         return super.onOptionsItemSelected(item);
+    }
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data){
+        if(resultCode!=RESULT_OK || data==null) return;
+        Uri fileUri = data.getData();
+        ReadFile readFile = new ReadFile();
+        switch(requestCode){
+            case 1: file_path = readFile.getFilePath(fileUri,context);
+                if(file_path!=null){
+                    System.out.println("File has been selected: "+file_path);
+                    Toast.makeText(context, "File has been selected: "+file_path, Toast.LENGTH_SHORT).show();
+                        /*
+                        new Thread(new Runnable(){
+                            public void run(){
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        System.out.println("Uploading your file....: "+file_path);
+                                        Toast.makeText(context,"Uploading your file...",Toast.LENGTH_LONG).show();
+                                        UploadFile uploadFile = new UploadFile(file_path,"http://"+ip+":8065/api/v1/files/upload");
+                                        uploadFile.execute();
+                                    }
+                                });
+                            }
+                        }).start();*/
+                }
+                break;
+            default:
+                Toast.makeText(context, "Invalid request code. You haven't selected any file", Toast.LENGTH_SHORT).show();
+        }
     }
     private void sendMyMessage(String link) {
         String messageText = messageEditText.getText().toString();
@@ -401,7 +431,6 @@ public class ConversationActivity extends AppCompatActivity {
                 }
                 inputStream.close();
                 result = sb.toString();
-                //System.out.println("JSON String: "+result);
             }catch(Exception e){
                 e.printStackTrace();
                 System.out.println("We have found an exception: \n"+e.toString());
@@ -409,42 +438,17 @@ public class ConversationActivity extends AppCompatActivity {
         }
         return result;
     }
-    public void onActivityResult(int requestCode, int resultCode, Intent data){
-        if(resultCode!=RESULT_OK || data==null) return;
-        Uri fileUri = data.getData();
-        ReadFile readFile = new ReadFile();
-        switch(requestCode){
-            case 1: file_path = readFile.getFilePath(fileUri,context);
-                    if(file_path!=null){
-                        new Thread(new Runnable(){
-                            public void run(){
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        System.out.println("Uploading your file....: "+file_path);
-                                        Toast.makeText(context,"Uploading your file...",Toast.LENGTH_LONG).show();
-                                        UploadFile uploadFile = new UploadFile(file_path,"http://"+ip+":8065/api/v1/files/upload");
-                                        uploadFile.execute();
-                                    }
-                                });
-                            }
-                        }).start();
-                    }
-                    break;
-            default:
-                Toast.makeText(context, "Invalid request code. You haven't selected any file", Toast.LENGTH_SHORT).show();
-        }
-    }
+
 
     private class UploadFile extends AsyncTask<Void,Void,String>{
         URL connectURL;
         String serverRespMsg,server_URI=null;
         HttpURLConnection httpURLConn = null;
         DataOutputStream dos = null;
-        /*
+
         String lineEnd = "\r\n";
         String twoHyphens = "--";
-        String boundary = "*****";*/
+        String boundary = "*****";
         int bytesRead, bytesAvailable, bufferSize;
         int serverRespCode;
         byte[] buffer;
@@ -474,15 +478,15 @@ public class ConversationActivity extends AppCompatActivity {
                     httpURLConn.setRequestMethod("POST");
                     httpURLConn.setRequestProperty("Connection", "Keep-Alive");
                     httpURLConn.setRequestProperty("ENCTYPE", "multipart/form-data");
-                    //httpURLConn.setRequestProperty("Content-Type", "multipart/form-data;boundary=" +boundary);
+                    httpURLConn.setRequestProperty("Content-Type", "multipart/form-data;boundary=" +boundary);
                     httpURLConn.setRequestProperty("Authorization", "Bearer " + token);
                     httpURLConn.setRequestProperty("files", fileLocation);
                     httpURLConn.setRequestProperty("channel_id", channel_id);
-                    //httpURLConn.connect();
+                    httpURLConn.connect();
                     dos = new DataOutputStream(httpURLConn.getOutputStream());
-                    //dos.writeBytes(twoHyphens+boundary+lineEnd);
-                    //dos.writeBytes("Content-Description: form-data; name=\"files\";filename=\""+fileLocation+"\""+lineEnd);
-                    //dos.writeBytes(lineEnd);
+                    dos.writeBytes(twoHyphens+boundary+lineEnd);
+                    dos.writeBytes("Content-Description: form-data; name=\"files\";filename=\""+fileLocation+"\""+lineEnd);
+                    dos.writeBytes(lineEnd);
                     //create a buffer of maximum size
                     bytesAvailable = fis.available();
                     bufferSize = Math.min(bytesAvailable,maxBufferSize);
@@ -495,10 +499,8 @@ public class ConversationActivity extends AppCompatActivity {
                         bufferSize = Math.min(bytesAvailable, maxBufferSize);
                         bytesRead = fis.read(buffer,0,bufferSize);
                     }
-
-                    //dos.writeBytes(lineEnd);
-                    //dos.writeBytes(twoHyphens+boundary+twoHyphens+lineEnd);
-
+                    dos.writeBytes(lineEnd);
+                    dos.writeBytes(twoHyphens+boundary+twoHyphens+lineEnd);
                     serverRespCode = httpURLConn.getResponseCode();
                     serverRespMsg = httpURLConn.getResponseMessage();
                     System.out.println("File Upload Response: " + serverRespMsg);
