@@ -60,7 +60,7 @@ public class ConversationActivity extends AppCompatActivity {
     HttpURLConnection conn=null;
     URL api_url=null;
     Thread thread;
-    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy' at 'h:mm:ss a");
+    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy' at 'h:mm a");
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -416,7 +416,6 @@ public class ConversationActivity extends AppCompatActivity {
         switch(requestCode){
             case 1: file_path = readFile.getFilePath(fileUri,context);
                     if(file_path!=null){
-
                         new Thread(new Runnable(){
                             public void run(){
                                 runOnUiThread(new Runnable() {
@@ -425,7 +424,7 @@ public class ConversationActivity extends AppCompatActivity {
                                         System.out.println("Uploading your file....: "+file_path);
                                         Toast.makeText(context,"Uploading your file...",Toast.LENGTH_LONG).show();
                                         UploadFile uploadFile = new UploadFile(file_path,"http://"+ip+":8065/api/v1/files/upload");
-                                        uploadFile.uploadFile();
+                                        uploadFile.execute();
                                     }
                                 });
                             }
@@ -436,85 +435,101 @@ public class ConversationActivity extends AppCompatActivity {
                 Toast.makeText(context, "Invalid request code. You haven't selected any file", Toast.LENGTH_SHORT).show();
         }
     }
-    private class UploadFile {
+
+    private class UploadFile extends AsyncTask<Void,Void,String>{
         URL connectURL;
         String serverRespMsg,server_URI=null;
         HttpURLConnection httpURLConn = null;
         DataOutputStream dos = null;
+        /*
         String lineEnd = "\r\n";
         String twoHyphens = "--";
-        String boundary = "*****";
+        String boundary = "*****";*/
         int bytesRead, bytesAvailable, bufferSize;
         int serverRespCode;
         byte[] buffer;
         int maxBufferSize = 1*1024*1024;
         String fileLocation=null;
+        InputStream isr=null;
         public UploadFile(String sourceFileUri,String serverUploadPath){
             fileLocation = sourceFileUri;
             server_URI = serverUploadPath;
 
         }
-        public void uploadFile(){
-            //InputStream is=null;
-            //String result =null;
+
+        @Override
+        protected String doInBackground(Void... v){
             File sourceFile = new File(fileLocation);
             if(!sourceFile.isFile()){
                 Toast.makeText(context, "Source file does not exist", Toast.LENGTH_SHORT).show();
-              return;
+                return null;
             }
-            try{
-                FileInputStream fis = new FileInputStream(sourceFile);
-                connectURL = new URL(server_URI);
-                httpURLConn = (HttpURLConnection) connectURL.openConnection();
-                httpURLConn.setDoInput(true);
-                httpURLConn.setDoOutput(true);
-                httpURLConn.setRequestMethod("POST");
-                httpURLConn.setRequestProperty("Connection", "Keep-Alive");
-                httpURLConn.setRequestProperty("ENCTYPE", "multipart/form-data");
-                httpURLConn.setRequestProperty("Content-Type", "multipart/form-data;boundary=" +boundary);
-                httpURLConn.setRequestProperty("Authorization", "Bearer " + token);
-                httpURLConn.setRequestProperty("files", fileLocation);
-                httpURLConn.setRequestProperty("channel_id", channel_id);
-                //httpURLConn.connect();
-                dos = new DataOutputStream(httpURLConn.getOutputStream());
-                dos.writeBytes(twoHyphens+boundary+lineEnd);
-                dos.writeBytes("Content-Description: form-data; name=\"files\";filename=\""+fileLocation+"\""+lineEnd);
-                dos.writeBytes(lineEnd);
-                //create a buffer of maximum size
-                bytesAvailable = fis.available();
-                bufferSize = Math.min(bytesAvailable,maxBufferSize);
-                buffer=new byte[bufferSize];
-
-                bytesRead = fis.read(buffer,0,bufferSize);
-                while(bytesRead>0){
-                    dos.write(buffer,0,bufferSize);
+            else{
+                try{
+                    FileInputStream fis = new FileInputStream(sourceFile);
+                    connectURL = new URL(server_URI);
+                    httpURLConn = (HttpURLConnection) connectURL.openConnection();
+                    httpURLConn.setDoInput(true);
+                    httpURLConn.setDoOutput(true);
+                    httpURLConn.setRequestMethod("POST");
+                    httpURLConn.setRequestProperty("Connection", "Keep-Alive");
+                    httpURLConn.setRequestProperty("ENCTYPE", "multipart/form-data");
+                    //httpURLConn.setRequestProperty("Content-Type", "multipart/form-data;boundary=" +boundary);
+                    httpURLConn.setRequestProperty("Authorization", "Bearer " + token);
+                    httpURLConn.setRequestProperty("files", fileLocation);
+                    httpURLConn.setRequestProperty("channel_id", channel_id);
+                    //httpURLConn.connect();
+                    dos = new DataOutputStream(httpURLConn.getOutputStream());
+                    //dos.writeBytes(twoHyphens+boundary+lineEnd);
+                    //dos.writeBytes("Content-Description: form-data; name=\"files\";filename=\""+fileLocation+"\""+lineEnd);
+                    //dos.writeBytes(lineEnd);
+                    //create a buffer of maximum size
                     bytesAvailable = fis.available();
-                    bufferSize = Math.min(bytesAvailable, maxBufferSize);
+                    bufferSize = Math.min(bytesAvailable,maxBufferSize);
+                    buffer=new byte[bufferSize];
+
                     bytesRead = fis.read(buffer,0,bufferSize);
-                }
+                    while(bytesRead>0){
+                        dos.write(buffer,0,bufferSize);
+                        bytesAvailable = fis.available();
+                        bufferSize = Math.min(bytesAvailable, maxBufferSize);
+                        bytesRead = fis.read(buffer,0,bufferSize);
+                    }
 
-                dos.writeBytes(lineEnd);
-                dos.writeBytes(twoHyphens+boundary+twoHyphens+lineEnd);
+                    //dos.writeBytes(lineEnd);
+                    //dos.writeBytes(twoHyphens+boundary+twoHyphens+lineEnd);
 
-                serverRespCode = httpURLConn.getResponseCode();
-                serverRespMsg = httpURLConn.getResponseMessage();
-                System.out.println("File Upload Response: " + serverRespMsg);
-                if(serverRespCode==200){
-                    Toast.makeText(context,"Your file upload is successfully completed",Toast.LENGTH_LONG).show();
-                    System.out.println("Your file upload is successfully completed");
-                }
-                else{
-                    Toast.makeText(context,"Oops! Your file upload is failed",Toast.LENGTH_LONG).show();
-                    System.out.println("Oops! Your file upload is failed");
-                }
-                fis.close();
-                dos.flush();
-                dos.close();
-            }catch(Exception e){
-                e.printStackTrace();
-                System.out.println("Exception here: "+e.toString());
+                    serverRespCode = httpURLConn.getResponseCode();
+                    serverRespMsg = httpURLConn.getResponseMessage();
+                    System.out.println("File Upload Response: " + serverRespMsg);
+                    if(serverRespCode==200){
+                        Toast.makeText(context,"Your file upload is successfully completed",Toast.LENGTH_LONG).show();
+                        System.out.println("Your file upload is successfully completed");
+                        isr = new BufferedInputStream(httpURLConn.getInputStream());
+                    }
+                    else{
+                        Toast.makeText(context,"Oops! Your file upload is failed",Toast.LENGTH_LONG).show();
+                        System.out.println("Oops! Your file upload is failed");
+                        isr = new BufferedInputStream(conn.getErrorStream());
+                    }
+                    fis.close();
+                    dos.flush();
+                    dos.close();
+                }catch(Exception e){
+                    e.printStackTrace();
+                    System.out.println("Exception here: "+e.toString());
+                    return null;
+                }//end try catch
             }
-        }//end of function uploadFile
+            return convertInputStreamToString(isr);
+        }
+
+        @Override
+        protected void onPostExecute(String result){
+            if(result!=null){
+                System.out.println(result);
+            }
+        }
     }//end of class UploadFile
 
     class GetCurrentMessageTask extends AsyncTask<String,Void,String>{
