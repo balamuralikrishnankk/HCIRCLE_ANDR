@@ -60,7 +60,7 @@ public class ConversationActivity extends AppCompatActivity {
     HttpURLConnection conn=null;
     URL api_url=null;
     Thread thread;
-    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy' at 'h:mm a");
+    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy' at 'h:mm a");
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -220,9 +220,9 @@ public class ConversationActivity extends AppCompatActivity {
         switch(requestCode){
             case 1: file_path = readFile.getFilePath(fileUri,context);
                 if(file_path!=null){
-                    System.out.println("File has been selected: "+file_path);
-                    Toast.makeText(context, "File has been selected: "+file_path, Toast.LENGTH_SHORT).show();
-                        /*
+                    //System.out.println("File has been selected: "+file_path);
+                    //Toast.makeText(context, "File has been selected: "+file_path, Toast.LENGTH_SHORT).show();
+
                         new Thread(new Runnable(){
                             public void run(){
                                 runOnUiThread(new Runnable() {
@@ -235,7 +235,7 @@ public class ConversationActivity extends AppCompatActivity {
                                     }
                                 });
                             }
-                        }).start();*/
+                        }).start();
                 }
                 break;
             default:
@@ -463,6 +463,8 @@ public class ConversationActivity extends AppCompatActivity {
 
         @Override
         protected String doInBackground(Void... v){
+            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+            StrictMode.setThreadPolicy(policy);
             File sourceFile = new File(fileLocation);
             if(!sourceFile.isFile()){
                 Toast.makeText(context, "Source file does not exist", Toast.LENGTH_SHORT).show();
@@ -483,10 +485,30 @@ public class ConversationActivity extends AppCompatActivity {
                     httpURLConn.setRequestProperty("files", fileLocation);
                     httpURLConn.setRequestProperty("channel_id", channel_id);
                     httpURLConn.connect();
+                    OutputStreamWriter osw = new OutputStreamWriter(httpURLConn.getOutputStream());
+                    //osw.write("files=" + fileLocation + "&channel_id=" + channel_id);
                     dos = new DataOutputStream(httpURLConn.getOutputStream());
+
                     dos.writeBytes(twoHyphens+boundary+lineEnd);
-                    dos.writeBytes("Content-Description: form-data; name=\"files\";filename=\""+fileLocation+"\""+lineEnd);
+                    dos.writeBytes("Content-Disposition: form-data; name=\"channel_id\""+lineEnd+lineEnd);
+                    dos.writeBytes(channel_id+lineEnd);
+
+                    dos.writeBytes(twoHyphens+boundary+lineEnd);
+                    dos.writeBytes("Content-Disposition: form-data; name=\"files\";filename=\""+fileLocation + "\"" + lineEnd);
                     dos.writeBytes(lineEnd);
+
+                    /*
+                    // Send parameter #1
+                    dos.writeBytes(twoHyphens + boundary + lineEnd);
+                    dos.writeBytes("Content-Disposition: form-data; name=\"param1\"" + lineEnd + lineEnd);
+                    dos.writeBytes("foo1" + lineEnd);
+
+                    // Send parameter #2
+                    dos.writeBytes(twoHyphens + boundary + lineEnd);
+                    dos.writeBytes("Content-Disposition: form-data; name=\"param2\"" + lineEnd + lineEnd);
+                    dos.writeBytes("foo2" + lineEnd);*/
+
+
                     //create a buffer of maximum size
                     bytesAvailable = fis.available();
                     bufferSize = Math.min(bytesAvailable,maxBufferSize);
@@ -500,37 +522,42 @@ public class ConversationActivity extends AppCompatActivity {
                         bytesRead = fis.read(buffer,0,bufferSize);
                     }
                     dos.writeBytes(lineEnd);
-                    dos.writeBytes(twoHyphens+boundary+twoHyphens+lineEnd);
+                    dos.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd);
+                    osw.flush();
+                    dos.flush();
                     serverRespCode = httpURLConn.getResponseCode();
                     serverRespMsg = httpURLConn.getResponseMessage();
-                    System.out.println("File Upload Response: " + serverRespMsg);
+                    System.out.println("File Upload Response: " + serverRespCode + " " + serverRespMsg);
+
                     if(serverRespCode==200){
-                        Toast.makeText(context,"Your file upload is successfully completed",Toast.LENGTH_LONG).show();
+                        //Toast.makeText(context,"Your file upload is successfully completed",Toast.LENGTH_LONG).show();
                         System.out.println("Your file upload is successfully completed");
                         isr = new BufferedInputStream(httpURLConn.getInputStream());
                     }
                     else{
-                        Toast.makeText(context,"Oops! Your file upload is failed",Toast.LENGTH_LONG).show();
                         System.out.println("Oops! Your file upload is failed");
-                        isr = new BufferedInputStream(conn.getErrorStream());
+                        isr = new BufferedInputStream(httpURLConn.getErrorStream());
                     }
                     fis.close();
-                    dos.flush();
                     dos.close();
+                    osw.close();
+
                 }catch(Exception e){
                     e.printStackTrace();
-                    System.out.println("Exception here: "+e.toString());
+                    System.out.println("File Upload Exception here: "+e.toString());
                     return null;
                 }//end try catch
             }
-            return convertInputStreamToString(isr);
+            String res = convertInputStreamToString(isr);
+            return res;
         }
 
         @Override
         protected void onPostExecute(String result){
             if(result!=null){
-                System.out.println(result);
+                System.out.println("Result: "+result);
             }
+            else System.out.println("Response is null");
         }
     }//end of class UploadFile
 
