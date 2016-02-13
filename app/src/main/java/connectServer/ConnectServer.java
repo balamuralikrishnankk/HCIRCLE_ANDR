@@ -33,14 +33,22 @@ public class ConnectServer {
             e.printStackTrace();
         }
     }
+    public ConnectServer(String web_api,String tokenId){
+        try{
+            api_url =new URL(web_api);
+            TokenId = tokenId;
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+    }
 
     public InputStream getData(){
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
         try{
             conn = (HttpURLConnection) api_url.openConnection();
-            conn.setRequestProperty("Content-Type", "application/json");
-            conn.setRequestMethod("POST");
+            conn.setRequestMethod("GET");
             conn.setDoInput(true);
             conn.setDoOutput(true);
             conn.connect();

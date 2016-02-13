@@ -21,6 +21,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -31,7 +32,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
@@ -39,7 +39,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import chattingEngine.ChatAdapter;
 import chattingEngine.ChatMessage;
-import connectServer.ConnectServer;
 import readData.ReadFile;
 import sharePreference.SharedPreference;
 
@@ -60,6 +59,7 @@ public class ConversationActivity extends AppCompatActivity {
     HttpURLConnection conn=null;
     URL api_url=null;
     Thread thread;
+    public Boolean interrupt=false;
     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy' at 'h:mm a");
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,8 +81,10 @@ public class ConversationActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 try{
-                    if(thread!=null)
+                    if(thread!=null){
                         thread.interrupt();
+                        interrupt=true;
+                    }
                 }catch(Exception e){
                     System.out.println("Interrupt Exception: "+e.toString());
                 }
@@ -117,14 +119,14 @@ public class ConversationActivity extends AppCompatActivity {
             JSONObject jsonObject;
             for(int i=0;i<jsonArray.length();i++){
                jsonObject = jsonArray.getJSONObject(i);
-                System.out.println("Title: "+title+"------->Channel name: "+jsonObject.getString("Channel_name")+" ---->ID: "+
-                        jsonObject.getString("Channel_ID"));
+               /*System.out.println("Title: "+title+"------->Channel name: "+jsonObject.getString("Channel_name")+" ---->ID: "+
+                        jsonObject.getString("Channel_ID"));*/
                if(title.equals(jsonObject.getString("Channel_name"))) {
                    channel_id = jsonObject.getString("Channel_ID");// setting channel id
                    break;
                }//channel_id = jsonObject.getString("Channel_ID");
             }
-            System.out.println("Title: "+title+" Channel Id: "+channel_id+"\nToken Id: "+token);
+            System.out.println("Title: "+title+" ---> Channel Id: "+channel_id+"\nToken Id: "+token);
 
         }catch(Exception e){
             System.out.println(e.toString());
@@ -142,8 +144,8 @@ public class ConversationActivity extends AppCompatActivity {
             @Override
             public void run(){
                 try{
-                    while(!isInterrupted()){
-                        Thread.sleep(3000);
+                    while(!isInterrupted() || !interrupt){
+                        Thread.sleep(4000);
                         runOnUiThread(new Runnable(){
                             @Override
                             public void run(){
@@ -205,9 +207,10 @@ public class ConversationActivity extends AppCompatActivity {
             return true;
         }
         if (id == R.id.attach_file){
-            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+            Intent intent = new Intent();
+            //Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
             intent.setType("*/*");
-            //intent.setAction(Intent.ACTION_GET_CONTENT);
+            intent.setAction(Intent.ACTION_GET_CONTENT);
             startActivityForResult(Intent.createChooser(intent,"Select a file from the gallary"),1);
         }
         return super.onOptionsItemSelected(item);
@@ -221,15 +224,14 @@ public class ConversationActivity extends AppCompatActivity {
             case 1: file_path = readFile.getFilePath(fileUri,context);
                 if(file_path!=null){
                     //System.out.println("File has been selected: "+file_path);
-                    //Toast.makeText(context, "File has been selected: "+file_path, Toast.LENGTH_SHORT).show();
-
+                    Toast.makeText(context, "You have selected: "+file_path, Toast.LENGTH_SHORT).show();
                         new Thread(new Runnable(){
                             public void run(){
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
                                         System.out.println("Uploading your file....: "+file_path);
-                                        Toast.makeText(context,"Uploading your file...",Toast.LENGTH_LONG).show();
+                                        Toast.makeText(context,"Sending your file now...",Toast.LENGTH_LONG).show();
                                         UploadFile uploadFile = new UploadFile(file_path,"http://"+ip+":8065/api/v1/files/upload");
                                         uploadFile.execute();
                                     }
@@ -244,6 +246,7 @@ public class ConversationActivity extends AppCompatActivity {
     }
     private void sendMyMessage(String link) {
         String messageText = messageEditText.getText().toString();
+        String response=null;
         if (TextUtils.isEmpty(messageText)) {
             return;
         }
@@ -253,12 +256,11 @@ public class ConversationActivity extends AppCompatActivity {
             jsonObject.put("root_id", "");
             jsonObject.put("parent_id","");
             jsonObject.put("Message", messageText);
-            String response=convertInputStreamToString(sendData(jsonObject,link));
-            if(response!=null){
-                if(sender_responseCode==200){
-                //Toast.makeTest(context,"Your message has been sent",Toast.LENGTH_SHORT).show();
+            ConnectAPIs messageAPI = new ConnectAPIs(link,token);
+            response=convertInputStreamToString(messageAPI.sendData(jsonObject));
+            if(response!=null ){
+                if(messageAPI.responseCode==200){
                     ChatMessage chatMessage = new ChatMessage();
-                    chatMessage.setId(122);//dummy
                     chatMessage.setMessage(messageText);
                     //chatMessage.setDate(DateFormat.getDateTimeInstance().format(new Date()));
                     chatMessage.setMe(true);
@@ -277,7 +279,9 @@ public class ConversationActivity extends AppCompatActivity {
                     }catch(Exception e){
                         System.out.print("Chat Exception: "+e.toString());
                     }
-                }else{
+                    file_path=null;
+                }
+                else{
                     try{
                         JSONObject json_obj= new JSONObject(response);
                         Toast.makeText(context,""+json_obj.get("message"),Toast.LENGTH_LONG).show();
@@ -285,8 +289,9 @@ public class ConversationActivity extends AppCompatActivity {
                         System.out.print("Chat Exception: "+e.toString());
                     }
                 }
+
             }else
-                Toast.makeText(context,"You are not connected to the network",Toast.LENGTH_LONG).show();
+                Toast.makeText(context,"Failed to send message",Toast.LENGTH_LONG).show();
 
         }catch(Exception e){
             System.out.println("Sending error: "+e.toString());
@@ -325,7 +330,6 @@ public class ConversationActivity extends AppCompatActivity {
                         msg.setSenderName(jsonObject.getString("messaged_by"));
                     }
                     msg.setMessage(jsonObject.getString("Message"));
-                    //System.out.println("Message" + i + ": " + jsonObject.getString("Message"));
                     Long chatTime = Long.parseLong(jsonObject.getString("CreateAt"));
                     Date date = new Date(chatTime);
                     msg.setDate(simpleDateFormat.format(date));
@@ -337,54 +341,16 @@ public class ConversationActivity extends AppCompatActivity {
                 System.out.println("Error: " + e.toString());
             }
 
-
-            for (int i = 0; i < chatHistory.size(); i++) {
+            adapter.add(chatHistory);
+            adapter.notifyDataSetChanged();
+            scroll();
+            /*for (int i = 0; i < chatHistory.size(); i++) {
                 ChatMessage message = chatHistory.get(i);
                 adapter.add(message);
                 adapter.notifyDataSetChanged();
                 scroll();
-            }
+            }*/
         }
-    }
-
-    public InputStream sendData(JSONObject parameters,String api_link){
-        OutputStream os;
-        OutputStreamWriter osw;
-        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-        StrictMode.setThreadPolicy(policy);
-        InputStream isr;
-        try{
-            api_url = new URL(api_link);
-            conn = (HttpURLConnection) api_url.openConnection();
-            conn.setRequestProperty("Content-Type", "application/json");
-            conn.setRequestProperty("Accept", "application/json");
-            conn.setRequestProperty("Authorization", "Bearer "+token);
-            conn.setRequestMethod("POST");
-            conn.setDoInput(true);
-            conn.setDoOutput(true);
-            conn.connect();
-            os = conn.getOutputStream();
-            osw = new OutputStreamWriter(os);
-            osw.write(parameters.toString());
-            osw.flush();
-            sender_responseCode = conn.getResponseCode(); //it only the code 200
-            responseMessage = conn.getResponseMessage();// it is the json response from the mattermost api
-            System.out.println("Response Code: "+sender_responseCode+"\nResponse message: "+responseMessage);
-            if(sender_responseCode == 200) {
-                isr = new BufferedInputStream(conn.getInputStream());
-            }
-            else{
-                isr = new BufferedInputStream(conn.getErrorStream());
-            }
-            osw.close();
-        }catch(Exception e){
-            e.printStackTrace();
-            errorMessage = e.toString();
-            sender_responseCode=-1;
-            System.out.println("Server Not Found Exception occurs here: " + e.toString());
-            isr = null;
-        }
-        return isr;
     }
 
     public InputStream getData(String api_link){
@@ -394,8 +360,6 @@ public class ConversationActivity extends AppCompatActivity {
         try{
             api_url = new URL(api_link);
             conn = (HttpURLConnection) api_url.openConnection();
-            //conn.setRequestProperty("Content-Type", "application/json");
-            //conn.setRequestProperty("Authorization", "Bearer "+token);
             conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
             conn.setRequestMethod("GET");
             conn.setDoInput(true);
@@ -440,15 +404,16 @@ public class ConversationActivity extends AppCompatActivity {
     }
 
 
-    private class UploadFile extends AsyncTask<Void,Void,String>{
+    public class UploadFile extends AsyncTask<Void,Void,String>{
         URL connectURL;
-        String serverRespMsg,server_URI=null;
+        String serverRespMsg,file_upload_uri=null;
         HttpURLConnection httpURLConn = null;
         DataOutputStream dos = null;
 
         String lineEnd = "\r\n";
         String twoHyphens = "--";
         String boundary = "*****";
+        // "----------------------------13820696122345";
         int bytesRead, bytesAvailable, bufferSize;
         int serverRespCode;
         byte[] buffer;
@@ -457,10 +422,12 @@ public class ConversationActivity extends AppCompatActivity {
         InputStream isr=null;
         public UploadFile(String sourceFileUri,String serverUploadPath){
             fileLocation = sourceFileUri;
-            server_URI = serverUploadPath;
-
+            file_upload_uri = serverUploadPath;
         }
-
+        @Override
+        protected void onPreExecute(){
+            Toast.makeText(context,"Sending your file now...",Toast.LENGTH_LONG).show();
+        }
         @Override
         protected String doInBackground(Void... v){
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
@@ -473,7 +440,7 @@ public class ConversationActivity extends AppCompatActivity {
             else{
                 try{
                     FileInputStream fis = new FileInputStream(sourceFile);
-                    connectURL = new URL(server_URI);
+                    connectURL = new URL(file_upload_uri);
                     httpURLConn = (HttpURLConnection) connectURL.openConnection();
                     httpURLConn.setDoInput(true);
                     httpURLConn.setDoOutput(true);
@@ -486,7 +453,7 @@ public class ConversationActivity extends AppCompatActivity {
                     httpURLConn.setRequestProperty("channel_id", channel_id);
                     httpURLConn.connect();
                     OutputStreamWriter osw = new OutputStreamWriter(httpURLConn.getOutputStream());
-                    //osw.write("files=" + fileLocation + "&channel_id=" + channel_id);
+                    osw.write("files=" + fileLocation + "&channel_id=" + channel_id);
                     dos = new DataOutputStream(httpURLConn.getOutputStream());
 
                     dos.writeBytes(twoHyphens+boundary+lineEnd);
@@ -502,12 +469,10 @@ public class ConversationActivity extends AppCompatActivity {
                     dos.writeBytes(twoHyphens + boundary + lineEnd);
                     dos.writeBytes("Content-Disposition: form-data; name=\"param1\"" + lineEnd + lineEnd);
                     dos.writeBytes("foo1" + lineEnd);
-
                     // Send parameter #2
                     dos.writeBytes(twoHyphens + boundary + lineEnd);
                     dos.writeBytes("Content-Disposition: form-data; name=\"param2\"" + lineEnd + lineEnd);
                     dos.writeBytes("foo2" + lineEnd);*/
-
 
                     //create a buffer of maximum size
                     bytesAvailable = fis.available();
@@ -548,19 +513,48 @@ public class ConversationActivity extends AppCompatActivity {
                     return null;
                 }//end try catch
             }
-            String res = convertInputStreamToString(isr);
-            return res;
+            return convertInputStreamToString(isr);
         }
-
         @Override
         protected void onPostExecute(String result){
             if(result!=null){
                 System.out.println("Result: "+result);
+                try{
+                    JSONObject fileObject = new JSONObject(result);
+                    JSONArray fileArray = fileObject.getJSONArray("filenames");
+                    for(int i=0;i<fileArray.length();i++){
+                        System.out.println("file name: "+fileArray.getString(i));
+                        ConnectAPIs connAPIs = new ConnectAPIs("http://"+ip+":8065/api/v1/files/get_info/"
+                                +fileArray.getString(i),token);
+                        InputStream isr = connAPIs.getData();
+                        System.out.println("File Info: "+convertInputStreamToString(isr));
+                    }
+                    if(fileArray.length()>0) {
+                        try {
+                            JSONObject msgObject = new JSONObject();
+                            msgObject.put("filenames", fileArray);
+                            msgObject.put("channel_id", channel_id);
+                            msgObject.put("root_id", "");
+                            msgObject.put("parent_id", "");
+                            msgObject.put("Message", "This is a File from mobile app. Wow it is working now...");
+                            ConnectAPIs msgAPI = new ConnectAPIs("http://"+ip+":8065/api/v1/channels/"+channel_id+"/create",token);
+                            InputStream is = msgAPI.sendData(msgObject);
+                            System.out.println(convertInputStreamToString(is));
+                        } catch (JSONException e) {
+                            System.out.println("Something goes wrong: "+e.toString());
+                        }
+                    }
+                    //end if statement
+                }catch(Exception e){
+                    System.out.println("Unable to read file details: "+e.toString());
+                }
             }
             else System.out.println("Response is null");
+            //Toast.makeText(context,result,Toast.LENGTH_LONG).show();
         }
     }//end of class UploadFile
 
+    //class for getting instant message
     class GetCurrentMessageTask extends AsyncTask<String,Void,String>{
         InputStream isr=null;
         HttpURLConnection conn;
@@ -575,7 +569,6 @@ public class ConversationActivity extends AppCompatActivity {
             try{
                 api_url = new URL(messageUrl[0]);
                 conn = (HttpURLConnection) api_url.openConnection();
-                conn.setRequestProperty("Content-Type", "application/json");
                 conn.setRequestProperty("Authorization", "Bearer " + token);
                 conn.setRequestMethod("POST");
                 conn.setDoInput(true);
@@ -644,5 +637,90 @@ public class ConversationActivity extends AppCompatActivity {
             }//end if
         }//end on post execution
     }//end of GetCurrentMessageTask class
+
+    //class for connecting APIs
+    class ConnectAPIs {
+        InputStream isr=null;
+        public int responseCode;
+        public String responseMessage, errorMessage,TokenId=null;
+        URL api_url=null;
+        public HttpURLConnection conn=null;
+        public ConnectAPIs(String web_api,String token){
+            try{
+                api_url =new URL(web_api);
+                TokenId = token;
+            }
+            catch(Exception e){
+                e.printStackTrace();
+            }
+        }
+
+        public InputStream getData(){
+            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+            StrictMode.setThreadPolicy(policy);
+            try{
+                conn = (HttpURLConnection) api_url.openConnection();
+                conn.setRequestProperty("Authorization", "Bearer " + TokenId);
+                conn.setRequestMethod("GET");
+                conn.setDoInput(true);
+                conn.setDoOutput(true);
+                conn.connect();
+                responseCode = conn.getResponseCode();
+                responseMessage = conn.getResponseMessage();
+                System.out.println("Response Code: " + responseCode + "\nResponse message: " + responseMessage);
+                if(responseCode == 200/*HttpURLConnection.HTTP_OK*/){
+                    isr = new BufferedInputStream(conn.getInputStream());
+                }
+                else {
+                    isr = new BufferedInputStream(conn.getErrorStream());
+                }
+            }catch(Exception e){
+                e.printStackTrace();
+                errorMessage = e.toString();
+                responseCode=-1;
+                System.out.println("Exception occurs here: " + e.toString());
+            }
+            return isr;
+        }//end of getData function
+        public InputStream sendData(JSONObject parameters){
+            OutputStream os;
+            OutputStreamWriter osw;
+            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+            StrictMode.setThreadPolicy(policy);
+            InputStream isr;
+            try{
+                //api_url = new URL(api_link);
+                conn = (HttpURLConnection) api_url.openConnection();
+                conn.setRequestProperty("Content-Type", "application/json");
+                conn.setRequestProperty("Accept", "application/json");
+                conn.setRequestProperty("Authorization", "Bearer "+TokenId);
+                conn.setRequestMethod("POST");
+                conn.setDoInput(true);
+                conn.setDoOutput(true);
+                conn.connect();
+                os = conn.getOutputStream();
+                osw = new OutputStreamWriter(os);
+                osw.write(parameters.toString());
+                osw.flush();
+                responseCode = conn.getResponseCode(); //it only the code 200
+                responseMessage = conn.getResponseMessage();// it is the json response from the mattermost api
+                System.out.println("Response Code: "+responseCode+"\nResponse message: "+responseMessage);
+                if(responseCode == 200) {
+                    isr = new BufferedInputStream(conn.getInputStream());
+                }
+                else{
+                    isr = new BufferedInputStream(conn.getErrorStream());
+                }
+                osw.close();
+            }catch(Exception e){
+                e.printStackTrace();
+                errorMessage = e.toString();
+                responseCode=-1;
+                System.out.println("Unable to send Exception occurs here: " + e.toString());
+                isr = null;
+            }
+            return isr;
+        }
+    }//end of connectAPIs class
 }
 

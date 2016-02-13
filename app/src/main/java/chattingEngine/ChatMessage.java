@@ -10,7 +10,7 @@ public class ChatMessage {
     private Long userId;
     private String dateTime;
     private String sender_name;
-
+    private String fileInfo;
     public long getId() {
         return id;
     }
@@ -31,6 +31,8 @@ public class ChatMessage {
     }
     public void setSenderName(String sender){this.sender_name=sender;}
     public String getSenderName(){return this.sender_name;}
+    public void setFileInfo(String info){this.fileInfo=info;}
+    public String getFileInfo(){return this.fileInfo;}
     public long getUserId() {
         return userId;
     }
