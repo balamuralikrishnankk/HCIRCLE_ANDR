@@ -18,7 +18,11 @@
         android:layout_above="@+id/messageLayout"
         android:layout_centerHorizontal="true"
         android:divider="@android:color/transparent"
-        android:dividerHeight="0dp" />
+        android:dividerHeight="0dp"
+        android:paddingBottom="10dp"
+        android:transcriptMode="alwaysScroll"/>
+    <!-- android:fastScrollEnabled="true"-->
+
     <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="50dp"
@@ -27,7 +31,7 @@
         android:layout_alignParentBottom="true">
             <EditText
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="50dp"
                 android:inputType="textMultiLine"
                 android:id="@+id/messageEditText"
                 android:hint="Type Your Message"
