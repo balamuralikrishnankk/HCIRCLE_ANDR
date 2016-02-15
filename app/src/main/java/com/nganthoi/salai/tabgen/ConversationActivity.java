@@ -58,7 +58,7 @@ public class ConversationActivity extends AppCompatActivity {
     String ip,responseMessage,errorMessage;
     HttpURLConnection conn=null;
     URL api_url=null;
-    Thread thread,sendMsgThread;
+    Thread thread;
     public Boolean interrupt=false;
     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy' at 'h:mm a");
     //JSONArray filenames=null;
@@ -169,20 +169,25 @@ public class ConversationActivity extends AppCompatActivity {
             }
         };
         thread.start();
-        sendMsgThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                //System.out.println(ip);
-                sendMyMessage("http://"+ip+":8065/api/v1/channels/"+channel_id+"/create");
-            }
-        });
         sendMessage = (ImageButton) findViewById(R.id.chatSendButton);
         sendMessage.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-
+                    String messageText = messageEditText.getText().toString();
+                    if (TextUtils.isEmpty(messageText)) {
+                        return;
+                    }
                     try {
-                        sendMyMessage("http://"+ip+":8065/api/v1/channels/"+channel_id+"/create");
+                        JSONObject jsonObject = new JSONObject();
+                        /*
+                        if(filenames!=null && filenames.length()>0){
+                            jsonObject.put("filenames",filenames);
+                        }*/
+                        jsonObject.put("channel_id", channel_id);
+                        jsonObject.put("root_id", "");
+                        jsonObject.put("parent_id","");
+                        jsonObject.put("Message", messageText);
+                        sendMyMessage(jsonObject);
                     } catch (Exception e) {
                         System.out.print("Message Sending failed: " + e.toString());
                         Snackbar.make(v, "Oops! Message Sending failed", Snackbar.LENGTH_LONG)
@@ -250,29 +255,15 @@ public class ConversationActivity extends AppCompatActivity {
                 Toast.makeText(context, "Invalid request code. You haven't selected any file", Toast.LENGTH_SHORT).show();
         }
     }
-    private void sendMyMessage(String link) {
-        String messageText = messageEditText.getText().toString();
+    private void sendMyMessage(JSONObject jsonMsg) {
+        String link = "http://"+ip+":8065/api/v1/channels/"+channel_id+"/create";
         String response=null;
-        if (TextUtils.isEmpty(messageText)) {
-            return;
-        }
         try{
-            JSONObject jsonObject = new JSONObject();
-            /*
-            if(filenames!=null && filenames.length()>0){
-                jsonObject.put("filenames",filenames);
-            }*/
-            jsonObject.put("channel_id", channel_id);
-            jsonObject.put("root_id", "");
-            jsonObject.put("parent_id","");
-            jsonObject.put("Message", messageText);
-
             ConnectAPIs messageAPI = new ConnectAPIs(link,token);
-            response=convertInputStreamToString(messageAPI.sendData(jsonObject));
+            response=convertInputStreamToString(messageAPI.sendData(jsonMsg));
             if(response!=null ){
                 if(messageAPI.responseCode==200){
                     ChatMessage chatMessage = new ChatMessage();
-                    chatMessage.setMessage(messageText);
                     //chatMessage.setDate(DateFormat.getDateTimeInstance().format(new Date()));
                     chatMessage.setMe(true);
                     chatMessage.setSenderName("Me");
@@ -281,6 +272,7 @@ public class ConversationActivity extends AppCompatActivity {
 
                     try{
                         JSONObject json_obj= new JSONObject(response);
+                        chatMessage.setMessage(json_obj.getString("message"));
                         last_timetamp = json_obj.getString("create_at");
                         Long timestamp = Long.parseLong(last_timetamp);
                         Date date = new Date(timestamp);
@@ -545,6 +537,7 @@ public class ConversationActivity extends AppCompatActivity {
                     }
 
                     if(filenames.length()>0) {
+                        Toast.makeText(context,"File uploaded",Toast.LENGTH_SHORT).show();
                         try {
                             JSONObject msgObject = new JSONObject();
                             msgObject.put("filenames", filenames);
@@ -552,9 +545,11 @@ public class ConversationActivity extends AppCompatActivity {
                             msgObject.put("root_id", "");
                             msgObject.put("parent_id", "");
                             msgObject.put("Message", "File Sent");
+                            /*
                             ConnectAPIs msgAPI = new ConnectAPIs("http://"+ip+":8065/api/v1/channels/"+channel_id+"/create",token);
                             InputStream is = msgAPI.sendData(msgObject);
-                            System.out.println(convertInputStreamToString(is));
+                            System.out.println(convertInputStreamToString(is));*/
+                            sendMyMessage(msgObject);
                         } catch (JSONException e) {
                             System.out.println("Something goes wrong: "+e.toString());
                         }
