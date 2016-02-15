@@ -1,5 +1,6 @@
 package com.nganthoi.salai.tabgen;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -61,8 +62,8 @@ public class ConversationActivity extends AppCompatActivity {
     Thread thread;
     public Boolean interrupt=false;
     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy' at 'h:mm a");
-    //JSONArray filenames=null;
-    // A JSON variable that contains list of file names returned from the mattermost APIs
+    JSONArray filenames=null;// A JSON variable that contains list of file names returned from the mattermost APIs
+    ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +71,14 @@ public class ConversationActivity extends AppCompatActivity {
         setContentView(R.layout.activity_conversation);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbarConversation);
         setSupportActionBar(toolbar);
+
+        /*Setting progress dialog for uploading a file*/
+        progressDialog = new ProgressDialog(context);
+        progressDialog.setTitle("File Upload");
+        progressDialog.setMessage("Uploading your file.....");
+        progressDialog.setIndeterminate(true);
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        /*********************************************/
 
         messagesContainer = (ListView) findViewById(R.id.chatListView);
         messageEditText = (EditText) findViewById(R.id.messageEditText);
@@ -91,7 +100,7 @@ public class ConversationActivity extends AppCompatActivity {
                 }catch(Exception e){
                     System.out.println("Interrupt Exception: "+e.toString());
                 }
-                onBackPressed();
+                onBackPressed();//move back to the previous activity (screen)
             }
         });
         Intent intent = getIntent();
@@ -174,15 +183,15 @@ public class ConversationActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     String messageText = messageEditText.getText().toString();
-                    if (TextUtils.isEmpty(messageText)) {
+                    if (TextUtils.isEmpty(messageText)|| messageText.equals(" ")) {
                         return;
                     }
                     try {
                         JSONObject jsonObject = new JSONObject();
-                        /*
+
                         if(filenames!=null && filenames.length()>0){
                             jsonObject.put("filenames",filenames);
-                        }*/
+                        }
                         jsonObject.put("channel_id", channel_id);
                         jsonObject.put("root_id", "");
                         jsonObject.put("parent_id","");
@@ -277,8 +286,27 @@ public class ConversationActivity extends AppCompatActivity {
                         Long timestamp = Long.parseLong(last_timetamp);
                         Date date = new Date(timestamp);
                         chatMessage.setDate(simpleDateFormat.format(date));
-                        //+json_obj.get("id")
+                        JSONArray files = json_obj.getJSONArray("filenames");
+                        String fileInfo="";
+                        for (int i = 0; i < files.length(); i++) {
+                            System.out.println("file name: " + files.getString(i));
+                            ConnectAPIs connAPIs = new ConnectAPIs("http://" + ip + ":8065/api/v1/files/get_info/"
+                                    + files.getString(i), token);
+                            InputStream isr = connAPIs.getData();
+
+                            JSONObject jsonfileInfo = new JSONObject(convertInputStreamToString(isr));
+                            fileInfo += "File name: "+jsonfileInfo.getString("filename")+" \n"+
+                                    "Type: "+jsonfileInfo.getString("mime")+" \n"+
+                                    "Size: "+jsonfileInfo.getString("size")+"\n";
+                            //System.out.println("File Info: " + fileInfo);
+                        }
+                        if(files.length()>0){
+                            chatMessage.setFileInfo(fileInfo);
+                        }
                         displayMessage(chatMessage);
+                        if(filenames!=null && filenames.length()>0){
+                            filenames=null;
+                        }
                     }catch(Exception e){
                         System.out.print("Chat Exception: "+e.toString());
                     }
@@ -308,7 +336,6 @@ public class ConversationActivity extends AppCompatActivity {
     }
 
     private void scroll() {
-        //messagesContainer.setSelection(messagesContainer.getCount() - 1);
         messagesContainer.setSelection(messagesContainer.getCount() - 1);
     }
 
@@ -431,7 +458,8 @@ public class ConversationActivity extends AppCompatActivity {
         }
         @Override
         protected void onPreExecute(){
-            Toast.makeText(context,"Sending your file now...",Toast.LENGTH_LONG).show();
+            //Toast.makeText(context,"Sending your file now...",Toast.LENGTH_LONG).show();
+            progressDialog.show();
         }
         @Override
         protected String doInBackground(Void... v){
@@ -485,10 +513,12 @@ public class ConversationActivity extends AppCompatActivity {
                     buffer=new byte[bufferSize];
 
                     bytesRead = fis.read(buffer,0,bufferSize);
+                    int total = bytesAvailable;
                     while(bytesRead>0){
                         dos.write(buffer,0,bufferSize);
                         bytesAvailable = fis.available();
                         bufferSize = Math.min(bytesAvailable, maxBufferSize);
+                        onProgressUpdate((int)(bytesAvailable/total)*100);
                         bytesRead = fis.read(buffer,0,bufferSize);
                     }
                     dos.writeBytes(lineEnd);
@@ -520,46 +550,48 @@ public class ConversationActivity extends AppCompatActivity {
             }
             return convertInputStreamToString(isr);
         }
+        protected void onProgressUpdate(Integer... progress){
+            //setProgressPercent(progress[0]);
+            progressDialog.show();
+            progressDialog.setProgress(progress[0]);
+        }
         @Override
         protected void onPostExecute(String result){
             if(result!=null){
                 System.out.println("Result: "+result);//printing out the server results
+
                 try{
                     JSONObject fileObject = new JSONObject(result);
-                    //assign the list of filenames in the global JSON array filename
-                    JSONArray filenames = fileObject.getJSONArray("filenames");
-                    for(int i=0;i<filenames.length();i++){
-                        System.out.println("file name: "+filenames.getString(i));
-                        ConnectAPIs connAPIs = new ConnectAPIs("http://"+ip+":8065/api/v1/files/get_info/"
-                                +filenames.getString(i),token);
-                        InputStream isr = connAPIs.getData();
-                        System.out.println("File Info: "+convertInputStreamToString(isr));
-                    }
-
-                    if(filenames.length()>0) {
-                        Toast.makeText(context,"File uploaded",Toast.LENGTH_SHORT).show();
-                        try {
-                            JSONObject msgObject = new JSONObject();
-                            msgObject.put("filenames", filenames);
-                            msgObject.put("channel_id", channel_id);
-                            msgObject.put("root_id", "");
-                            msgObject.put("parent_id", "");
-                            msgObject.put("Message", "File Sent");
+                    if(serverRespCode==200) {
+                        //assign the list of filenames in the global JSON array filename
+                        //filenames = new JSONArray();
+                        filenames=fileObject.getJSONArray("filenames");
+                        for (int i = 0; i < filenames.length(); i++) {
+                            System.out.println("file name: " + filenames.getString(i));
                             /*
-                            ConnectAPIs msgAPI = new ConnectAPIs("http://"+ip+":8065/api/v1/channels/"+channel_id+"/create",token);
-                            InputStream is = msgAPI.sendData(msgObject);
-                            System.out.println(convertInputStreamToString(is));*/
-                            sendMyMessage(msgObject);
-                        } catch (JSONException e) {
-                            System.out.println("Something goes wrong: "+e.toString());
+                            ConnectAPIs connAPIs = new ConnectAPIs("http://" + ip + ":8065/api/v1/files/get_info/"
+                                    + filenames.getString(i), token);
+                            InputStream isr = connAPIs.getData();
+                            System.out.println("File Info: " + convertInputStreamToString(isr));*/
                         }
+                        progressDialog.setMessage("Upload Completed, send the file with message");
+                        progressDialog.show();
+                    }//end if statement
+                    else{
+                        progressDialog.setMessage("Upload failed, please try again.");
+                        progressDialog.show();
                     }
-                    //end if statement
                 }catch(Exception e){
                     System.out.println("Unable to read file details: "+e.toString());
+                    progressDialog.setMessage("Upload failed, please try again.");
+                    progressDialog.show();
                 }
             }
-            else System.out.println("Response is null");
+            else {
+                System.out.println("Response is null");
+                progressDialog.setMessage("Upload failed, please try again.");
+                progressDialog.show();
+            }
             //Toast.makeText(context,result,Toast.LENGTH_LONG).show();
         }
     }//end of class UploadFile

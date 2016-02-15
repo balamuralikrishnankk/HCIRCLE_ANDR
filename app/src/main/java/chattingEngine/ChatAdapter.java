@@ -71,7 +71,13 @@ public class ChatAdapter extends BaseAdapter {
 
         holder.sender_name.setText(chatMessage.getSenderName());
         holder.txtMessage.setText(chatMessage.getMessage());
-        holder.fileInfo.setText(chatMessage.getFileInfo());
+        if(chatMessage.getFileInfo()==null||chatMessage.getFileInfo().equals(" ")){
+            holder.fileInfo.setHeight(0);
+        }
+        else {
+            holder.fileInfo.setHeight(ViewGroup.LayoutParams.WRAP_CONTENT);
+            holder.fileInfo.setText(chatMessage.getFileInfo());
+        }
         holder.txtMessage.setPadding(10, 5, 10, 5);
         holder.txtMessage.setGravity(Gravity.CENTER_VERTICAL);
         holder.dateInfo.setText(chatMessage.getDate());
