@@ -183,7 +183,7 @@ public class ConversationActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     String messageText = messageEditText.getText().toString();
-                    if (TextUtils.isEmpty(messageText)|| messageText.equals(" ")) {
+                    if (TextUtils.isEmpty(messageText)||messageText.equals(" ")||messageText.length()==0) {
                         return;
                     }
                     try {
@@ -197,6 +197,7 @@ public class ConversationActivity extends AppCompatActivity {
                         jsonObject.put("parent_id","");
                         jsonObject.put("Message", messageText);
                         sendMyMessage(jsonObject);
+                        filenames=null;
                     } catch (Exception e) {
                         System.out.print("Message Sending failed: " + e.toString());
                         Snackbar.make(v, "Oops! Message Sending failed", Snackbar.LENGTH_LONG)
@@ -293,18 +294,19 @@ public class ConversationActivity extends AppCompatActivity {
                             ConnectAPIs connAPIs = new ConnectAPIs("http://" + ip + ":8065/api/v1/files/get_info/"
                                     + files.getString(i), token);
                             InputStream isr = connAPIs.getData();
-
+                            //System.out.println("File Information: "+convertInputStreamToString(isr));
                             JSONObject jsonfileInfo = new JSONObject(convertInputStreamToString(isr));
                             fileInfo += "File name: "+jsonfileInfo.getString("filename")+" \n"+
                                     "Type: "+jsonfileInfo.getString("mime")+" \n"+
                                     "Size: "+jsonfileInfo.getString("size")+"\n";
-                            //System.out.println("File Info: " + fileInfo);
+                            System.out.println("File Info: " + fileInfo);
                         }
                         if(files.length()>0){
                             chatMessage.setFileInfo(fileInfo);
                         }
+                        else {chatMessage.setFileInfo(" ");}
                         displayMessage(chatMessage);
-                        if(filenames!=null && filenames.length()>0){
+                        if(filenames!=null || filenames.length()>0){
                             filenames=null;
                         }
                     }catch(Exception e){
@@ -564,15 +566,9 @@ public class ConversationActivity extends AppCompatActivity {
                     JSONObject fileObject = new JSONObject(result);
                     if(serverRespCode==200) {
                         //assign the list of filenames in the global JSON array filename
-                        //filenames = new JSONArray();
                         filenames=fileObject.getJSONArray("filenames");
                         for (int i = 0; i < filenames.length(); i++) {
                             System.out.println("file name: " + filenames.getString(i));
-                            /*
-                            ConnectAPIs connAPIs = new ConnectAPIs("http://" + ip + ":8065/api/v1/files/get_info/"
-                                    + filenames.getString(i), token);
-                            InputStream isr = connAPIs.getData();
-                            System.out.println("File Info: " + convertInputStreamToString(isr));*/
                         }
                         progressDialog.setMessage("Upload Completed, send the file with message");
                         progressDialog.show();
