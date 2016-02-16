@@ -11,6 +11,10 @@ public class ChatMessage {
     private String dateTime;
     private String sender_name;
     private String fileInfo;
+    public ChatMessage(){
+        message=null;
+        fileInfo=null;
+    }
     public long getId() {
         return id;
     }

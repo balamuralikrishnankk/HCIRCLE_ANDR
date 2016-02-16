@@ -57,10 +57,10 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
                 .findViewById(R.id.expandedListItem);
         ImageView imageList = (ImageView) convertView.findViewById(R.id.imageView2);
         expandedListTextView.setText(expandedListText);
-        if(expandedListText=="Laboratory Group"){
+        if(expandedListText=="Town Square"){
             imageList.setImageResource(R.drawable.laboratory_group);
         }
-        else if(expandedListText=="Cardiology Dept"){
+        else if(expandedListText=="Off-Topic"){
             imageList.setImageResource(R.drawable.cardiology_dept);
         }
         return convertView;
@@ -102,6 +102,9 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
             imageTitleView.setImageResource(R.drawable.hiranandani_hospital);
         }
         else if(listTitle=="Lilavati Hospital"){
+            imageTitleView.setImageResource(R.drawable.lilavati_hospital);
+        }
+        else if(listTitle=="neworgunit"){
             imageTitleView.setImageResource(R.drawable.lilavati_hospital);
         }
         return convertView;
