@@ -514,7 +514,8 @@ public class ConversationActivity extends AppCompatActivity {
                     while(bytesRead>0){
                         dos.write(buffer,0,bufferSize);
                         bytesAvailable = fis.available();
-                        onProgressUpdate(((total-bytesAvailable)/total)*100);
+                        //publishProgress(" "+((total-bytesAvailable)/total)*100);
+                        publishProgress();
                         bufferSize = Math.min(bytesAvailable, maxBufferSize);
                         bytesRead = fis.read(buffer,0,bufferSize);
                     }
@@ -547,9 +548,9 @@ public class ConversationActivity extends AppCompatActivity {
             }
             return convertInputStreamToString(isr);
         }
-        protected void onProgressUpdate(Integer... progress){
+        protected void onProgressUpdate(String... progress){
             //setProgressPercent(progress[0]);
-            progressDialog.setProgress(progress[0]);
+            progressDialog.setProgress(Integer.parseInt(progress[0]));
             progressDialog.show();
         }
         @Override
@@ -691,7 +692,7 @@ public class ConversationActivity extends AppCompatActivity {
         }//end on post execution
     }//end of GetCurrentMessageTask class
 
-    //class for connecting APIs
+    //class for connecting chatting APIs
     class ConnectAPIs {
         InputStream isr=null;
         public int responseCode;

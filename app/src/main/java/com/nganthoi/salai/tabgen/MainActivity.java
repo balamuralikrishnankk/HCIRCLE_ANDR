@@ -182,6 +182,7 @@ public class MainActivity extends Activity {
                             //Toast.makeText(MainActivity.this,"Token ID: "+TokenId,Toast.LENGTH_SHORT).show();
                             sp.saveTokenPreference(context,TokenId);
                         }
+                        System.out.println(jObj.getString("id"));
                         switch(jObj.getString("roles")){
                             case "system_admin":
                                 intent = new Intent(context,SuperAdminActivity.class);
