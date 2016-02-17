@@ -251,8 +251,6 @@ public class ConversationActivity extends AppCompatActivity {
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        System.out.println("Uploading your file....: "+file_path);
-                                        Toast.makeText(context,"Sending your file now...",Toast.LENGTH_LONG).show();
                                         UploadFile uploadFile = new UploadFile(file_path,"http://"+ip+":8065/api/v1/files/upload");
                                         uploadFile.execute();
                                     }
@@ -267,7 +265,7 @@ public class ConversationActivity extends AppCompatActivity {
     }
     private void sendMyMessage(JSONObject jsonMsg) {
         String link = "http://"+ip+":8065/api/v1/channels/"+channel_id+"/create";
-        String response=null;
+        String response;
         try{
             ConnectAPIs messageAPI = new ConnectAPIs(link,token);
             response=convertInputStreamToString(messageAPI.sendData(jsonMsg));
@@ -282,6 +280,7 @@ public class ConversationActivity extends AppCompatActivity {
 
                     try{
                         JSONObject json_obj= new JSONObject(response);
+                        chatMessage.setId(json_obj.getString("id"));
                         chatMessage.setMessage(json_obj.getString("message"));
                         last_timetamp = json_obj.getString("create_at");
                         Long timestamp = Long.parseLong(last_timetamp);
@@ -348,7 +347,7 @@ public class ConversationActivity extends AppCompatActivity {
                 for (i = 0; i < jsonArray.length(); i++) {
                     jsonObject = jsonArray.getJSONObject(i);
                     ChatMessage msg = new ChatMessage();
-                    msg.setId(i);
+
                     if (user_id.equals(jsonObject.getString("UserId"))) {
                         msg.setMe(true);
                         msg.setSenderName("Me");
@@ -416,7 +415,7 @@ public class ConversationActivity extends AppCompatActivity {
             try{
                 BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream,"iso-8859-1"),8);
                 StringBuilder sb = new StringBuilder();
-                String line=null;
+                String line;
                 while((line=reader.readLine())!=null){
                     sb.append(line +"\n");
                 }
@@ -444,7 +443,7 @@ public class ConversationActivity extends AppCompatActivity {
         int bytesRead, bytesAvailable, bufferSize;
         int serverRespCode;
         byte[] buffer;
-        int maxBufferSize = 1*1024*1024;
+        int maxBufferSize = 1024*1024;
         String fileLocation=null;
         InputStream isr=null;
 
@@ -455,6 +454,7 @@ public class ConversationActivity extends AppCompatActivity {
         @Override
         protected void onPreExecute(){
             //Toast.makeText(context,"Sending your file now...",Toast.LENGTH_LONG).show();
+            progressDialog.setMessage("Uploading your file: "+fileLocation);
             progressDialog.show();
         }
         @Override
@@ -480,6 +480,7 @@ public class ConversationActivity extends AppCompatActivity {
                     httpURLConn.setRequestProperty("Authorization", "Bearer " + token);
                     httpURLConn.setRequestProperty("files", fileLocation);
                     httpURLConn.setRequestProperty("channel_id", channel_id);
+                    System.setProperty("http.keepAlive", "false");
                     httpURLConn.connect();
                     OutputStreamWriter osw = new OutputStreamWriter(httpURLConn.getOutputStream());
                     osw.write("files=" + fileLocation + "&channel_id=" + channel_id);
@@ -513,8 +514,8 @@ public class ConversationActivity extends AppCompatActivity {
                     while(bytesRead>0){
                         dos.write(buffer,0,bufferSize);
                         bytesAvailable = fis.available();
+                        onProgressUpdate(((total-bytesAvailable)/total)*100);
                         bufferSize = Math.min(bytesAvailable, maxBufferSize);
-                        onProgressUpdate((int)(bytesAvailable/total)*100);
                         bytesRead = fis.read(buffer,0,bufferSize);
                     }
                     dos.writeBytes(lineEnd);
@@ -548,8 +549,8 @@ public class ConversationActivity extends AppCompatActivity {
         }
         protected void onProgressUpdate(Integer... progress){
             //setProgressPercent(progress[0]);
-            progressDialog.show();
             progressDialog.setProgress(progress[0]);
+            progressDialog.show();
         }
         @Override
         protected void onPostExecute(String result){
@@ -564,7 +565,7 @@ public class ConversationActivity extends AppCompatActivity {
                         for (int i = 0; i < filenames.length(); i++) {
                             System.out.println("file name: " + filenames.getString(i));
                         }
-                        progressDialog.setMessage("Upload Completed, send the file with message");
+                        progressDialog.setMessage("Upload Completed, send the file with a message");
                         progressDialog.show();
                     }//end if statement
                     else{
@@ -635,7 +636,7 @@ public class ConversationActivity extends AppCompatActivity {
                     if (jsonArray.length() > 0) {
                         jObj2 = jObj1.getJSONObject("posts");
                         int i = 0;
-                        String messageDate = null;
+                        String messageDate;
                         while (i < jsonArray.length()) {
                             //System.out.println(jsonArray.getString(i));
                             JSONObject jObj3 = jObj2.getJSONObject(jsonArray.getString(i));
@@ -643,7 +644,7 @@ public class ConversationActivity extends AppCompatActivity {
                             messageDate = "" + jObj3.getString("create_at");
                             System.out.println("Message Date: " + messageDate);
                             ChatMessage currentMsg = new ChatMessage();
-                            //currentMsg.setId(777);
+                            currentMsg.setId(jObj3.getString("id"));
                             currentMsg.setMessage("" + jObj3.getString("message"));
                             Long timeStamp = Long.parseLong(messageDate);
                             Date date = new Date(timeStamp);
@@ -669,7 +670,7 @@ public class ConversationActivity extends AppCompatActivity {
                             //}else currentMsg.setFileInfo(" ");
                             /**************************/
 
-                            if (user_id.equals("" + jObj3.getString("user_id"))) {
+                            if (user_id.equals(""+jObj3.getString("user_id"))) {
                                 currentMsg.setMe(true);
                                 currentMsg.setSenderName("Me");
                             } else {
@@ -678,8 +679,8 @@ public class ConversationActivity extends AppCompatActivity {
                             }
                             if(!messageDate.equals(last_timetamp))
                                 displayMessage(currentMsg);
-                            if (messageDate != null)
-                                last_timetamp = messageDate;
+                            //if (messageDate != null)
+                            last_timetamp = messageDate;
                             i++;
                         }//end while loop
                     }
