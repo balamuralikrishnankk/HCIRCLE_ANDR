@@ -2,16 +2,24 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <group android:checkableBehavior="single">
-        <item android:id="@+id/nav_camara" android:icon="@android:drawable/ic_menu_camera"
+        <!--<item android:id="@+id/nav_camara" android:icon="@android:drawable/ic_menu_camera"
             android:title="Import" />
         <item android:id="@+id/showTemplates" android:icon="@android:drawable/ic_menu_gallery"
             android:title="Show My Templates" />
         <item android:id="@+id/nav_slideshow" android:icon="@android:drawable/ic_menu_slideshow"
             android:title="Slideshow" />
         <item android:id="@+id/nav_manage" android:icon="@android:drawable/ic_menu_manage"
-            android:title="Tools" />
+            android:title="Tools" />-->
+        <item android:id="@+id/nav_bookmark"
+            android:title="My Bookmark" />
+        <item android:id="@+id/nav_notify"
+            android:title="Notification" />
+        <item android:id="@+id/nav_acc_setting"
+            android:title="Acount Setting" />
+        <item  android:id="@+id/logout"
+            android:title="Sign Out" />
     </group>
-
+    <!--
     <item android:title="Communicate">
         <menu>
             <item android:id="@+id/nav_share" android:icon="@android:drawable/ic_menu_share"
@@ -22,9 +30,8 @@
     </item>
     <item android:title="Setting">
         <menu>
-            <item android:icon="@android:drawable/ic_lock_power_off" android:id="@+id/logout"
-                android:title="Logout" />
+    android:icon="@android:drawable/ic_lock_power_off"
         </menu>
-    </item>
+    </item>-->
 
 </menu>

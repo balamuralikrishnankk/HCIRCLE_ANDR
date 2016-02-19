@@ -129,23 +129,9 @@ public class UserActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-
-        if (id == R.id.nav_camara) {
-            // Handle the camera action
-        }  else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
-        } else if (id == R.id.logout){
+        if (id == R.id.logout){
             logout();
-        } else if(id == R.id.showTemplates){
-            startActivity(new Intent(_context,ShowTemplateActivity.class));
         }
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
@@ -219,26 +205,26 @@ public class UserActivity extends AppCompatActivity
             switch(list.get(i)){
                 case "Chat Template"://check if Chat template exist
                     TextView chatView = (TextView) LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
-                    chatView.setText("CHAT");
-                    chatView.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.chat_icon, 0, 0);
+                    chatView.setText(" ");//chatView.setText("CHAT");
+                    chatView.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.icon_chat, 0, 0);
                     tabLayout.getTabAt(i).setCustomView(chatView);
                     break;
                 case "Reference Template":
                     TextView refView = (TextView) LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
-                    refView.setText("REFERENCE");
-                    refView.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.refer_icon, 0, 0);
+                    refView.setText(" ");//refView.setText("REFERENCE");
+                    refView.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.icon_reference, 0, 0);
                     tabLayout.getTabAt(i).setCustomView(refView);
                     break;
                 case "CME Template":
                     TextView cmeView = (TextView) LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
-                    cmeView.setText("CME");
-                    cmeView.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.cms, 0, 0);
+                    cmeView.setText(" ");//cmeView.setText("CME");
+                    cmeView.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.icon_cme, 0, 0);
                     tabLayout.getTabAt(i).setCustomView(cmeView);
                     break;
                 case "Latest News Template":
                     TextView newsView = (TextView) LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
-                    newsView.setText("LATEST NEWS");
-                    newsView.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.news_icon, 0, 0);
+                    newsView.setText(" ");//newsView.setText("LATEST NEWS");
+                    newsView.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.icon_news, 0, 0);
                     tabLayout.getTabAt(i).setCustomView(newsView);
                     break;
             }

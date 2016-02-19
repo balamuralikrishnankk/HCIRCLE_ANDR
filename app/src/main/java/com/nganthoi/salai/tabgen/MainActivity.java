@@ -37,7 +37,7 @@ public class MainActivity extends Activity {
     Context context=this;
     String msg,uname, passwd, team,server_ip;
     EditText username,password,team_name;
-    CheckBox show_password;
+    //CheckBox show_password;
     ProgressDialog progressDialog;
     TextView forgotPassword;
     InputStream is;

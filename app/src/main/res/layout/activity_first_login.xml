@@ -9,8 +9,8 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.nganthoi.salai.tabgen.FirstLoginActivity"
-    android:background="@drawable/background_screen"
-    android:fillViewport="true">
+    android:fillViewport="true"
+    android:background="@drawable/bg_scr">
     <Button
         android:layout_width="200dp"
         android:layout_height="40dp"

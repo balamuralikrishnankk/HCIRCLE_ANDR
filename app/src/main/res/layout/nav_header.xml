@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent" android:layout_height="wrap_content"
-    android:background="?attr/colorPrimary"
+    android:background="#f6f4f4"
     android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
@@ -15,14 +15,15 @@
     <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
         android:text="Mr. User"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-        android:id="@+id/username" />
+        android:id="@+id/username"
+        android:textColor="#373636" />
 
     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
         android:text="user@android.com" android:id="@+id/user_email"
-        android:textColor="#e3dfdf" />
+        android:textColor="#252525" />
     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
         android:text="user_role" android:id="@+id/user_role"
-        android:textColor="#e3dfdf" />
+        android:textColor="#252525" />
 
 </LinearLayout>
 
