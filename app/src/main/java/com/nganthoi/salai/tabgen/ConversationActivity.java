@@ -53,7 +53,7 @@ public class ConversationActivity extends AppCompatActivity {
     private ArrayList<ChatMessage> chatHistory;
     SharedPreference sp;
     Context context=this;
-    String channel_id="",user_id,token,last_timetamp=null;
+    String channel_id="",user_id,token,last_timetamp=null,extra_info;
     String channelDetails=null,file_path=null;
     int receiver_responseCode;
     String ip,responseMessage,errorMessage;
@@ -64,6 +64,8 @@ public class ConversationActivity extends AppCompatActivity {
     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy' at 'h:mm a");
     JSONArray filenames=null;// A JSON variable that contains list of file names returned from the mattermost APIs
     ProgressDialog progressDialog;
+    JSONObject extraInfoObj;
+    JSONArray members;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,6 +73,9 @@ public class ConversationActivity extends AppCompatActivity {
         setContentView(R.layout.activity_conversation);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbarConversation);
         setSupportActionBar(toolbar);
+        /*** labels in the action abar of the activity_conversation ***/
+        TextView no_of_members = (TextView) toolbar.findViewById(R.id.no_of_members);
+        TextView conversationLabel = (TextView) toolbar.findViewById(R.id.conversation_Label);
 
         /*Setting progress dialog for uploading a file*/
         progressDialog = new ProgressDialog(context);
@@ -105,7 +110,6 @@ public class ConversationActivity extends AppCompatActivity {
         });
         Intent intent = getIntent();
         String title = intent.getStringExtra(ChatFragment.TITLE);
-        TextView conversationLabel = (TextView) toolbar.findViewById(R.id.conversation_Label);
         conversationLabel.setText(title);
         conv_Icon = (ImageView) toolbar.findViewById(R.id.conv_icon);
         if(title.equals("Laboratory Group")){
@@ -151,6 +155,20 @@ public class ConversationActivity extends AppCompatActivity {
             System.out.println("Unable to read user ID: "+e.toString());
         }
         ip = sp.getServerIP_Preference(context);//getting ip
+
+        /*** Getting extra information about the current channel ***/
+        ConnectAPIs connApis = new ConnectAPIs("http://"+ip+":8065//api/v1/channels/"+channel_id+"/extra_info",token);
+        extra_info = convertInputStreamToString(connApis.getData());
+        System.out.println("Extra Information: "+extra_info);
+        try{
+            extraInfoObj = new JSONObject(extra_info);
+            int n = extraInfoObj.getInt("member_count");
+            no_of_members.setText((n>1?n+" Members":n+" Member"));
+            members=extraInfoObj.getJSONArray("members");
+        }catch(Exception e){
+            System.out.println("unable to get user extra information");
+        }
+        /*************************************************************/
         loadHistory();
         thread = new Thread(){
             @Override
@@ -262,6 +280,25 @@ public class ConversationActivity extends AppCompatActivity {
             default:
                 Toast.makeText(context, "Invalid request code. You haven't selected any file", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private String getUsernameById(String user_id){
+        String username=null;
+        if(members!=null){
+            try{
+                for(int i=0;i<members.length();i++){
+                    JSONObject users = members.getJSONObject(i);
+                    if(user_id.equals(users.getString("id"))){
+                        username = users.getString("username");
+                        break;
+                    }
+                }
+            }catch(JSONException e){
+                System.out.println("Unable to get Username in getUsernameById: "+e.toString());
+                username=null;
+            }
+        }
+        return username;
     }
     private void sendMyMessage(JSONObject jsonMsg) {
         String link = "http://"+ip+":8065/api/v1/channels/"+channel_id+"/create";
@@ -676,7 +713,8 @@ public class ConversationActivity extends AppCompatActivity {
                                 currentMsg.setSenderName("Me");
                             } else {
                                 currentMsg.setMe(false);
-                                currentMsg.setSenderName(""+jObj3.getString("user_id"));
+                                getUsernameById(jObj3.getString("user_id"));
+                                currentMsg.setSenderName(getUsernameById(jObj3.getString("user_id")));
                             }
                             if(!messageDate.equals(last_timetamp))
                                 displayMessage(currentMsg);
@@ -714,8 +752,10 @@ public class ConversationActivity extends AppCompatActivity {
             StrictMode.setThreadPolicy(policy);
             try{
                 conn = (HttpURLConnection) api_url.openConnection();
+                //conn.setRequestProperty("Content-Type", "application/json");
+                conn.setRequestProperty("Accept", "application/json");
                 conn.setRequestProperty("Authorization", "Bearer " + TokenId);
-                conn.setRequestMethod("GET");
+                conn.setRequestMethod("POST");
                 conn.setDoInput(true);
                 conn.setDoOutput(true);
                 conn.connect();

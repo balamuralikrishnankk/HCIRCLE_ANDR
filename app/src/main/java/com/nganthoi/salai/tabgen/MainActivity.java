@@ -15,6 +15,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -42,6 +43,8 @@ public class MainActivity extends Activity {
     InputStream is;
     ConnectServer cs;
     SharedPreference sp;
+    TextView signup;
+    ImageView backButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,13 +53,20 @@ public class MainActivity extends Activity {
         signin = (Button) findViewById(R.id.signIn);
         username = (EditText) findViewById(R.id.username);
         password = (EditText) findViewById(R.id.password);
-        show_password = (CheckBox) findViewById(R.id.show_password);
+        //show_password = (CheckBox) findViewById(R.id.show_password);
         forgotPassword = (TextView) findViewById(R.id.forgotPassword);
         server_ip="128.199.111.18";
         //forgotPassword.setPaintFlags(forgotPassword.getPaintFlags()| Paint.UNDERLINE_TEXT_FLAG);
-        forgotPassword.setText(Html.fromHtml("<u><i>Forgot Password ?</i></u>"));
+        //forgotPassword.setText(Html.fromHtml("<u><i>Forgot Password ?</i></u>"));
 
         sp = new SharedPreference();
+        backButton = (ImageView) findViewById(R.id.backButton);
+        backButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
+            }
+        });
 
         signin.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -96,6 +106,7 @@ public class MainActivity extends Activity {
                 startActivity(intent);
             }
         });
+        /*
         show_password.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -106,12 +117,13 @@ public class MainActivity extends Activity {
                     password.setTransformationMethod(PasswordTransformationMethod.getInstance());
                 }
             }
-        });
+        });*/
     }
 
     @Override
     public void onBackPressed(){
-        moveTaskToBack(true);
+        super.onBackPressed();
+        //moveTaskToBack(true);
     }
 
     public Boolean isValidate(){

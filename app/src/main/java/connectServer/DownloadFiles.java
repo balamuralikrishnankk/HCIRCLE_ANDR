@@ -70,7 +70,7 @@ public class DownloadFiles extends AsyncTask<String,Void,String>{
                 long total = 0;
                 while ((count = isr.read(data)) != -1) {
                     total += count;
-                    //publishProgress(""+(int)((total*100)/lenghtOfFile));
+                    //publishProgress((int)((total*100)/lenghtOfFile));
                     outputStream.write(data, 0, count);
                 }
 
