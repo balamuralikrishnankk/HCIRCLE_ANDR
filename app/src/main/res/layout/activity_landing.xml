@@ -10,23 +10,39 @@
     tools:context="com.nganthoi.salai.tabgen.LandingActivity">
 
     <Button
-        android:layout_width="match_parent"
+        android:layout_width="300dp"
         android:layout_height="120dp"
         android:id="@+id/chat"
         android:background="@drawable/landing_chat"
+        android:clickable="true"
         android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:clickable="true" />
+        android:layout_centerHorizontal="true" />
 
     <Button
-        android:layout_width="match_parent"
+        android:layout_width="300dp"
         android:layout_height="120dp"
         android:id="@+id/landing_reference"
+        android:background="@drawable/landing_reference"
         android:layout_below="@+id/chat"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="27dp"
-        android:background="@drawable/landing_reference" />
+        android:layout_alignLeft="@+id/chat"
+        android:layout_alignStart="@+id/chat" />
+
+    <Button
+        android:layout_width="300dp"
+        android:layout_height="120dp"
+        android:id="@+id/landing_cme"
+        android:background="@drawable/landing_cme"
+        android:layout_below="@+id/landing_reference"
+        android:layout_alignLeft="@+id/landing_reference"
+        android:layout_alignStart="@+id/landing_reference" />
+
+    <Button
+        android:layout_width="300dp"
+        android:layout_height="120dp"
+        android:id="@+id/landing_news"
+        android:background="@drawable/landing_news"
+        android:layout_below="@+id/landing_cme"
+        android:layout_alignLeft="@+id/landing_cme"
+        android:layout_alignStart="@+id/landing_cme" />
 
 </RelativeLayout>

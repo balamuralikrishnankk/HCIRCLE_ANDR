@@ -230,11 +230,6 @@ public class UserActivity extends AppCompatActivity
             }
         }
 
-        /*
-        tabLayout.getTabAt(1).setIcon(R.drawable.reference);
-        tabLayout.getTabAt(2).setIcon(R.drawable.cme);
-        tabLayout.getTabAt(3).setIcon(R.drawable.latest_news);
-        */
     }
 
     class ViewPagerAdapter extends FragmentPagerAdapter {
