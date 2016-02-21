@@ -41,8 +41,6 @@ public class UserActivity extends AppCompatActivity
     String role;//role of the user
     SharedPreference sp;
     List<String> list;
-    Boolean chatExist=false,refExist=false,cmeExist=false,newsExist=false;
-    String tabArray[]=new String[4];
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -199,35 +197,38 @@ public class UserActivity extends AppCompatActivity
     }
 
     private void setTabLayoutIcons(TabLayout tabLayout,List<String> list) throws Exception{
-
-        for(int i=0;i<list.size();i++){
+        try {
+            for (int i = 0; i < list.size(); i++) {
             /*Adding tabs and fragments according to the Templates from the server*/
-            switch(list.get(i)){
-                case "Chat Template"://check if Chat template exist
-                    TextView chatView = (TextView) LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
-                    chatView.setText(" ");//chatView.setText("CHAT");
-                    chatView.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.icon_chat, 0, 0);
-                    tabLayout.getTabAt(i).setCustomView(chatView);
-                    break;
-                case "Reference Template":
-                    TextView refView = (TextView) LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
-                    refView.setText(" ");//refView.setText("REFERENCE");
-                    refView.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.icon_reference, 0, 0);
-                    tabLayout.getTabAt(i).setCustomView(refView);
-                    break;
-                case "CME Template":
-                    TextView cmeView = (TextView) LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
-                    cmeView.setText(" ");//cmeView.setText("CME");
-                    cmeView.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.icon_cme, 0, 0);
-                    tabLayout.getTabAt(i).setCustomView(cmeView);
-                    break;
-                case "Latest News Template":
-                    TextView newsView = (TextView) LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
-                    newsView.setText(" ");//newsView.setText("LATEST NEWS");
-                    newsView.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.icon_news, 0, 0);
-                    tabLayout.getTabAt(i).setCustomView(newsView);
-                    break;
+                switch (list.get(i)) {
+                    case "Chat Template"://check if Chat template exist
+                        TextView chatView = (TextView) LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
+                        chatView.setText(" ");//chatView.setText("CHAT");
+                        chatView.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.icon_chat, 0, 0);
+                        tabLayout.getTabAt(i).setCustomView(chatView);
+                        break;
+                    case "Reference Template":
+                        TextView refView = (TextView) LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
+                        refView.setText(" ");//refView.setText("REFERENCE");
+                        refView.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.icon_reference, 0, 0);
+                        tabLayout.getTabAt(i).setCustomView(refView);
+                        break;
+                    case "CME Template":
+                        TextView cmeView = (TextView) LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
+                        cmeView.setText(" ");//cmeView.setText("CME");
+                        cmeView.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.icon_cme, 0, 0);
+                        tabLayout.getTabAt(i).setCustomView(cmeView);
+                        break;
+                    case "Latest News Template":
+                        TextView newsView = (TextView) LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
+                        newsView.setText(" ");//newsView.setText("LATEST NEWS");
+                        newsView.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.icon_news, 0, 0);
+                        tabLayout.getTabAt(i).setCustomView(newsView);
+                        break;
+                }
             }
+        }catch(Exception e){
+            System.out.println("Exception: "+e.toString());
         }
 
     }
@@ -282,6 +283,5 @@ public class UserActivity extends AppCompatActivity
         AlertDialog alertDialog = alertDialogBuilder.create();
         alertDialog.show();
     }
-
 
 }

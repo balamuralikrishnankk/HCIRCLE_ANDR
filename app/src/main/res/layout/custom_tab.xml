@@ -6,5 +6,4 @@
     android:textColor="#f2efef"
     android:textSize="16sp"
     android:fontFamily="@string/font_fontFamily_medium">
-
 </TextView>

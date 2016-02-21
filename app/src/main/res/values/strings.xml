@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">TabGen</string>
+    <string name="app_name">HCircle</string>
     <string name="welcome">WELCOME</string>
     <string name="email">Email</string>
     <string name="password">Password</string>
@@ -47,4 +47,5 @@
     <string name="CreateRole">Create Role</string>
     <string name="team_name">Team Name</string>
     <string name="title_activity_show_template">ShowTemplateActivity</string>
+    <string name="title_activity_user_landing">UserLandingActivity</string>
 </resources>

@@ -78,8 +78,8 @@ public class MainActivity extends Activity {
                         passwd = password.getText().toString().trim();
                         team = "neworgunit";
                         sp.saveServerIP_Preference(context,server_ip);
-                        if(team=="")
-                            team="myteam";
+                        /*if(team=="")
+                            team="myteam";*/
                         JSONObject jsonObject= new JSONObject();
                         jsonObject.put("name",team);
                         jsonObject.put("username", uname);//username.getText().toString()
@@ -167,9 +167,8 @@ public class MainActivity extends Activity {
         protected String doInBackground(JSONObject... jObj){
             String ip = sp.getServerIP_Preference(context);
             cs = new ConnectServer("http://"+ip+":8065/api/v1/users/login");
-            String result=null;
             is = cs.putData(jObj[0]);
-            result = cs.convertInputStreamToString(is);
+            String result = cs.convertInputStreamToString(is);
             return result;
         }
 
@@ -209,7 +208,7 @@ public class MainActivity extends Activity {
                                 finish();
                                 break;
                             default:
-                                intent = new Intent(context,UserActivity.class);
+                                intent = new Intent(context,UserLandingActivity.class);
                                 Toast.makeText(context,"You have sucessfully login",Toast.LENGTH_LONG).show();
                                 startActivity(intent);
                                 finish();
@@ -224,7 +223,7 @@ public class MainActivity extends Activity {
                         error.showCustomDialog();
                     }
                 }catch(JSONException e){
-                    System.out.println("JSON Exception occurs here: " + e.toString()+"\n the JSON is: "+jObj.toString());
+                    System.out.println("JSON Exception occurs here: " + e.toString());
                 }
             }
             else

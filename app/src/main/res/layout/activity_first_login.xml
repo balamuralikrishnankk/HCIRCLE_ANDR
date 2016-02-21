@@ -16,13 +16,13 @@
         android:layout_height="40dp"
         android:text="Sign Up"
         android:id="@+id/signup"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="93dp"
+        android:layout_marginBottom="17dp"
         android:background="@drawable/button_background"
         android:textColor="#20a0fb"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textStyle="normal" />
+        android:textStyle="normal"
+        android:layout_above="@+id/login"
+        android:layout_centerHorizontal="true" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -30,10 +30,11 @@
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="Log in"
         android:id="@+id/login"
+        android:layout_marginBottom="25dp"
+        android:textColor="#ffffff"
+        android:clickable="true"
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="45dp"
-        android:textColor="#ffffff" />
+        android:layout_centerHorizontal="true" />
 
     <ImageView
         android:layout_width="150dp"
