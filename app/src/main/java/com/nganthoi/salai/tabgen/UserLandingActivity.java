@@ -169,8 +169,8 @@ public class UserLandingActivity extends AppCompatActivity
         alertDialogBuilder.setPositiveButton("YES", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 startActivity(new Intent(_context, MainActivity.class));
-                sp.clearPreference(_context);
                 finish();
+                sp.clearPreference(_context);
             }
         });
         alertDialogBuilder.setNegativeButton("NO", new DialogInterface.OnClickListener() {

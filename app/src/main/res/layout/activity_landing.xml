@@ -8,7 +8,7 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.nganthoi.salai.tabgen.LandingActivity">
-
+    <!--
     <Button
         android:layout_width="350dp"
         android:layout_height="140dp"
@@ -19,30 +19,62 @@
         android:layout_centerHorizontal="true" />
 
     <Button
-        android:layout_width="300dp"
-        android:layout_height="120dp"
+        android:layout_width="170dp"
+        android:layout_height="140dp"
         android:id="@+id/landing_reference"
         android:background="@drawable/landing_reference"
-        android:layout_below="@+id/chat"
-        android:layout_alignLeft="@+id/chat"
-        android:layout_alignStart="@+id/chat" />
+        android:layout_centerVertical="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
 
     <Button
-        android:layout_width="300dp"
-        android:layout_height="120dp"
+        android:layout_width="170dp"
+        android:layout_height="140dp"
         android:id="@+id/landing_cme"
         android:background="@drawable/landing_cme"
-        android:layout_below="@+id/landing_reference"
-        android:layout_alignLeft="@+id/landing_reference"
-        android:layout_alignStart="@+id/landing_reference" />
+        android:layout_alignTop="@+id/landing_reference"
+        android:layout_alignRight="@+id/chat"
+        android:layout_alignEnd="@+id/chat" />
 
     <Button
-        android:layout_width="300dp"
-        android:layout_height="120dp"
+        android:layout_width="350dp"
+        android:layout_height="140dp"
         android:id="@+id/landing_news"
         android:background="@drawable/landing_news"
-        android:layout_below="@+id/landing_cme"
-        android:layout_alignLeft="@+id/landing_cme"
-        android:layout_alignStart="@+id/landing_cme" />
+        android:layout_below="@+id/landing_reference"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="23dp" />-->
 
+    <GridLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true">
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="New Button"
+            android:id="@+id/button6"
+            android:layout_row="0"
+            android:layout_column="0"
+            android:layout_columnSpan="2" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="New Button"
+            android:id="@+id/button5"
+            android:layout_row="1"
+            android:layout_column="0" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="New Button"
+            android:id="@+id/button7"
+            android:layout_row="1"
+            android:layout_column="1" />
+    </GridLayout>
 </RelativeLayout>

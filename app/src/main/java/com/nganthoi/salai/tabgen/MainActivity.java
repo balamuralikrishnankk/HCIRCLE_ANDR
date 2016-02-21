@@ -78,8 +78,6 @@ public class MainActivity extends Activity {
                         passwd = password.getText().toString().trim();
                         team = "neworgunit";
                         sp.saveServerIP_Preference(context,server_ip);
-                        /*if(team=="")
-                            team="myteam";*/
                         JSONObject jsonObject= new JSONObject();
                         jsonObject.put("name",team);
                         jsonObject.put("username", uname);//username.getText().toString()

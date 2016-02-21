@@ -22,6 +22,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -87,7 +88,40 @@ public class UserActivity extends AppCompatActivity
         progressDialog.setMessage("Loading Your Templates....");
         progressDialog.setIndeterminate(true);
         progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+
+        mViewPager = (ViewPager) findViewById(R.id.container);
+        tabLayout = (TabLayout) findViewById(R.id.tabLayout);
+
         new GetTabList().execute(role);
+        tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                switch (tab.getText().toString()) {
+                    case "chat":
+                        Toast.makeText(_context, "Chat is selected", Toast.LENGTH_SHORT).show();
+                        break;
+                    case "reference":
+                        Toast.makeText(_context, "Reference is selected", Toast.LENGTH_SHORT).show();
+                        break;
+                    case "cme":
+                        Toast.makeText(_context, "CME is selected", Toast.LENGTH_SHORT).show();
+                        break;
+                    case "news":
+                        Toast.makeText(_context, "News is selected", Toast.LENGTH_SHORT).show();
+                        break;
+                }
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+
+            }
+        });
     }
 
     @Override
@@ -96,8 +130,8 @@ public class UserActivity extends AppCompatActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            //super.onBackPressed();
-            logout();
+            super.onBackPressed();
+            //logout();
         }
     }
 
@@ -152,10 +186,8 @@ public class UserActivity extends AppCompatActivity
         }
         @Override
         protected void onPostExecute(List<String> list){
-            mViewPager = (ViewPager) findViewById(R.id.container);
-            setupViewPager(mViewPager,list);
 
-            tabLayout = (TabLayout) findViewById(R.id.tabLayout);
+            setupViewPager(mViewPager, list);
             tabLayout.setupWithViewPager(mViewPager);
 
             try{
@@ -169,6 +201,7 @@ public class UserActivity extends AppCompatActivity
             tabLayout.getTabAt(1).setIcon(R.drawable.reference);
             tabLayout.getTabAt(2).setIcon(R.drawable.cme);
             tabLayout.getTabAt(3).setIcon(R.drawable.latest_news);*/
+
         }
     }
 
@@ -177,7 +210,6 @@ public class UserActivity extends AppCompatActivity
 
         for(int i=0;i<list.size();i++){
             /*Adding tabs and fragments according to the Templates from the server*/
-            //System.out.println(list.get(i));
             switch(list.get(i)){
                 case "Chat Template"://check if Chat template exist
                     adapter.addFragment(new ChatFragment(), "CHAT");
@@ -206,24 +238,28 @@ public class UserActivity extends AppCompatActivity
                         chatView.setText(" ");//chatView.setText("CHAT");
                         chatView.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.icon_chat, 0, 0);
                         tabLayout.getTabAt(i).setCustomView(chatView);
+                        tabLayout.getTabAt(i).setText("chat");
                         break;
                     case "Reference Template":
                         TextView refView = (TextView) LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
                         refView.setText(" ");//refView.setText("REFERENCE");
                         refView.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.icon_reference, 0, 0);
                         tabLayout.getTabAt(i).setCustomView(refView);
+                        tabLayout.getTabAt(i).setText("reference");
                         break;
                     case "CME Template":
                         TextView cmeView = (TextView) LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
                         cmeView.setText(" ");//cmeView.setText("CME");
                         cmeView.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.icon_cme, 0, 0);
                         tabLayout.getTabAt(i).setCustomView(cmeView);
+                        tabLayout.getTabAt(i).setText("cme");
                         break;
                     case "Latest News Template":
                         TextView newsView = (TextView) LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
                         newsView.setText(" ");//newsView.setText("LATEST NEWS");
                         newsView.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.icon_news, 0, 0);
                         tabLayout.getTabAt(i).setCustomView(newsView);
+                        tabLayout.getTabAt(i).setText("news");
                         break;
                 }
             }
