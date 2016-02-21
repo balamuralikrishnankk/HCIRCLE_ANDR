@@ -16,9 +16,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -71,12 +73,34 @@ public class UserLandingActivity extends AppCompatActivity
         templateList.setAdapter(arrayAdapter);*/
         templateAdapter = new TemplateAdapter(UserLandingActivity.this,list);
         templateList.setAdapter(templateAdapter);
+        //adding on click event for a particular item
+        templateList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String template_name = templateAdapter.getItem(position);
+                switch(template_name){
+                    case "Chat Template"://check if Chat template exist
+                        Toast.makeText(_context,"You have selected chat template",Toast.LENGTH_SHORT).show();
+                        startActivity(new Intent(_context,UserActivity.class));
+                        break;
+                    case "Reference Template":
+                        Toast.makeText(_context,"You have selected reference template",Toast.LENGTH_SHORT).show();
+                        break;
+                    case "CME Template":
+                        Toast.makeText(_context,"You have selected CME template",Toast.LENGTH_SHORT).show();
+                        break;
+                    case "Latest News Template":
+                        Toast.makeText(_context,"You have selected News template",Toast.LENGTH_SHORT).show();
+                        break;
+                }
+            }
+        });
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                Snackbar.make(view, "No action yet.", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
         });
