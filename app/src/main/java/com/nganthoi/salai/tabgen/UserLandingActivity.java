@@ -29,7 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import sharePreference.SharedPreference;
-import templates.TemplateAdapter;
+import template.TemplateAdapter;
 
 public class UserLandingActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
