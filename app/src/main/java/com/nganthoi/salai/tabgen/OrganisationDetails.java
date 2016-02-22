@@ -149,4 +149,29 @@ public class OrganisationDetails {
         return list;
         /**********************************************************/
     }
+    public static String getChannelId(String channel_name,Context context){
+        String channel_id=null;
+        SharedPreference sp = new SharedPreference();
+        String channelDetails = sp.getChannelPreference(context);
+        if(channelDetails!=null) {
+            System.out.println("Channel is not null: " + channelDetails);
+            try {
+                JSONArray jsonArray = new JSONArray(channelDetails);
+                JSONObject jsonObject;
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    jsonObject = jsonArray.getJSONObject(i);
+               /*System.out.println("Title: "+title+"------->Channel name: "+jsonObject.getString("Channel_name")+" ---->ID: "+
+                        jsonObject.getString("Channel_ID"));*/
+                    if (channel_name.equals(jsonObject.getString("Channel_name"))) {
+                        channel_id = jsonObject.getString("Channel_ID");// setting channel id
+                        break;
+                    }
+                }
+
+            } catch (Exception e) {
+                System.out.println(e.toString());
+            }
+        }
+        return channel_id;
+    }
 }

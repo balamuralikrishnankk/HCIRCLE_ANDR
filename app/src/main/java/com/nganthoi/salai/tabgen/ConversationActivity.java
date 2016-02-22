@@ -31,7 +31,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
+//import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -42,6 +42,7 @@ import chattingEngine.ChatAdapter;
 import chattingEngine.ChatMessage;
 import readData.ReadFile;
 import sharePreference.SharedPreference;
+import connectServer.ConnectAPIs;
 
 public class ConversationActivity extends AppCompatActivity {
     //ImageButton sendMessage;
@@ -117,6 +118,12 @@ public class ConversationActivity extends AppCompatActivity {
         }else if(title.equals("Cardiology Dept")){
             conv_Icon.setImageResource(R.drawable.cardiology_dept);
         }
+        else if(title.equals("Town Square")){
+            conv_Icon.setImageResource(R.drawable.laboratory_group);
+        }
+        else if(title.equals("Off-Topic")){
+            conv_Icon.setImageResource(R.drawable.laboratory_group);
+        }
         /*
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -127,26 +134,10 @@ public class ConversationActivity extends AppCompatActivity {
             }
         });*/
         sp = new SharedPreference();
-        channelDetails = sp.getChannelPreference(context);
+        //channelDetails = sp.getChannelPreference(context);
         token=sp.getTokenPreference(context);
-        if(channelDetails!=null) System.out.println("Channel is not null: "+channelDetails);
-        try{
-            JSONArray jsonArray = new JSONArray(channelDetails);
-            JSONObject jsonObject;
-            for(int i=0;i<jsonArray.length();i++){
-               jsonObject = jsonArray.getJSONObject(i);
-               /*System.out.println("Title: "+title+"------->Channel name: "+jsonObject.getString("Channel_name")+" ---->ID: "+
-                        jsonObject.getString("Channel_ID"));*/
-               if(title.equals(jsonObject.getString("Channel_name"))) {
-                   channel_id = jsonObject.getString("Channel_ID");// setting channel id
-                   break;
-               }//channel_id = jsonObject.getString("Channel_ID");
-            }
-            System.out.println("Title: "+title+" ---> Channel Id: "+channel_id+"\nToken Id: "+token);
-
-        }catch(Exception e){
-            System.out.println(e.toString());
-        }
+        channel_id=OrganisationDetails.getChannelId(title,context);
+        System.out.println("Title: "+title+" ---> Channel Id: "+channel_id+"\nToken Id: "+token);
         String user_details=sp.getPreference(context);
         try{
             JSONObject jObj = new JSONObject(user_details);
@@ -160,6 +151,7 @@ public class ConversationActivity extends AppCompatActivity {
         ConnectAPIs connApis = new ConnectAPIs("http://"+ip+":8065//api/v1/channels/"+channel_id+"/extra_info",token);
         extra_info = convertInputStreamToString(connApis.getData());
         System.out.println("Extra Information: "+extra_info);
+
         try{
             extraInfoObj = new JSONObject(extra_info);
             int n = extraInfoObj.getInt("member_count");
@@ -729,92 +721,5 @@ public class ConversationActivity extends AppCompatActivity {
             }//end if
         }//end on post execution
     }//end of GetCurrentMessageTask class
-
-    //class for connecting chatting APIs
-    class ConnectAPIs {
-        InputStream isr=null;
-        public int responseCode;
-        public String responseMessage, errorMessage,TokenId=null;
-        URL api_url=null;
-        public HttpURLConnection conn=null;
-        public ConnectAPIs(String web_api,String token){
-            try{
-                api_url =new URL(web_api);
-                TokenId = token;
-            }
-            catch(Exception e){
-                e.printStackTrace();
-            }
-        }
-
-        public InputStream getData(){
-            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-            StrictMode.setThreadPolicy(policy);
-            try{
-                conn = (HttpURLConnection) api_url.openConnection();
-                //conn.setRequestProperty("Content-Type", "application/json");
-                conn.setRequestProperty("Accept", "application/json");
-                conn.setRequestProperty("Authorization", "Bearer " + TokenId);
-                conn.setRequestMethod("POST");
-                conn.setDoInput(true);
-                conn.setDoOutput(true);
-                conn.connect();
-                responseCode = conn.getResponseCode();
-                responseMessage = conn.getResponseMessage();
-                System.out.println("Response Code: " + responseCode + "\nResponse message: " + responseMessage);
-                if(responseCode == 200/*HttpURLConnection.HTTP_OK*/){
-                    isr = new BufferedInputStream(conn.getInputStream());
-                }
-                else {
-                    isr = new BufferedInputStream(conn.getErrorStream());
-                }
-            }catch(Exception e){
-                e.printStackTrace();
-                errorMessage = e.toString();
-                responseCode=-1;
-                System.out.println("Exception occurs here: " + e.toString());
-            }
-            return isr;
-        }//end of getData function
-        public InputStream sendData(JSONObject parameters){
-            OutputStream os;
-            OutputStreamWriter osw;
-            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-            StrictMode.setThreadPolicy(policy);
-            InputStream isr;
-            try{
-                //api_url = new URL(api_link);
-                conn = (HttpURLConnection) api_url.openConnection();
-                conn.setRequestProperty("Content-Type", "application/json");
-                conn.setRequestProperty("Accept", "application/json");
-                conn.setRequestProperty("Authorization", "Bearer "+TokenId);
-                conn.setRequestMethod("POST");
-                conn.setDoInput(true);
-                conn.setDoOutput(true);
-                conn.connect();
-                os = conn.getOutputStream();
-                osw = new OutputStreamWriter(os);
-                osw.write(parameters.toString());
-                osw.flush();
-                responseCode = conn.getResponseCode(); //it only the code 200
-                responseMessage = conn.getResponseMessage();// it is the json response from the mattermost api
-                System.out.println("Response Code: "+responseCode+"\nResponse message: "+responseMessage);
-                if(responseCode == 200) {
-                    isr = new BufferedInputStream(conn.getInputStream());
-                }
-                else{
-                    isr = new BufferedInputStream(conn.getErrorStream());
-                }
-                osw.close();
-            }catch(Exception e){
-                e.printStackTrace();
-                errorMessage = e.toString();
-                responseCode=-1;
-                System.out.println("Unable to send Exception occurs here: " + e.toString());
-                isr = null;
-            }
-            return isr;
-        }
-    }//end of connectAPIs class
 }
 

@@ -11,6 +11,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ExpandableListView;
+import android.widget.ImageView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -42,27 +44,26 @@ public class ChatFragment extends Fragment {
     public View onCreateView(LayoutInflater layoutInflater,ViewGroup container,Bundle savedInstanceState){
         chatView = layoutInflater.inflate(R.layout.chat_layout,container,false);
         expandableListView = (ExpandableListView) chatView.findViewById(R.id.chatExpandableListView);
-
-        layoutGroupHeader = layoutInflater.inflate(R.layout.list_group,null);
-        showChatLists();
+        showChatLists(layoutInflater);
         return chatView;
     }
 
-    public void showChatLists(){
+    public void showChatLists(LayoutInflater layoutInflater){
         /*Setting chat list View*/
         expandableListDetail = ExpandableListDataPump.getData(chatView.getContext());
         expandableListTitle = new ArrayList<String>(expandableListDetail.keySet());
         expandableListAdapter= new ExpandableListAdapter(chatView.getContext(),expandableListTitle,expandableListDetail);
         expandableListView.setAdapter(expandableListAdapter);
-
-         expandableListView.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
+        layoutGroupHeader = layoutInflater.inflate(R.layout.list_group,null);
+        expandableListView.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
             @Override
             public void onGroupExpand(int groupPosition) {
-
-              /*
+                /*
                 Toast.makeText(chatView.getContext(),
                         expandableListTitle.get(groupPosition) + " List Expanded "+expandableIndex.getText().toString(),
                         Toast.LENGTH_SHORT).show();*/
+                ImageView direction = (ImageView) layoutGroupHeader.findViewById(R.id.direction);
+                direction.setImageResource(R.drawable.down_icon);
             }
         });
 
@@ -73,7 +74,9 @@ public class ChatFragment extends Fragment {
 
                 /*Toast.makeText(chatView.getContext(),
                         expandableListTitle.get(groupPosition) + " List Collapsed: "+expandableButton.getText().toString(),
-                        Toast.LENGTH_SHORT).show();*/
+                        Toast.LENGTH_SHORT).show(); @android:drawable/ic_media_play*/
+                ImageView direction = (ImageView) layoutGroupHeader.findViewById(R.id.direction);
+                direction.setImageResource(R.drawable.back_icon);
             }
         });
 
