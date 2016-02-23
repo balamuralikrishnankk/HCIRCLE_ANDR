@@ -1,5 +1,10 @@
 package chattingEngine;
 
+import org.json.JSONArray;
+
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by Lenovo on 26-Jan-16.
  */
@@ -11,9 +16,11 @@ public class ChatMessage {
     private String dateTime;
     private String sender_name;
     private String fileInfo;
+    private List<String> fileList;
     public ChatMessage(){
         message=null;
         fileInfo=null;
+        fileList=new ArrayList<String>();
     }
     public String getId() {
         return id;
@@ -51,5 +58,18 @@ public class ChatMessage {
 
     public void setDate(String dateTime) {
         this.dateTime = dateTime;
+    }
+    public void setFileList(JSONArray filenames){
+        try {
+            for (int i = 0; i < filenames.length(); i++) {
+                fileList.add(filenames.getString(i));
+            }
+        }catch(Exception e){
+            System.out.println("Unable to store file lists: "+e.toString());
+            fileList=null;
+        }
+    }
+    public List<String> getFileList(){
+        return this.fileList;
     }
 }

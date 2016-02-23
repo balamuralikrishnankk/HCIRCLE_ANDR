@@ -64,13 +64,14 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         ImageView imageList = (ImageView) convertView.findViewById(R.id.imageView2);
         TextView count = (TextView) convertView.findViewById(R.id.count);//count the number of members for each channel in organisation unit
         expandedListTextView.setText(expandedListText);
-
+        count.setText("0");
+        /*
         SharedPreference sp = new SharedPreference();
         String token = sp.getTokenPreference(context);
         String channel_id = OrganisationDetails.getChannelId(expandedListText, context);
         String ip = sp.getServerIP_Preference(context);
         System.out.println("Title: "+expandedListText+" ---> Channel Id: "+channel_id+"\nToken Id: "+token);
-        /*** Getting extra information about the current channel ***/
+        *** Getting extra information about the current channel ***
         ConnectAPIs connApis = new ConnectAPIs("http://"+ip+":8065//api/v1/channels/"+channel_id+"/extra_info",token);
         String extra_info = connApis.convertInputStreamToString(connApis.getData());
         System.out.println("Extra Information: "+extra_info);
@@ -121,7 +122,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
             convertView = layoutInflater.inflate(R.layout.list_group, null);
         }
         TextView listTitleTextView = (TextView) convertView.findViewById(R.id.listTitle);//channel Title
-        ImageView imageTitleView = (ImageView) convertView.findViewById(R.id.imageView1);//channel Icon
+        ImageView imageTitleView = (ImageView) convertView.findViewById(R.id.teamLogo);//channel Icon
         listTitleTextView.setTypeface(null, Typeface.BOLD);
         listTitleTextView.setText(listTitle);//setting channel title
 

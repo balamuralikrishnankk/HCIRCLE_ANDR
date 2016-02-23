@@ -168,7 +168,7 @@ public class UserLandingActivity extends AppCompatActivity
         alertDialogBuilder.setIcon(R.drawable.failure_icon);
         alertDialogBuilder.setPositiveButton("YES", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
-                startActivity(new Intent(_context, MainActivity.class));
+                startActivity(new Intent(_context, FirstLoginActivity.class));
                 finish();
                 sp.clearPreference(_context);
             }

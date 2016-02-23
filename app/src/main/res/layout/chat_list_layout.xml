@@ -17,7 +17,8 @@
             android:textColor="#666565"
             android:textStyle="bold|italic"
             android:textSize="18sp"
-            android:text="sender" />
+            android:text="sender"
+            android:layout_gravity="right" />
         <LinearLayout
             android:id="@+id/contentWithBackground"
             android:layout_width="wrap_content"
@@ -37,16 +38,23 @@
                 android:textSize="20sp"
                 android:gravity="center_vertical|center_horizontal"/>
 
+
         </LinearLayout>
-        <TextView
+        <ListView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/fileList"
+            android:nestedScrollingEnabled="true"
+            android:listSelector="#ade1f0">
+        </ListView>
+        <!--<TextView
             android:id="@+id/fileInfo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="right"
             android:textSize="8sp"
-            android:text=""
-            android:textColor="#414040" />
-
+            android:text="gg"
+            android:textColor="#414040" />-->
         <TextView
             android:id="@+id/dateInfo"
             android:layout_width="wrap_content"

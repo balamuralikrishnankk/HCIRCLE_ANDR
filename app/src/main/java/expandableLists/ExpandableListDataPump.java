@@ -14,7 +14,7 @@ import sharePreference.SharedPreference;
 
 public class ExpandableListDataPump {
     static String user_id="";
-    static String username,teamName;
+    static String teamName;
     static List<String> channelList;
 
 
@@ -27,7 +27,7 @@ public class ExpandableListDataPump {
             JSONObject jObj = new JSONObject(user_details);
             user_id=jObj.getString("id");
             System.out.println("User ID: "+user_id);
-            username = jObj.getString("username");
+            //username = jObj.getString("username");
         }catch(Exception e){
             System.out.println("Unable to read user ID: "+e.toString());
         }

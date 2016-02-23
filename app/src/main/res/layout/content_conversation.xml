@@ -31,7 +31,7 @@
         android:layout_alignParentBottom="true">
             <EditText
                 android:layout_width="wrap_content"
-                android:layout_height="50dp"
+                android:layout_height="40dp"
                 android:inputType="textMultiLine"
                 android:id="@+id/messageEditText"
                 android:hint="Type Your Message"
@@ -42,20 +42,21 @@
                 android:layout_weight="0.84"
                 android:layout_gravity="left"
                 android:background="@drawable/msg_write_bg"
-                android:layout_alignTop="@+id/chatSendButton"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true"
-                android:layout_toLeftOf="@+id/chatSendButton"
-                android:layout_toStartOf="@+id/chatSendButton" />
+                android:layout_toStartOf="@+id/chatSendButton"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentBottom="true" />
         <ImageButton
-            android:layout_width="35dp"
+            android:layout_width="50dp"
             android:layout_height="35dp"
             android:id="@+id/chatSendButton"
             android:src="@android:drawable/ic_menu_send"
-            android:background="@drawable/round_button_background"
+            android:background="@drawable/button_blue_background"
             android:layout_alignParentBottom="true"
             android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true" />
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true" />
     </RelativeLayout>
 
 </RelativeLayout>

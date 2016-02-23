@@ -3,18 +3,26 @@ package chattingEngine;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
+import android.support.annotation.NonNull;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.nganthoi.salai.tabgen.R;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 
 /**
  * Created by SALAI on 1/26/2016.
@@ -71,15 +79,32 @@ public class ChatAdapter extends BaseAdapter {
 
         holder.sender_name.setText(chatMessage.getSenderName());
         holder.txtMessage.setText(chatMessage.getMessage());
-        if(chatMessage.getFileInfo()==null||chatMessage.getFileInfo().equals(" ")){
+        List<String> files;
+        files=chatMessage.getFileList();
+        if(files.size()!=0){
+            FileAdapter fileAdapter = new FileAdapter(files,context);
+            //ArrayAdapter<String> fileAdapter = new ArrayAdapter<String>(context,android.R.layout.simple_list_item_1,files);
+            holder.fileList.setAdapter(fileAdapter);
+        }
+        else{
+            holder.fileList.setAdapter(null);
+        }
+        /*if(chatMessage.getFileInfo()==null||chatMessage.getFileInfo().equals(" ")){
             holder.fileInfo.setHeight(0);
             holder.fileInfo.setText(null);
         }
         else {
-            holder.fileInfo.setHeight(200);
-            holder.fileInfo.setWidth(250);
+            holder.fileInfo.setHeight(120);
+            holder.fileInfo.setWidth(200);
             holder.fileInfo.setText(chatMessage.getFileInfo());
-        }
+            holder.fileInfo.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    Toast.makeText(context,"Do you want to download",Toast.LENGTH_LONG).show();
+                    return false;
+                }
+            });
+        }*/
         holder.txtMessage.setPadding(10, 5, 10, 5);
         holder.txtMessage.setGravity(Gravity.CENTER_VERTICAL);
         holder.dateInfo.setText(chatMessage.getDate());
@@ -151,10 +176,11 @@ public class ChatAdapter extends BaseAdapter {
         ViewHolder holder = new ViewHolder();
         holder.txtMessage = (TextView) v.findViewById(R.id.txtMessage);
         holder.sender_name = (TextView) v.findViewById(R.id.sender);
-        holder.fileInfo = (TextView) v.findViewById(R.id.fileInfo);
+        //holder.fileInfo = (TextView) v.findViewById(R.id.fileInfo);
         holder.content = (LinearLayout) v.findViewById(R.id.content);
         holder.contentWithBG = (LinearLayout) v.findViewById(R.id.contentWithBackground);
         holder.dateInfo = (TextView) v.findViewById(R.id.dateInfo);
+        holder.fileList = (ListView) v.findViewById(R.id.fileList);
         return holder;
     }
 
@@ -162,8 +188,9 @@ public class ChatAdapter extends BaseAdapter {
         public TextView txtMessage;
         public TextView sender_name;
         public TextView dateInfo;
-        public TextView fileInfo;
+        //public TextView fileInfo;
         public LinearLayout content;
         public LinearLayout contentWithBG;
+        public ListView fileList;
     }
 }

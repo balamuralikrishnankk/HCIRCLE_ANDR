@@ -161,7 +161,8 @@ public class ConversationActivity extends AppCompatActivity {
             System.out.println("unable to get user extra information");
         }
         /*************************************************************/
-        loadHistory();
+        loadHistory();//for loading entire chat history
+        //last_timetamp="1456185600000";
         thread = new Thread(){
             @Override
             public void run(){
@@ -306,7 +307,6 @@ public class ConversationActivity extends AppCompatActivity {
                     chatMessage.setSenderName("Me");
                     messageEditText.setText("");
                     System.out.println("Sending result: "+response);
-
                     try{
                         JSONObject json_obj= new JSONObject(response);
                         chatMessage.setId(json_obj.getString("id"));
@@ -316,20 +316,7 @@ public class ConversationActivity extends AppCompatActivity {
                         Date date = new Date(timestamp);
                         chatMessage.setDate(simpleDateFormat.format(date));
                         JSONArray files = json_obj.getJSONArray("filenames");
-                        String fileInfo=" ";
-                        for (int i = 0; i < files.length(); i++) {
-                            System.out.println("file name: " + files.getString(i));
-                            ConnectAPIs connAPIs = new ConnectAPIs("http://" + ip + ":8065/api/v1/files/get_info/"
-                                    + files.getString(i), token);
-                            InputStream isr = connAPIs.getData();
-                            //System.out.println("File Information: "+convertInputStreamToString(isr));
-                            JSONObject jsonfileInfo = new JSONObject(convertInputStreamToString(isr));
-                            fileInfo += "File name: "+jsonfileInfo.getString("filename")+" \n"+
-                                    "Type: "+jsonfileInfo.getString("mime")+" \n"+
-                                    "Size: "+jsonfileInfo.getString("size")+"\n";
-                            System.out.println("File Info: " + fileInfo);
-                        }
-                        chatMessage.setFileInfo(fileInfo);
+                        chatMessage.setFileList(files);
                         displayMessage(chatMessage);
                     }catch(Exception e){
                         System.out.print("Chat Exception: "+e.toString());
@@ -682,23 +669,7 @@ public class ConversationActivity extends AppCompatActivity {
 
                             /*If the post contains files*/
                             JSONArray files = jObj3.getJSONArray("filenames");
-                            String fileInfo=" ";
-                            for (int j = 0; j < files.length(); j++) {
-                                System.out.println("file name: " + files.getString(j));
-                                ConnectAPIs connAPIs = new ConnectAPIs("http://" + ip + ":8065/api/v1/files/get_info/"
-                                        + files.getString(j), token);
-                                InputStream isr = connAPIs.getData();
-                                //System.out.println("File Information: "+convertInputStreamToString(isr));
-                                JSONObject jsonfileInfo = new JSONObject(convertInputStreamToString(isr));
-                                fileInfo += "File name: "+jsonfileInfo.getString("filename")+" \n"+
-                                        "Type: "+jsonfileInfo.getString("mime")+" \n"+
-                                        "Size: "+jsonfileInfo.getString("size")+"\n";
-                                System.out.println("File Info: " + fileInfo);
-                            }
-                            //if(files.length()>0){
-                            currentMsg.setFileInfo(fileInfo);
-                            //}else currentMsg.setFileInfo(" ");
-                            /**************************/
+                            currentMsg.setFileList(files);
 
                             if (user_id.equals(""+jObj3.getString("user_id"))) {
                                 currentMsg.setMe(true);

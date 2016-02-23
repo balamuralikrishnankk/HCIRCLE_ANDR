@@ -4,14 +4,20 @@ package com.nganthoi.salai.tabgen;
  * Created by SALAI on 1/15/2016.
  */
 
+import android.annotation.TargetApi;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ExpandableListView;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -30,7 +36,6 @@ public class ChatFragment extends Fragment {
     HashMap<String, List<String>> expandableListDetail;
     View chatView,layoutGroupHeader;
 
-
     public final static String TITLE = "com.nganthoi.salai.tabgen.MESSAGE";
     //Context _context=this;
     public ChatFragment(){
@@ -44,26 +49,40 @@ public class ChatFragment extends Fragment {
     public View onCreateView(LayoutInflater layoutInflater,ViewGroup container,Bundle savedInstanceState){
         chatView = layoutInflater.inflate(R.layout.chat_layout,container,false);
         expandableListView = (ExpandableListView) chatView.findViewById(R.id.chatExpandableListView);
+        //expandableListView.setIndicatorBounds(expandableListView.getRight()-150, expandableListView.getWidth()-GetDipsFromPixel(10));
+        /*DisplayMetrics metrics = new DisplayMetrics();
+        getActivity().getWindowManager().getDefaultDisplay().getMetrics(metrics);
+        int width = metrics.widthPixels;*/
+        //this code for adjusting the group indicator into right side of the view
+        //expandableListView.setIndicatorBounds(width - GetDipsFromPixel(250), width - GetDipsFromPixel(150));
+        /*expandableListView.setIndicatorBounds(width - UIUtils.getPxFromDp(getActivity(), 40), width - UIUtils.getPxFromDp(getActivity(),20));
+        //.setIndicatorBounds(width - UIUtils.getPxFromDp(getActivity(), 40), width - UIUtils.getPxFromDp(getActivity(),20));
+        */
         showChatLists(layoutInflater);
+        /*(new Handler()).post(new Runnable() {
+
+            @Override
+            public void run() {
+
+            }
+        });*/
         return chatView;
     }
 
-    public void showChatLists(LayoutInflater layoutInflater){
+    public void showChatLists(LayoutInflater layoutInflater) {
         /*Setting chat list View*/
         expandableListDetail = ExpandableListDataPump.getData(chatView.getContext());
         expandableListTitle = new ArrayList<String>(expandableListDetail.keySet());
         expandableListAdapter= new ExpandableListAdapter(chatView.getContext(),expandableListTitle,expandableListDetail);
         expandableListView.setAdapter(expandableListAdapter);
-        layoutGroupHeader = layoutInflater.inflate(R.layout.list_group,null);
+        layoutGroupHeader = layoutInflater.inflate(R.layout.list_group, null);
         expandableListView.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
             @Override
             public void onGroupExpand(int groupPosition) {
                 /*
                 Toast.makeText(chatView.getContext(),
-                        expandableListTitle.get(groupPosition) + " List Expanded "+expandableIndex.getText().toString(),
+                        expandableListTitle.get(groupPosition) + " List Expanded ",
                         Toast.LENGTH_SHORT).show();*/
-                ImageView direction = (ImageView) layoutGroupHeader.findViewById(R.id.direction);
-                direction.setImageResource(R.drawable.down_icon);
             }
         });
 
@@ -71,12 +90,10 @@ public class ChatFragment extends Fragment {
 
             @Override
             public void onGroupCollapse(int groupPosition) {
-
-                /*Toast.makeText(chatView.getContext(),
-                        expandableListTitle.get(groupPosition) + " List Collapsed: "+expandableButton.getText().toString(),
-                        Toast.LENGTH_SHORT).show(); @android:drawable/ic_media_play*/
-                ImageView direction = (ImageView) layoutGroupHeader.findViewById(R.id.direction);
-                direction.setImageResource(R.drawable.back_icon);
+                /*
+                Toast.makeText(chatView.getContext(),
+                        expandableListTitle.get(groupPosition) + " List Collapsed",
+                        Toast.LENGTH_SHORT).show();*/
             }
         });
 
@@ -98,4 +115,12 @@ public class ChatFragment extends Fragment {
             }
         });
     }
+    public int GetDipsFromPixel(float pixels)
+    {
+        // Get the screen's density scale
+        final float scale = getResources().getDisplayMetrics().density;
+        // Convert the dps to pixels, based on density scale
+        return (int) (pixels * scale + 0.5f);
+    }
+
 }
