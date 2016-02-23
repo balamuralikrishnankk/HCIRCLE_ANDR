@@ -40,6 +40,8 @@ public class UserLandingActivity extends AppCompatActivity
     ListView templateList;
     ArrayAdapter<String> arrayAdapter;
     TemplateAdapter templateAdapter;
+    public final static String templateListExtra="TEMPLATE_LIST";
+    ArrayList<String> stringArray = new ArrayList<String>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,6 +71,7 @@ public class UserLandingActivity extends AppCompatActivity
             System.out.println("Exception :" + e.toString());
         }
 
+
         /*arrayAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, list);
         templateList.setAdapter(arrayAdapter);*/
         templateAdapter = new TemplateAdapter(UserLandingActivity.this,list);
@@ -81,7 +84,12 @@ public class UserLandingActivity extends AppCompatActivity
                 switch(template_name){
                     case "Chat Template"://check if Chat template exist
                         Toast.makeText(_context,"You have selected chat template",Toast.LENGTH_SHORT).show();
-                        startActivity(new Intent(_context,UserActivity.class));
+                        Intent intent = new Intent(_context,UserActivity.class);
+                        for(int i=0;i<list.size();i++){
+                            stringArray.add(list.get(i));
+                        }
+                        intent.putStringArrayListExtra(templateListExtra,stringArray);
+                        startActivity(intent);
                         break;
                     case "Reference Template":
                         Toast.makeText(_context,"You have selected reference template",Toast.LENGTH_SHORT).show();

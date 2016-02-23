@@ -34,7 +34,7 @@
                 android:layout_height="40dp"
                 android:inputType="textMultiLine"
                 android:id="@+id/messageEditText"
-                android:hint="Type Your Message"
+                android:hint="@string/messageHint"
                 android:paddingLeft="10dp"
                 android:paddingRight="20dp"
                 android:paddingTop="0dp"

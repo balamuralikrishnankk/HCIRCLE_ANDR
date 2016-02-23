@@ -31,8 +31,7 @@
         android:id="@+id/downloadButton"
         android:src="@android:drawable/ic_menu_more"
         android:background="@drawable/button_blue_background"
-        android:layout_alignBottom="@+id/fileInformation"
-        android:layout_toRightOf="@+id/fileInformation"
-        android:layout_toEndOf="@+id/fileInformation"
-        android:layout_marginBottom="35dp" />
+        android:layout_alignBottom="@+id/attachmentView"
+        android:layout_toLeftOf="@+id/fileInformation"
+        android:layout_toStartOf="@+id/fileInformation" />
 </RelativeLayout>

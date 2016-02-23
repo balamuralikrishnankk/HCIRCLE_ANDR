@@ -86,9 +86,6 @@ public class ChatAdapter extends BaseAdapter {
             //ArrayAdapter<String> fileAdapter = new ArrayAdapter<String>(context,android.R.layout.simple_list_item_1,files);
             holder.fileList.setAdapter(fileAdapter);
         }
-        else{
-            holder.fileList.setAdapter(null);
-        }
         /*if(chatMessage.getFileInfo()==null||chatMessage.getFileInfo().equals(" ")){
             holder.fileInfo.setHeight(0);
             holder.fileInfo.setText(null);

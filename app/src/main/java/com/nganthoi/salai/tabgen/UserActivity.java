@@ -42,6 +42,7 @@ public class UserActivity extends AppCompatActivity
     String role;//role of the user
     SharedPreference sp;
     List<String> list;
+    ArrayList<String> template_list;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -91,8 +92,10 @@ public class UserActivity extends AppCompatActivity
 
         mViewPager = (ViewPager) findViewById(R.id.container);
         tabLayout = (TabLayout) findViewById(R.id.tabLayout);
+        Intent intent = getIntent();
+        template_list = intent.getStringArrayListExtra(UserLandingActivity.templateListExtra);//gettting list of templates from the previous activity
 
-        new GetTabList().execute(role);
+        new GetTabList().execute(template_list);
         tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
@@ -168,15 +171,19 @@ public class UserActivity extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
-    class GetTabList extends AsyncTask<String,Void,List<String>> {
+    class GetTabList extends AsyncTask<ArrayList<String>,Void,List<String>> {
         @Override
         protected void onPreExecute(){
             progressDialog.show();
         }
         @Override
-        protected List<String> doInBackground(String... userRole){
+        protected List<String> doInBackground(ArrayList<String>... template_list){
             /*Getting list of Templates for a particular role */
-            list=OrganisationDetails.getListOfTemplates(_context,userRole[0]);
+            //list=OrganisationDetails.getListOfTemplates(_context,userRole[0]);
+            list = new ArrayList<String>();
+            for(int i=0;i<template_list[0].size();i++){
+                list.add(template_list[0].get(i));
+            }
             onProgressUpdate();
             return list;
         }

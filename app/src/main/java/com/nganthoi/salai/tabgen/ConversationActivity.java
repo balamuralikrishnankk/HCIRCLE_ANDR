@@ -98,14 +98,6 @@ public class ConversationActivity extends AppCompatActivity {
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                try{
-                    if(thread!=null){
-                        thread.interrupt();
-                        interrupt=true;
-                    }
-                }catch(Exception e){
-                    System.out.println("Interrupt Exception: "+e.toString());
-                }
                 onBackPressed();//move back to the previous activity (screen)
             }
         });
@@ -245,6 +237,19 @@ public class ConversationActivity extends AppCompatActivity {
             startActivityForResult(Intent.createChooser(intent,"Select a file from the gallary"),1);
         }
         return super.onOptionsItemSelected(item);
+    }
+    @Override
+    public void onBackPressed(){
+        try{
+            if(thread!=null){
+                thread.interrupt();
+                interrupt=true;
+            }
+        }catch(Exception e){
+            System.out.println("Interrupt Exception: "+e.toString());
+        }
+        super.onBackPressed();
+        finish();
     }
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data){
