@@ -665,28 +665,28 @@ public class ConversationActivity extends AppCompatActivity {
                             System.out.println("Id: " + jObj3.getString("id") + " Message: " + jObj3.getString("message"));
                             messageDate = "" + jObj3.getString("create_at");
                             System.out.println("Message Date: " + messageDate);
-                            ChatMessage currentMsg = new ChatMessage();
-                            currentMsg.setId(jObj3.getString("id"));
-                            currentMsg.setMessage("" + jObj3.getString("message"));
-                            Long timeStamp = Long.parseLong(messageDate);
-                            Date date = new Date(timeStamp);
-                            currentMsg.setDate(simpleDateFormat.format(date));
+                            if(!messageDate.equals(last_timetamp)) {//it means if the message is new, which is indicated by the last timestamp
+                                ChatMessage currentMsg = new ChatMessage();
+                                currentMsg.setId(jObj3.getString("id"));
+                                currentMsg.setMessage("" + jObj3.getString("message"));
+                                Long timeStamp = Long.parseLong(messageDate);
+                                Date date = new Date(timeStamp);
+                                currentMsg.setDate(simpleDateFormat.format(date));
 
-                            /*If the post contains files*/
-                            JSONArray files = jObj3.getJSONArray("filenames");
-                            currentMsg.setFileList(files);
+                                /*If the post contains files*/
+                                JSONArray files = jObj3.getJSONArray("filenames");
+                                currentMsg.setFileList(files);
 
-                            if (user_id.equals(""+jObj3.getString("user_id"))) {
-                                currentMsg.setMe(true);
-                                currentMsg.setSenderName("Me");
-                            } else {
-                                currentMsg.setMe(false);
-                                getUsernameById(jObj3.getString("user_id"));
-                                currentMsg.setSenderName(getUsernameById(jObj3.getString("user_id")));
-                            }
-                            if(!messageDate.equals(last_timetamp))
+                                if (user_id.equals("" + jObj3.getString("user_id"))) {
+                                    currentMsg.setMe(true);
+                                    currentMsg.setSenderName("Me");
+                                } else {
+                                    currentMsg.setMe(false);
+                                    getUsernameById(jObj3.getString("user_id"));
+                                    currentMsg.setSenderName(getUsernameById(jObj3.getString("user_id")));
+                                }
                                 displayMessage(currentMsg);
-                            //if (messageDate != null)
+                            }//otherwise dont create the message
                             last_timetamp = messageDate;
                             i++;
                         }//end while loop

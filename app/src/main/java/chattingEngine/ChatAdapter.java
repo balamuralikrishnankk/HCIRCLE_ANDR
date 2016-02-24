@@ -79,12 +79,14 @@ public class ChatAdapter extends BaseAdapter {
 
         holder.sender_name.setText(chatMessage.getSenderName());
         holder.txtMessage.setText(chatMessage.getMessage());
-        List<String> files;
-        files=chatMessage.getFileList();
+        List<String> files = chatMessage.getFileList();
         if(files.size()!=0){
             FileAdapter fileAdapter = new FileAdapter(files,context);
             //ArrayAdapter<String> fileAdapter = new ArrayAdapter<String>(context,android.R.layout.simple_list_item_1,files);
             holder.fileList.setAdapter(fileAdapter);
+        }
+        else{
+            holder.fileList.setAdapter(null);
         }
         /*if(chatMessage.getFileInfo()==null||chatMessage.getFileInfo().equals(" ")){
             holder.fileInfo.setHeight(0);
@@ -129,6 +131,7 @@ public class ChatAdapter extends BaseAdapter {
             holder.contentWithBG.setPadding(10, 0, 40, 0);
             holder.txtMessage.setPadding(15,0,20,0);
             holder.sender_name.setGravity(Gravity.RIGHT);
+            //holder.fileList.setBackgroundResource(R.drawable.msg_bg);
             //holder.sender_name.setTextColor(Color.GREEN);
 
             RelativeLayout.LayoutParams lp =
@@ -154,6 +157,7 @@ public class ChatAdapter extends BaseAdapter {
             holder.txtMessage.setPadding(20, 0, 15, 0);
             holder.sender_name.setGravity(Gravity.LEFT);
             //holder.sender_name.setTextColor(Color.RED);
+            //holder.fileList.setBackgroundResource(R.drawable.msg_reply_bg);
 
             RelativeLayout.LayoutParams lp =
                     (RelativeLayout.LayoutParams) holder.content.getLayoutParams();

@@ -15,7 +15,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.List;
 
 import connectServer.ConnectAPIs;
@@ -29,7 +28,7 @@ public class FileAdapter extends BaseAdapter{
     private Activity context;
 
     public FileAdapter(List<String> list,Activity _context){
-        this.fileList = new ArrayList<String>();
+        //this.fileList = new ArrayList<String>();
         this.fileList = list;
         this.context = _context;
     }
@@ -65,25 +64,27 @@ public class FileAdapter extends BaseAdapter{
         }else{
             holder = (FileViewHolder) convertView.getTag();
         }
-        SharedPreference sp = new SharedPreference();
-        String ip = sp.getServerIP_Preference(context);
-        String token = sp.getTokenPreference(context);
-        ConnectAPIs connectAPIs = new ConnectAPIs("http://" + ip + ":8065/api/v1/files/get_info/"+ file_info, token);
-        InputStream isr = connectAPIs.getData();
-        String fileInfo;
-        try {
-            //System.out.println("File Information: "+convertInputStreamToString(isr));
-            JSONObject jsonfileInfo = new JSONObject(connectAPIs.convertInputStreamToString(isr));
-            String file_name = jsonfileInfo.getString("filename");
-            int lastOccurance = file_name.lastIndexOf('/');
-            String only_filename = file_name.substring(lastOccurance+1);
-            fileInfo = "File name: "+only_filename+" \n"+
-                    "Type: "+jsonfileInfo.getString("mime")+" \n"+
-                    "Size: "+jsonfileInfo.getString("size")+" Bytes\n";
-            holder.file_details.setText(fileInfo);
-        }catch(JSONException e){
-            System.out.println("JSON Exception in FileAdapter: "+e.toString());
-            holder.file_details.setText(null);
+        if(file_info!=null) {
+            SharedPreference sp = new SharedPreference();
+            String ip = sp.getServerIP_Preference(context);
+            String token = sp.getTokenPreference(context);
+            ConnectAPIs connectAPIs = new ConnectAPIs("http://" + ip + ":8065/api/v1/files/get_info/" + file_info, token);
+            InputStream isr = connectAPIs.getData();
+            String fileInfo;
+            try {
+                //System.out.println("File Information: "+convertInputStreamToString(isr));
+                JSONObject jsonfileInfo = new JSONObject(connectAPIs.convertInputStreamToString(isr));
+                String file_name = jsonfileInfo.getString("filename");
+                int lastOccurance = file_name.lastIndexOf('/');
+                String only_filename = file_name.substring(lastOccurance + 1);
+                fileInfo = "File name: " + only_filename + " \n" +
+                        "Type: " + jsonfileInfo.getString("mime") + " \n" +
+                        "Size: " + jsonfileInfo.getString("size") + " Bytes\n";
+                holder.file_details.setText(fileInfo);
+            } catch (JSONException e) {
+                System.out.println("JSON Exception in FileAdapter: " + e.toString());
+                holder.file_details.setText(null);
+            }
         }
         return convertView;
     }

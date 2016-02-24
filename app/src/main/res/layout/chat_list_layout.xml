@@ -45,7 +45,11 @@
             android:layout_height="wrap_content"
             android:id="@+id/fileList"
             android:nestedScrollingEnabled="true"
-            android:listSelector="#ade1f0">
+            android:listSelector="#ade1f0"
+            android:footerDividersEnabled="true"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:touchscreenBlocksFocus="true">
         </ListView>
         <!--<TextView
             android:id="@+id/fileInfo"
