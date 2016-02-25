@@ -451,7 +451,7 @@ public class ConversationActivity extends AppCompatActivity {
     }
 
 
-    public class UploadFile extends AsyncTask<Void,Void,String>{
+    public class UploadFile extends AsyncTask<Void, String, String>{//extends AsyncTask<Void,Void,String>{
         URL connectURL;
         String serverRespMsg,file_upload_uri=null;
         HttpURLConnection httpURLConn = null;
@@ -482,6 +482,7 @@ public class ConversationActivity extends AppCompatActivity {
         protected String doInBackground(Void... v){
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
             StrictMode.setThreadPolicy(policy);
+            progressDialog.setCancelable(false);
             File sourceFile = new File(fileLocation);
             if(!sourceFile.isFile()){
                 Toast.makeText(context, "Source file does not exist", Toast.LENGTH_SHORT).show();
@@ -535,8 +536,9 @@ public class ConversationActivity extends AppCompatActivity {
                     while(bytesRead>0){
                         dos.write(buffer,0,bufferSize);
                         bytesAvailable = fis.available();
-                        //publishProgress(" "+((total-bytesAvailable)/total)*100);
-                        publishProgress();
+                        publishProgress(""+(int)((total-bytesAvailable)*100)/total);
+                        //publishProgress(""+(int)((total*100)/total));
+
                         bufferSize = Math.min(bytesAvailable, maxBufferSize);
                         bytesRead = fis.read(buffer,0,bufferSize);
                     }
@@ -552,10 +554,12 @@ public class ConversationActivity extends AppCompatActivity {
                         //Toast.makeText(context,"Your file upload is successfully completed",Toast.LENGTH_LONG).show();
                         System.out.println("Your file upload is successfully completed");
                         isr = new BufferedInputStream(httpURLConn.getInputStream());
+                        progressDialog.setCancelable(true);
                     }
                     else{
                         System.out.println("Oops! Your file upload is failed");
                         isr = new BufferedInputStream(httpURLConn.getErrorStream());
+                        progressDialog.setCancelable(true);
                     }
                     fis.close();
                     dos.close();
@@ -563,7 +567,8 @@ public class ConversationActivity extends AppCompatActivity {
 
                 }catch(Exception e){
                     e.printStackTrace();
-                    System.out.println("File Upload Exception here: "+e.toString());
+                    System.out.println("File Upload Exception here: " + e.toString());
+                    progressDialog.setCancelable(true);
                     return null;
                 }//end try catch
             }
@@ -591,6 +596,7 @@ public class ConversationActivity extends AppCompatActivity {
                         progressDialog.show();
                     }//end if statement
                     else{
+                        progressDialog.setCancelable(true);
                         progressDialog.setMessage("Upload failed, please try again.");
                         progressDialog.show();
                     }
@@ -602,6 +608,7 @@ public class ConversationActivity extends AppCompatActivity {
             }
             else {
                 System.out.println("Response is null");
+                progressDialog.setCancelable(true);
                 progressDialog.setMessage("Upload failed, please try again.");
                 progressDialog.show();
             }
