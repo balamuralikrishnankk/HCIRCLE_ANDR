@@ -14,6 +14,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 //import android.widget.Toast;
 
 import com.nganthoi.salai.tabgen.R;
@@ -63,7 +64,7 @@ public class ChatAdapter extends BaseAdapter {
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
         ViewHolder holder;
-        ChatMessage chatMessage = getItem(position);
+        final ChatMessage chatMessage = getItem(position);
         LayoutInflater vi = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         if (convertView == null) {
@@ -76,9 +77,16 @@ public class ChatAdapter extends BaseAdapter {
 
         //boolean myMsg = chatMessage.getIsme() ;//to check whether it me or other sender
         //setAlignment(holder, myMsg);//Setting message allignment according to the type of sender
-        setAlignment(holder);
+        //setAlignment(holder);
         holder.sender_name.setText(chatMessage.getSenderName());
         holder.txtMessage.setText(chatMessage.getMessage());
+        holder.messageOption.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(context,"Message ID is: "+chatMessage.getId(),Toast.LENGTH_LONG).show();
+                System.out.println("You have clicked message option, message id is: "+chatMessage.getId());
+            }
+        });
         List<String> files = chatMessage.getFileList();
         if(files.size()!=0){
             FileAdapter fileAdapter = new FileAdapter(files,context);
@@ -101,7 +109,7 @@ public class ChatAdapter extends BaseAdapter {
     public void add(List<ChatMessage> messages) {
         chatMessages.addAll(messages);
     }
-
+    /*
     private void setAlignment(ViewHolder holder){
         LinearLayout.LayoutParams layoutParams =
                 (LinearLayout.LayoutParams) holder.contentWithBG.getLayoutParams();
@@ -120,7 +128,7 @@ public class ChatAdapter extends BaseAdapter {
         layoutParams = (LinearLayout.LayoutParams) holder.dateInfo.getLayoutParams();
         layoutParams.gravity = Gravity.LEFT;
         holder.dateInfo.setLayoutParams(layoutParams);
-    }
+    }*/
 
     /*private void setAlignment(ViewHolder holder, boolean isMe) {
         if (isMe) {
@@ -180,6 +188,7 @@ public class ChatAdapter extends BaseAdapter {
         ViewHolder holder = new ViewHolder();
         holder.txtMessage = (TextView) v.findViewById(R.id.txtMessage);
         holder.sender_name = (TextView) v.findViewById(R.id.sender);
+        holder.messageOption = (TextView) v.findViewById(R.id.messageOption);
         holder.content = (LinearLayout) v.findViewById(R.id.content);
         holder.contentWithBG = (LinearLayout) v.findViewById(R.id.contentWithBackground);
         holder.dateInfo = (TextView) v.findViewById(R.id.dateInfo);
@@ -191,6 +200,7 @@ public class ChatAdapter extends BaseAdapter {
         public TextView txtMessage;
         public TextView sender_name;
         public TextView dateInfo;
+        public TextView messageOption;
         public LinearLayout contentWithBG;
         public LinearLayout content;
         public ListView fileList;

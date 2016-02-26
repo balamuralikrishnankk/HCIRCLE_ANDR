@@ -107,18 +107,6 @@ public class ConversationActivity extends AppCompatActivity {
         team_label.setText(team_title);
         String channel_title = intent.getStringExtra(ChatFragment.CHANNEL_NAME);
         channel_label.setText(channel_title);
-        //conv_Icon = (ImageView) toolbar.findViewById(R.id.conv_icon);
-        /*if(title.equals("Laboratory Group")){
-            conv_Icon.setImageResource(R.drawable.laboratory_group);
-        }else if(title.equals("Cardiology Dept")){
-            conv_Icon.setImageResource(R.drawable.cardiology_dept);
-        }
-        else if(title.equals("Town Square")){
-            conv_Icon.setImageResource(R.drawable.laboratory_group);
-        }
-        else if(title.equals("Off-Topic")){
-            conv_Icon.setImageResource(R.drawable.laboratory_group);
-        }*/
         /*
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {

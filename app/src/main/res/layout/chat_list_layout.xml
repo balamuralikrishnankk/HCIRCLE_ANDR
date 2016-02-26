@@ -2,8 +2,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:padding="4dp"
-    android:paddingTop="0dp"
-    android:paddingBottom="0dp">
+    android:paddingTop="10dp"
+    android:paddingBottom="5dp">
     <LinearLayout
         android:id="@+id/content"
         android:layout_width="match_parent"
@@ -15,37 +15,103 @@
             android:id="@+id/contentWithBackground"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp">
             <!--android:background="@drawable/msg_bg"-->
             <ImageView
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:src="@drawable/user_profile"
-                android:id="@+id/user_profile_picture" />
+                android:id="@+id/user_profile_picture"
+                android:layout_gravity="top"/>
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingLeft="15dp"
                 android:orientation="vertical">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/sender"
-                    android:textColor="#666565"
-                    android:textStyle="bold|italic"
-                    android:textSize="18sp"
-                    android:text="sender"
-                    android:layout_gravity="left" />
-                <TextView
-                    android:id="@+id/txtMessage"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="#494949"
-                    android:text="test"
-                    android:typeface="sans"
-                    android:textStyle="normal"
-                    android:textSize="20sp"
-                    android:gravity="center_vertical"/>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/sender"
+                        android:textColor="#232324"
+                        android:textStyle="bold"
+                        android:textSize="18sp"
+                        android:text="sender"
+                        android:layout_gravity="left"
+                        android:gravity="center_vertical" />
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:id="@+id/chatBookmark"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentRight="true"
+                        android:layout_alignParentEnd="true"
+                        android:src="@drawable/icon_my_bookmark" />
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:id="@+id/chatLove"
+                        android:layout_marginRight="15dp"
+                        android:layout_marginEnd="15dp"
+                        android:src="@drawable/icon_love"
+                        android:layout_alignParentTop="true"
+                        android:layout_toLeftOf="@+id/chatBookmark"
+                        android:layout_toStartOf="@+id/chatBookmark" />
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:id="@+id/chatReplies"
+                        android:layout_marginRight="14dp"
+                        android:layout_marginEnd="14dp"
+                        android:src="@drawable/icon_reply"
+                        android:layout_alignParentTop="true"
+                        android:layout_toLeftOf="@+id/chatLove"
+                        android:layout_toStartOf="@+id/chatLove" />
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:id="@+id/chatReplyback"
+                        android:src="@drawable/icon_arrow_back"
+                        android:layout_marginRight="15dp"
+                        android:layout_marginEnd="15dp"
+                        android:layout_alignParentTop="true"
+                        android:layout_toLeftOf="@+id/chatReplies"
+                        android:layout_toStartOf="@+id/chatReplies" />
+                </RelativeLayout>
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <TextView
+                        android:id="@+id/txtMessage"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="#383737"
+                        android:text="test"
+                        android:typeface="sans"
+                        android:textStyle="normal"
+                        android:textSize="16sp"
+                        android:gravity="center_vertical"
+                        android:layout_alignParentTop="true"
+                        android:layout_toLeftOf="@+id/messageOption" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="20sp"
+                        android:text="[...]"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentRight="true"
+                        android:layout_alignParentEnd="true"
+                        android:id="@+id/messageOption" />
+                </RelativeLayout>
                 <ListView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -57,13 +123,29 @@
                     android:focusableInTouchMode="true"
                     android:touchscreenBlocksFocus="false">
                 </ListView>
-                <TextView
-                    android:id="@+id/dateInfo"
-                    android:layout_width="wrap_content"
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textSize="12sp"
-                    android:text="dateInfo"
-                    android:textColor="#414040" />
+                    android:paddingTop="15dp">
+                    <TextView
+                        android:id="@+id/dateInfo"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="12sp"
+                        android:text="dateInfo"
+                        android:textColor="#8f8e8e"
+                        android:layout_gravity="right" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Read"
+                        android:id="@+id/read"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentRight="true"
+                        android:layout_alignParentEnd="true"
+                        android:textSize="12sp" />
+                </RelativeLayout>
             </LinearLayout>
         </LinearLayout>
 

@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal"
-    android:layout_width="match_parent"
+    android:layout_width="wrap_content"
     android:layout_height="match_parent"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="5dp"
-    android:paddingBottom="5dp">
+    android:paddingBottom="5dp"
+    android:minWidth="25dp"
+    android:minHeight="25dp">
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
@@ -20,17 +22,19 @@
             android:paddingLeft="?android:attr/expandableListPreferredChildPaddingLeft"
             android:src="@drawable/ic_launcher" />
         <TextView
-            android:layout_width="20dp"
-            android:layout_height="20dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:padding="5dp"
-            android:text="00"
+            android:text="0"
             android:id="@+id/count"
             android:gravity="center_horizontal|center_vertical"
             android:background="@drawable/round_button_background"
             android:textColor="#ffffff"
             android:textSize="10sp"
             android:layout_gravity="bottom"
-            android:layout_marginLeft="-15dp" />
+            android:layout_marginLeft="-15dp"
+            android:minWidth="25dp"
+            android:minHeight="25dp" />
         <TextView
             android:id="@+id/expandedListItem"
             android:layout_gravity="center_vertical|center_horizontal"
