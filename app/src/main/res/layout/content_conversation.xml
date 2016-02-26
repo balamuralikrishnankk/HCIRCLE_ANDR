@@ -10,25 +10,70 @@
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:showIn="@layout/activity_conversation"
     tools:context="com.nganthoi.salai.tabgen.ConversationActivity">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/titleBar">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="Team Name"
+            android:id="@+id/teamName"
+            android:background="@drawable/button_background"
+            android:layout_centerVertical="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:textColor="#0ca0eb"
+            android:textSize="20sp" />
+        <View
+            android:layout_width="20dp"
+            android:layout_height="2dp"
+            android:background="#0ca0eb"
+            android:id="@+id/line"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@+id/teamName"
+            android:layout_toEndOf="@+id/teamName" />
+        <TextView
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/channel_name"
+            android:text="Channel"
+            android:textColor="#ffffff"
+            android:textSize="20sp"
+            android:background="@drawable/button_blue_background"
+            android:layout_alignParentTop="true"
+            android:layout_toRightOf="@+id/line"
+            android:layout_toEndOf="@+id/line" />
+
+    </RelativeLayout>
 
     <ListView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/chatListView"
+        android:divider="#d4d2d2"
+        android:dividerHeight="1dp"
+        android:paddingBottom="5dp"
+        android:transcriptMode="alwaysScroll"
+        android:layout_below="@+id/titleBar"
         android:layout_above="@+id/messageLayout"
-        android:layout_centerHorizontal="true"
-        android:divider="@android:color/transparent"
-        android:dividerHeight="0dp"
-        android:paddingBottom="10dp"
-        android:transcriptMode="alwaysScroll"/>
-    <!-- android:fastScrollEnabled="true"-->
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="25dp" />
+    <!-- android:divider="@android:color/transparent"
+    android:fastScrollEnabled="true"-->
 
     <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="50dp"
         android:id="@+id/messageLayout"
         android:orientation="horizontal"
-        android:layout_alignParentBottom="true">
+        android:layout_above="@+id/taskbar">
             <EditText
                 android:layout_width="wrap_content"
                 android:layout_height="40dp"
@@ -44,7 +89,7 @@
                 android:background="@drawable/msg_write_bg"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true"
-                android:layout_toStartOf="@+id/chatSendButton"
+                android:layout_toLeftOf="@+id/chatSendButton"
                 android:layout_alignParentTop="true"
                 android:layout_alignParentBottom="true" />
         <ImageButton
@@ -57,6 +102,41 @@
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
             android:layout_alignParentTop="true" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:background="#e3e1e1"
+        android:id="@+id/taskbar">
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/writeImageButton"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:src="@android:drawable/ic_menu_edit" />
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/cameraImageButton"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:src="@android:drawable/ic_menu_camera" />
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/pickImageFile"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:src="@android:drawable/ic_menu_gallery" />
     </RelativeLayout>
 
 </RelativeLayout>

@@ -46,16 +46,16 @@ import connectServer.ConnectAPIs;
 
 public class ConversationActivity extends AppCompatActivity {
     //ImageButton sendMessage;
-    ImageView backButton,conv_Icon;
+    ImageView backButton;//,conv_Icon;
     ListView messagesContainer;
     EditText messageEditText;
-    ImageButton sendMessage;
+    ImageButton sendMessage,pickImageFile;
     private ChatAdapter adapter;
     private ArrayList<ChatMessage> chatHistory;
     SharedPreference sp;
     Context context=this;
     String channel_id="",user_id,token,last_timetamp=null,extra_info;
-    String channelDetails=null,file_path=null;
+    String file_path=null;
     int receiver_responseCode;
     String ip,responseMessage,errorMessage;
     HttpURLConnection conn=null;
@@ -75,8 +75,9 @@ public class ConversationActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbarConversation);
         setSupportActionBar(toolbar);
         /*** labels in the action abar of the activity_conversation ***/
-        TextView no_of_members = (TextView) toolbar.findViewById(R.id.no_of_members);
-        TextView conversationLabel = (TextView) toolbar.findViewById(R.id.conversation_Label);
+        //TextView no_of_members = (TextView) toolbar.findViewById(R.id.no_of_members);
+        TextView channel_label = (TextView) findViewById(R.id.channel_name);
+        TextView team_label = (TextView) findViewById(R.id.teamName);
 
         /*Setting progress dialog for uploading a file*/
         progressDialog = new ProgressDialog(context);
@@ -102,10 +103,12 @@ public class ConversationActivity extends AppCompatActivity {
             }
         });
         Intent intent = getIntent();
-        String title = intent.getStringExtra(ChatFragment.TITLE);
-        conversationLabel.setText(title);
-        conv_Icon = (ImageView) toolbar.findViewById(R.id.conv_icon);
-        if(title.equals("Laboratory Group")){
+        String team_title=intent.getStringExtra(ChatFragment.TEAM_NAME);
+        team_label.setText(team_title);
+        String channel_title = intent.getStringExtra(ChatFragment.CHANNEL_NAME);
+        channel_label.setText(channel_title);
+        //conv_Icon = (ImageView) toolbar.findViewById(R.id.conv_icon);
+        /*if(title.equals("Laboratory Group")){
             conv_Icon.setImageResource(R.drawable.laboratory_group);
         }else if(title.equals("Cardiology Dept")){
             conv_Icon.setImageResource(R.drawable.cardiology_dept);
@@ -115,7 +118,7 @@ public class ConversationActivity extends AppCompatActivity {
         }
         else if(title.equals("Off-Topic")){
             conv_Icon.setImageResource(R.drawable.laboratory_group);
-        }
+        }*/
         /*
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -128,8 +131,8 @@ public class ConversationActivity extends AppCompatActivity {
         sp = new SharedPreference();
         //channelDetails = sp.getChannelPreference(context);
         token=sp.getTokenPreference(context);
-        channel_id=OrganisationDetails.getChannelId(title,context);
-        System.out.println("Title: "+title+" ---> Channel Id: "+channel_id+"\nToken Id: "+token);
+        channel_id=OrganisationDetails.getChannelId(channel_title,context);
+        System.out.println("Channel Title: "+channel_title+" ---> Channel Id: "+channel_id+"\nToken Id: "+token);
         String user_details=sp.getPreference(context);
         try{
             JSONObject jObj = new JSONObject(user_details);
@@ -146,8 +149,8 @@ public class ConversationActivity extends AppCompatActivity {
 
         try{
             extraInfoObj = new JSONObject(extra_info);
-            int n = extraInfoObj.getInt("member_count");
-            no_of_members.setText((n>1?n+" Members":n+" Member"));
+            //int n = extraInfoObj.getInt("member_count");
+            //no_of_members.setText((n>1?n+" Members":n+" Member"));
             members=extraInfoObj.getJSONArray("members");
         }catch(Exception e){
             System.out.println("unable to get user extra information");
@@ -186,7 +189,7 @@ public class ConversationActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     String messageText = messageEditText.getText().toString();
-                    if (TextUtils.isEmpty(messageText)||messageText.equals(" ")||messageText.length()==0) {
+                    if (TextUtils.isEmpty(messageText)||messageText.trim().length()==0) {
                         return;
                     }
                     try {
@@ -206,6 +209,17 @@ public class ConversationActivity extends AppCompatActivity {
                         Snackbar.make(v, "Oops! Message Sending failed", Snackbar.LENGTH_LONG)
                                 .setAction("Action", null).show();
                     }
+                }
+            });
+            pickImageFile = (ImageButton) findViewById(R.id.pickImageFile);
+            pickImageFile.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent();
+                    //Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                    intent.setType("*/*");
+                    intent.setAction(Intent.ACTION_GET_CONTENT);
+                    startActivityForResult(Intent.createChooser(intent,"Select a file from the gallary"),1);
                 }
             });
         }
@@ -228,13 +242,6 @@ public class ConversationActivity extends AppCompatActivity {
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
-        }
-        if (id == R.id.attach_file){
-            Intent intent = new Intent();
-            //Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-            intent.setType("*/*");
-            intent.setAction(Intent.ACTION_GET_CONTENT);
-            startActivityForResult(Intent.createChooser(intent,"Select a file from the gallary"),1);
         }
         return super.onOptionsItemSelected(item);
     }
@@ -451,7 +458,7 @@ public class ConversationActivity extends AppCompatActivity {
     }
 
 
-    public class UploadFile extends AsyncTask<Void, String, String>{//extends AsyncTask<Void,Void,String>{
+    public class UploadFile extends AsyncTask<Void, String, String>{
         URL connectURL;
         String serverRespMsg,file_upload_uri=null;
         HttpURLConnection httpURLConn = null;

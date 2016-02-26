@@ -2,27 +2,27 @@ package chattingEngine;
 
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.Color;
-import android.support.annotation.NonNull;
+/*import android.graphics.Color;
+import android.support.annotation.NonNull;*/
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
+//import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
+//import android.widget.Toast;
 
 import com.nganthoi.salai.tabgen.R;
 
-import java.util.ArrayList;
+/*import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
+import java.util.Iterator;*/
 import java.util.List;
-import java.util.ListIterator;
+//import java.util.ListIterator;
 
 /**
  * Created by SALAI on 1/26/2016.
@@ -74,9 +74,9 @@ public class ChatAdapter extends BaseAdapter {
             holder = (ViewHolder) convertView.getTag();
         }
 
-        boolean myMsg = chatMessage.getIsme() ;//to check whether it me or other sender
-        setAlignment(holder, myMsg);//Setting message allignment according to the type of sender
-
+        //boolean myMsg = chatMessage.getIsme() ;//to check whether it me or other sender
+        //setAlignment(holder, myMsg);//Setting message allignment according to the type of sender
+        setAlignment(holder);
         holder.sender_name.setText(chatMessage.getSenderName());
         holder.txtMessage.setText(chatMessage.getMessage());
         List<String> files = chatMessage.getFileList();
@@ -88,26 +88,9 @@ public class ChatAdapter extends BaseAdapter {
         else{
             holder.fileList.setAdapter(null);
         }
-        /*if(chatMessage.getFileInfo()==null||chatMessage.getFileInfo().equals(" ")){
-            holder.fileInfo.setHeight(0);
-            holder.fileInfo.setText(null);
-        }
-        else {
-            holder.fileInfo.setHeight(120);
-            holder.fileInfo.setWidth(200);
-            holder.fileInfo.setText(chatMessage.getFileInfo());
-            holder.fileInfo.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    Toast.makeText(context,"Do you want to download",Toast.LENGTH_LONG).show();
-                    return false;
-                }
-            });
-        }*/
-        holder.txtMessage.setPadding(10, 5, 10, 5);
-        holder.txtMessage.setGravity(Gravity.CENTER_VERTICAL);
+        //holder.txtMessage.setPadding(10, 5, 10, 5);
+        //holder.txtMessage.setGravity(Gravity.CENTER_VERTICAL);
         holder.dateInfo.setText(chatMessage.getDate());
-
         return convertView;
     }
 
@@ -119,7 +102,27 @@ public class ChatAdapter extends BaseAdapter {
         chatMessages.addAll(messages);
     }
 
-    private void setAlignment(ViewHolder holder, boolean isMe) {
+    private void setAlignment(ViewHolder holder){
+        LinearLayout.LayoutParams layoutParams =
+                (LinearLayout.LayoutParams) holder.contentWithBG.getLayoutParams();
+        layoutParams.gravity = Gravity.LEFT;
+        holder.contentWithBG.setLayoutParams(layoutParams);
+        holder.contentWithBG.setGravity(Gravity.CENTER_VERTICAL);
+        holder.sender_name.setGravity(Gravity.LEFT);
+        RelativeLayout.LayoutParams lp =
+                (RelativeLayout.LayoutParams) holder.content.getLayoutParams();
+        lp.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, 0);
+        lp.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
+        holder.content.setLayoutParams(lp);
+        layoutParams = (LinearLayout.LayoutParams) holder.txtMessage.getLayoutParams();
+        layoutParams.gravity = Gravity.LEFT;
+        holder.txtMessage.setLayoutParams(layoutParams);
+        layoutParams = (LinearLayout.LayoutParams) holder.dateInfo.getLayoutParams();
+        layoutParams.gravity = Gravity.LEFT;
+        holder.dateInfo.setLayoutParams(layoutParams);
+    }
+
+    /*private void setAlignment(ViewHolder holder, boolean isMe) {
         if (isMe) {
             holder.contentWithBG.setBackgroundResource(R.drawable.msg_bg);
 
@@ -172,12 +175,11 @@ public class ChatAdapter extends BaseAdapter {
             holder.dateInfo.setLayoutParams(layoutParams);
         }
     }
-
+    */
     private ViewHolder createViewHolder(View v) {
         ViewHolder holder = new ViewHolder();
         holder.txtMessage = (TextView) v.findViewById(R.id.txtMessage);
         holder.sender_name = (TextView) v.findViewById(R.id.sender);
-        //holder.fileInfo = (TextView) v.findViewById(R.id.fileInfo);
         holder.content = (LinearLayout) v.findViewById(R.id.content);
         holder.contentWithBG = (LinearLayout) v.findViewById(R.id.contentWithBackground);
         holder.dateInfo = (TextView) v.findViewById(R.id.dateInfo);
@@ -189,9 +191,8 @@ public class ChatAdapter extends BaseAdapter {
         public TextView txtMessage;
         public TextView sender_name;
         public TextView dateInfo;
-        //public TextView fileInfo;
-        public LinearLayout content;
         public LinearLayout contentWithBG;
+        public LinearLayout content;
         public ListView fileList;
     }
 }

@@ -2,7 +2,6 @@ package connectServer;
 
 import android.app.ProgressDialog;
 import android.content.Context;
-//import android.os.AsyncTask;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.os.StrictMode;
@@ -54,7 +53,7 @@ public class DownloadFiles extends AsyncTask<String,String,String> {
         try{
             conn = (HttpURLConnection) api_url.openConnection();
             conn.setRequestProperty("Authorization", "Bearer " + TokenId);
-            //conn.setRequestMethod("POST");
+            //conn.setRequestMethod("GET");
             conn.setDoInput(true);
             conn.setDoOutput(true);
             conn.connect();
@@ -66,17 +65,12 @@ public class DownloadFiles extends AsyncTask<String,String,String> {
                 //isr = new BufferedInputStream(api_url.openStream());
                 isr = conn.getInputStream();
                 /*
+                //For accessing internal data storage
                 File mydir = context.getDir("TabGen", Context.MODE_PRIVATE); //Creating an internal dir;
                 File fileWithinMyDir = new File(mydir, filename[0]); //Getting a file within the dir.
                 FileOutputStream output = new FileOutputStream(fileWithinMyDir); //Use the stream as usual to write into the file.
                 */
-                /*
                 //For accessing external data storage
-                File directory = new File(Environment.getExternalStorageDirectory() + "/sdcard/TabGen/files");
-                if(!directory.isDirectory())//if directory does not exists
-                    directory.mkdirs();//then make the directory
-                OutputStream outputStream = new FileOutputStream("/sdcard/TabGen/files/"+filename[0]);*/
-
                 File SDCardRoot = new File(Environment.getExternalStorageDirectory()+"/HCircle");
                 if(!SDCardRoot.isDirectory())//if directory does not exists
                     SDCardRoot.mkdirs();//then make the directory

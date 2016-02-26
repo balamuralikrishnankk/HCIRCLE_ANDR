@@ -3,7 +3,7 @@
     android:thickness="5dp"
     android:shape="rectangle">
     <stroke android:width="2dp"
-        android:color="#f0f1ef"/>
+        android:color="#2facff"/>
     <corners android:radius="100dp"/>
     <gradient
         android:startColor="#fafafa"

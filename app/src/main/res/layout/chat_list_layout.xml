@@ -1,72 +1,71 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:padding="4dp"
     android:paddingTop="0dp"
     android:paddingBottom="0dp">
     <LinearLayout
         android:id="@+id/content"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:orientation="vertical">
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/sender"
-            android:textColor="#666565"
-            android:textStyle="bold|italic"
-            android:textSize="18sp"
-            android:text="sender"
-            android:layout_gravity="right" />
+
         <LinearLayout
             android:id="@+id/contentWithBackground"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="right|center_vertical"
-            android:background="@drawable/msg_bg"
-            android:orientation="vertical">
-            <!--android:background="@drawable/in_message_bg"-->
-            <TextView
-                android:id="@+id/txtMessage"
-                android:layout_width="wrap_content"
+            android:orientation="horizontal">
+            <!--android:background="@drawable/msg_bg"-->
+            <ImageView
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:src="@drawable/user_profile"
+                android:id="@+id/user_profile_picture" />
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="#494949"
-                android:text="test"
-                android:typeface="sans"
-                android:textStyle="normal"
-                android:textSize="20sp"
-                android:gravity="center_vertical|center_horizontal"/>
-
-
+                android:paddingLeft="15dp"
+                android:orientation="vertical">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/sender"
+                    android:textColor="#666565"
+                    android:textStyle="bold|italic"
+                    android:textSize="18sp"
+                    android:text="sender"
+                    android:layout_gravity="left" />
+                <TextView
+                    android:id="@+id/txtMessage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#494949"
+                    android:text="test"
+                    android:typeface="sans"
+                    android:textStyle="normal"
+                    android:textSize="20sp"
+                    android:gravity="center_vertical"/>
+                <ListView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/fileList"
+                    android:nestedScrollingEnabled="true"
+                    android:listSelector="#ade1f0"
+                    android:footerDividersEnabled="true"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:touchscreenBlocksFocus="false">
+                </ListView>
+                <TextView
+                    android:id="@+id/dateInfo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="12sp"
+                    android:text="dateInfo"
+                    android:textColor="#414040" />
+            </LinearLayout>
         </LinearLayout>
-        <ListView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/fileList"
-            android:nestedScrollingEnabled="true"
-            android:listSelector="#ade1f0"
-            android:footerDividersEnabled="true"
-            android:focusable="true"
-            android:focusableInTouchMode="true"
-            android:touchscreenBlocksFocus="true">
-        </ListView>
-        <!--<TextView
-            android:id="@+id/fileInfo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="right"
-            android:textSize="8sp"
-            android:text="gg"
-            android:textColor="#414040" />-->
-        <TextView
-            android:id="@+id/dateInfo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="right"
-            android:textSize="12sp"
-            android:text="dateInfo"
-            android:textColor="#414040" />
 
     </LinearLayout>
 </RelativeLayout>

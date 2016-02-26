@@ -36,7 +36,8 @@ public class ChatFragment extends Fragment {
     HashMap<String, List<String>> expandableListDetail;
     View chatView,layoutGroupHeader;
 
-    public final static String TITLE = "com.nganthoi.salai.tabgen.MESSAGE";
+    public final static String CHANNEL_NAME = "com.nganthoi.salai.tabgen.MESSAGE";
+    public final static String TEAM_NAME="team_name";
     //Context _context=this;
     public ChatFragment(){
 
@@ -109,7 +110,8 @@ public class ChatFragment extends Fragment {
                                 + expandableListDetail.get(
                                 expandableListTitle.get(groupPosition)).get(childPosition), Toast.LENGTH_SHORT).show();*/
                 Intent intent = new Intent(chatView.getContext(), ConversationActivity.class);
-                intent.putExtra(TITLE, expandableListDetail.get(expandableListTitle.get(groupPosition)).get(childPosition));
+                intent.putExtra(TEAM_NAME,expandableListTitle.get(groupPosition));
+                intent.putExtra(CHANNEL_NAME, expandableListDetail.get(expandableListTitle.get(groupPosition)).get(childPosition));
                 startActivity(intent);
                 return false;
             }
