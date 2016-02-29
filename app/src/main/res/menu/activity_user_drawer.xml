@@ -11,10 +11,13 @@
         <item android:id="@+id/nav_manage" android:icon="@android:drawable/ic_menu_manage"
             android:title="Tools" />-->
         <item android:id="@+id/nav_bookmark"
+            android:icon="@drawable/bookmark_icon_small"
             android:title="My Bookmark" />
-        <item android:id="@+id/nav_notify" android:icon="@android:drawable/ic_popup_reminder"
+        <item android:id="@+id/nav_notify"
+            android:icon="@drawable/notification_icon_small"
             android:title="Notification" />
         <item android:id="@+id/nav_acc_setting"
+            android:icon="@drawable/setting_icon_small"
             android:title="Acount Setting" />
         <item  android:id="@+id/logout"
             android:title="Sign Out" />

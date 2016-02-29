@@ -108,29 +108,7 @@ public class ConversationActivity extends AppCompatActivity {
                 boolean hasCheckedItems = adapter.getSelectedCount()>0;
                 if(hasCheckedItems && mActionMode==null){
                     //if there are some selected items, then start the action mode
-                    mActionMode = ConversationActivity.this.startActionMode(new ActionMode.Callback() {
-                        @Override
-                        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-                            mode.getMenuInflater().inflate(R.menu.context_menu,menu);
-                            return true;
-                        }
-
-                        @Override
-                        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-                            return false;
-                        }
-
-                        @Override
-                        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-                            return false;
-                        }
-
-                        @Override
-                        public void onDestroyActionMode(ActionMode mode) {
-                            adapter.removeSelection();
-                            mActionMode=null;
-                        }
-                    });
+                    mActionMode = ConversationActivity.this.startActionMode(new ActionModeCallback());
                 }
                 else if(!hasCheckedItems && mActionMode!=null){
                     //if there are no selecte items then finish the action mode
@@ -140,6 +118,7 @@ public class ConversationActivity extends AppCompatActivity {
                 if(mActionMode!=null){
                     //mActionMode.setTitle(String.valueOf(adapter.getSelectedCount())+ " selected");
                 }
+                view.setSelected(true);
                 return true;
             }
         });
@@ -753,5 +732,30 @@ public class ConversationActivity extends AppCompatActivity {
             }//end if
         }//end on post execution
     }//end of GetCurrentMessageTask class
+
+    //class for contextual action bar
+    private class ActionModeCallback implements ActionMode.Callback{
+        @Override
+        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+            mode.getMenuInflater().inflate(R.menu.context_menu,menu);
+            return true;
+        }
+
+        @Override
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            return false;
+        }
+
+        @Override
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            return false;
+        }
+
+        @Override
+        public void onDestroyActionMode(ActionMode mode) {
+            adapter.removeSelection();
+            mActionMode=null;
+        }
+    }
 }
 
