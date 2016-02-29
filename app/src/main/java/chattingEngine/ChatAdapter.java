@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Context;
 /*import android.graphics.Color;
 import android.support.annotation.NonNull;*/
+import android.graphics.Color;
+import android.util.SparseBooleanArray;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,10 +34,12 @@ public class ChatAdapter extends BaseAdapter {
 
     private final List<ChatMessage> chatMessages;
     private Activity context;
+    private SparseBooleanArray selectedItemIds;
 
     public ChatAdapter(Activity context, List<ChatMessage> chatMessages) {
         this.context = context;
         this.chatMessages = chatMessages;
+        selectedItemIds = new SparseBooleanArray();
     }
 
     @Override
@@ -80,13 +84,7 @@ public class ChatAdapter extends BaseAdapter {
         //setAlignment(holder);
         holder.sender_name.setText(chatMessage.getSenderName());
         holder.txtMessage.setText(chatMessage.getMessage());
-        holder.messageOption.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(context,"Message ID is: "+chatMessage.getId(),Toast.LENGTH_LONG).show();
-                System.out.println("You have clicked message option, message id is: "+chatMessage.getId());
-            }
-        });
+
         List<String> files = chatMessage.getFileList();
         if(files.size()!=0){
             FileAdapter fileAdapter = new FileAdapter(files,context);
@@ -99,6 +97,7 @@ public class ChatAdapter extends BaseAdapter {
         //holder.txtMessage.setPadding(10, 5, 10, 5);
         //holder.txtMessage.setGravity(Gravity.CENTER_VERTICAL);
         holder.dateInfo.setText(chatMessage.getDate());
+        convertView.setBackgroundColor(selectedItemIds.get(position) ? 0x9934B5E4 : Color.TRANSPARENT);
         return convertView;
     }
 
@@ -109,6 +108,39 @@ public class ChatAdapter extends BaseAdapter {
     public void add(List<ChatMessage> messages) {
         chatMessages.addAll(messages);
     }
+
+    public void remove(int position){
+        chatMessages.remove(position);
+        notifyDataSetChanged();
+    }
+    /***********************************************************/
+    public void toggleSelection(int position) {
+        selectView(position, !selectedItemIds.get(position));
+    }
+
+    public void selectView(int position, boolean value) {
+        if (value)
+            selectedItemIds.put(position, value);
+        else
+            selectedItemIds.delete(position);
+
+        notifyDataSetChanged();
+    }
+
+    public void removeSelection() {
+        selectedItemIds = new SparseBooleanArray();
+        notifyDataSetChanged();
+    }
+
+    public int getSelectedCount() {
+        return selectedItemIds.size();
+    }
+
+    public SparseBooleanArray getSelectedIds() {
+        return selectedItemIds;
+    }
+    /****************************************************************************/
+
     /*
     private void setAlignment(ViewHolder holder){
         LinearLayout.LayoutParams layoutParams =
@@ -188,7 +220,6 @@ public class ChatAdapter extends BaseAdapter {
         ViewHolder holder = new ViewHolder();
         holder.txtMessage = (TextView) v.findViewById(R.id.txtMessage);
         holder.sender_name = (TextView) v.findViewById(R.id.sender);
-        holder.messageOption = (TextView) v.findViewById(R.id.messageOption);
         holder.content = (LinearLayout) v.findViewById(R.id.content);
         holder.contentWithBG = (LinearLayout) v.findViewById(R.id.contentWithBackground);
         holder.dateInfo = (TextView) v.findViewById(R.id.dateInfo);
@@ -200,7 +231,6 @@ public class ChatAdapter extends BaseAdapter {
         public TextView txtMessage;
         public TextView sender_name;
         public TextView dateInfo;
-        public TextView messageOption;
         public LinearLayout contentWithBG;
         public LinearLayout content;
         public ListView fileList;

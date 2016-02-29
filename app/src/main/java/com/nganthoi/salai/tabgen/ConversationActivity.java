@@ -1,8 +1,10 @@
 package com.nganthoi.salai.tabgen;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -11,9 +13,11 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -49,7 +53,8 @@ public class ConversationActivity extends AppCompatActivity {
     ImageView backButton;//,conv_Icon;
     ListView messagesContainer;
     EditText messageEditText;
-    ImageButton sendMessage,pickImageFile;
+    ImageButton sendMessage;
+    ImageView pickImageFile;
     private ChatAdapter adapter;
     private ArrayList<ChatMessage> chatHistory;
     SharedPreference sp;
@@ -67,6 +72,9 @@ public class ConversationActivity extends AppCompatActivity {
     ProgressDialog progressDialog;
     JSONObject extraInfoObj;
     JSONArray members;
+    /****for contextual action Bar ****/
+    Activity activity=this;
+    private ActionMode mActionMode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,12 +91,58 @@ public class ConversationActivity extends AppCompatActivity {
         progressDialog = new ProgressDialog(context);
         progressDialog.setTitle("File Upload");
         progressDialog.setMessage("Uploading your file.....");
-        progressDialog.setIndeterminate(true);
         progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         /*********************************************/
 
         messagesContainer = (ListView) findViewById(R.id.chatListView);
         messageEditText = (EditText) findViewById(R.id.messageEditText);
+        messagesContainer.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                //adapter.remove(position);
+                //adapter.notifyDataSetChanged();
+                //scroll();
+                //view.setBackgroundColor(Color.BLUE);
+                //view.setBackgroundColor(Color.parseColor("#fcfcfc"));
+                adapter.toggleSelection(position);
+                boolean hasCheckedItems = adapter.getSelectedCount()>0;
+                if(hasCheckedItems && mActionMode==null){
+                    //if there are some selected items, then start the action mode
+                    mActionMode = ConversationActivity.this.startActionMode(new ActionMode.Callback() {
+                        @Override
+                        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                            mode.getMenuInflater().inflate(R.menu.context_menu,menu);
+                            return true;
+                        }
+
+                        @Override
+                        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                            return false;
+                        }
+
+                        @Override
+                        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                            return false;
+                        }
+
+                        @Override
+                        public void onDestroyActionMode(ActionMode mode) {
+                            adapter.removeSelection();
+                            mActionMode=null;
+                        }
+                    });
+                }
+                else if(!hasCheckedItems && mActionMode!=null){
+                    //if there are no selecte items then finish the action mode
+                    mActionMode.finish();
+                }
+
+                if(mActionMode!=null){
+                    //mActionMode.setTitle(String.valueOf(adapter.getSelectedCount())+ " selected");
+                }
+                return true;
+            }
+        });
 
         //setting Chat adapter
         adapter = new ChatAdapter(ConversationActivity.this, new ArrayList<ChatMessage>());
@@ -199,7 +253,7 @@ public class ConversationActivity extends AppCompatActivity {
                     }
                 }
             });
-            pickImageFile = (ImageButton) findViewById(R.id.pickImageFile);
+            pickImageFile = (ImageView) findViewById(R.id.pickImageFile);
             pickImageFile.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

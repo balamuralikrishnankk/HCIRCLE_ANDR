@@ -71,7 +71,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         String channel_id = OrganisationDetails.getChannelId(expandedListText, context);
         String ip = sp.getServerIP_Preference(context);
         System.out.println("Title: "+expandedListText+" ---> Channel Id: "+channel_id+"\nToken Id: "+token);
-        *** Getting extra information about the current channel ***
+        //*** Getting extra information about the current channel ***
         ConnectAPIs connApis = new ConnectAPIs("http://"+ip+":8065//api/v1/channels/"+channel_id+"/extra_info",token);
         String extra_info = connApis.convertInputStreamToString(connApis.getData());
         System.out.println("Extra Information: "+extra_info);

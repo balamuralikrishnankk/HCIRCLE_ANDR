@@ -13,7 +13,8 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/titleBar">
+        android:id="@+id/titleBar"
+        android:background="#ffffff">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -29,7 +30,7 @@
             android:paddingBottom="3dp"
             android:paddingTop="3dp"
             android:textColor="#0ca0eb"
-            android:textSize="20sp" />
+            android:textSize="12sp" />
         <View
             android:layout_width="20dp"
             android:layout_height="2dp"
@@ -48,7 +49,7 @@
             android:id="@+id/channel_name"
             android:text="Channel"
             android:textColor="#ffffff"
-            android:textSize="20sp"
+            android:textSize="12sp"
             android:background="@drawable/button_blue_background"
             android:layout_alignParentTop="true"
             android:layout_toRightOf="@+id/line"
@@ -58,7 +59,7 @@
 
     <ListView
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="200dp"
         android:id="@+id/chatListView"
         android:divider="#d4d2d2"
         android:dividerHeight="1dp"
@@ -68,9 +69,17 @@
         android:layout_above="@+id/messageLayout"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_marginTop="15dp"
-        android:focusableInTouchMode="true" />
-    <!-- android:divider="@android:color/transparent"
+        android:layout_marginTop="10dp"
+        android:focusableInTouchMode="true"
+        android:scrollIndicators="right"
+        android:overScrollFooter="#fff6f6"
+        android:overScrollHeader="#fff6f6"
+        android:outlineProvider="paddedBounds"
+        android:nestedScrollingEnabled="true"
+        android:background="#ffffff" />
+    <!--
+
+    android:divider="@android:color/transparent"
     android:fastScrollEnabled="true"-->
 
     <RelativeLayout
@@ -78,7 +87,11 @@
         android:layout_height="50dp"
         android:id="@+id/messageLayout"
         android:orientation="horizontal"
-        android:layout_above="@+id/taskbar">
+        android:layout_above="@+id/taskbar"
+        android:paddingRight="3dp"
+        android:paddingLeft="3dp"
+        android:background="#ffffff"
+        ><!--android:layout_above="@+id/taskbar"-->
             <EditText
                 android:layout_width="wrap_content"
                 android:layout_height="40dp"
@@ -112,36 +125,40 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:id="@+id/taskbar"
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:background="#e3e1e1"
-        android:id="@+id/taskbar">
-
-        <ImageButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true">
+        <!--android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"-->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="3dp"
+            android:background="#b1aeae"/>
+        <ImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
             android:id="@+id/writeImageButton"
             android:layout_alignParentTop="true"
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
-            android:src="@android:drawable/ic_menu_edit" />
+            android:src="@drawable/icon_pen" />
 
-        <ImageButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+        <ImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
             android:id="@+id/cameraImageButton"
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"
-            android:src="@android:drawable/ic_menu_camera" />
+            android:src="@drawable/icon_camera" />
 
-        <ImageButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+        <ImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
             android:id="@+id/pickImageFile"
             android:layout_alignParentTop="true"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
-            android:src="@android:drawable/ic_menu_gallery" />
+            android:src="@drawable/icon_gallary" />
     </RelativeLayout>
 
 </RelativeLayout>
