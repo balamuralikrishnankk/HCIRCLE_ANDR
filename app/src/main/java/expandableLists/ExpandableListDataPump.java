@@ -49,7 +49,8 @@ public class ExpandableListDataPump {
                         JSONObject jsonObject;
                         for(int i=0;i<jsonArray.length();i++){
                             jsonObject = jsonArray.getJSONObject(i);
-                            channelList.add(jsonObject.getString("Channel_name"));
+                            if(jsonObject.getString("Channel_name").trim().length()!=0)
+                                channelList.add(jsonObject.getString("Channel_name"));
                             teamName=(jsonObject.getString("Team_Name"));
                         }
                     }

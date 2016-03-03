@@ -16,9 +16,9 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import sharePreference.SharedPreference;
@@ -27,6 +27,7 @@ public class Admin extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     Context _context=this;
     SharedPreference sp;
+    Button createUsersButton;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,6 +36,13 @@ public class Admin extends AppCompatActivity
         setSupportActionBar(toolbar);
 
         TextView user_admin = (TextView) toolbar.findViewById(R.id.user_admin);
+        createUsersButton = (Button) findViewById(R.id.createUsersButton);
+        createUsersButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(Admin.this,CreateUserActivity.class));
+            }
+        });
         sp = new SharedPreference();
         String user_detail = sp.getPreference(_context);
         try {

@@ -1,10 +1,13 @@
 package com.nganthoi.salai.tabgen;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -14,6 +17,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.ActionMode;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -44,6 +48,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import chattingEngine.ChatAdapter;
 import chattingEngine.ChatMessage;
+import customDialogManager.CustomDialogManager;
 import readData.ReadFile;
 import sharePreference.SharedPreference;
 import connectServer.ConnectAPIs;
@@ -52,14 +57,15 @@ public class ConversationActivity extends AppCompatActivity {
     //ImageButton sendMessage;
     ImageView backButton;//,conv_Icon;
     ListView messagesContainer;
-    EditText messageEditText;
-    ImageButton sendMessage;
+    //EditText messageEditText;
+    EditText msgText;
+    //ImageButton sendMessage;
     ImageView pickImageFile;
     private ChatAdapter adapter;
     private ArrayList<ChatMessage> chatHistory;
     SharedPreference sp;
     Context context=this;
-    String channel_id="",user_id,token,last_timetamp=null,extra_info;
+    String channel_id="",user_id,token,last_timetamp=null,extra_info,copied_msg=null,channel_title,team_title;
     String file_path=null;
     int receiver_responseCode;
     String ip,responseMessage,errorMessage;
@@ -67,7 +73,7 @@ public class ConversationActivity extends AppCompatActivity {
     URL api_url=null;
     Thread thread;
     public Boolean interrupt=false;
-    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy' at 'h:mm a");
+    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy' at 'h:mm a");
     JSONArray filenames=null;// A JSON variable that contains list of file names returned from the mattermost APIs
     ProgressDialog progressDialog;
     JSONObject extraInfoObj;
@@ -75,6 +81,10 @@ public class ConversationActivity extends AppCompatActivity {
     /****for contextual action Bar ****/
     Activity activity=this;
     private ActionMode mActionMode;
+    /******************************************/
+
+    /*****************Writing message task*******************/
+    ImageView writeImageButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,7 +105,10 @@ public class ConversationActivity extends AppCompatActivity {
         /*********************************************/
 
         messagesContainer = (ListView) findViewById(R.id.chatListView);
-        messageEditText = (EditText) findViewById(R.id.messageEditText);
+        //messageEditText = (EditText) findViewById(R.id.messageEditText);
+        //setting Chat adapter
+        adapter = new ChatAdapter(ConversationActivity.this, new ArrayList<ChatMessage>());
+        messagesContainer.setAdapter(adapter);
         messagesContainer.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
@@ -105,17 +118,16 @@ public class ConversationActivity extends AppCompatActivity {
                 //view.setBackgroundColor(Color.BLUE);
                 //view.setBackgroundColor(Color.parseColor("#fcfcfc"));
                 adapter.toggleSelection(position);
-                boolean hasCheckedItems = adapter.getSelectedCount()>0;
-                if(hasCheckedItems && mActionMode==null){
+                boolean hasCheckedItems = adapter.getSelectedCount() > 0;
+                if (hasCheckedItems && mActionMode == null) {
                     //if there are some selected items, then start the action mode
-                    mActionMode = ConversationActivity.this.startActionMode(new ActionModeCallback());
-                }
-                else if(!hasCheckedItems && mActionMode!=null){
+                    mActionMode = ConversationActivity.this.startActionMode(new ActionModeCallback(position));
+                } else if (!hasCheckedItems && mActionMode != null) {
                     //if there are no selecte items then finish the action mode
                     mActionMode.finish();
                 }
 
-                if(mActionMode!=null){
+                if (mActionMode != null) {
                     //mActionMode.setTitle(String.valueOf(adapter.getSelectedCount())+ " selected");
                 }
                 view.setSelected(true);
@@ -123,9 +135,7 @@ public class ConversationActivity extends AppCompatActivity {
             }
         });
 
-        //setting Chat adapter
-        adapter = new ChatAdapter(ConversationActivity.this, new ArrayList<ChatMessage>());
-        messagesContainer.setAdapter(adapter);
+
         /********************************************/
 
         backButton = (ImageView) toolbar.findViewById(R.id.back_button);
@@ -136,9 +146,9 @@ public class ConversationActivity extends AppCompatActivity {
             }
         });
         Intent intent = getIntent();
-        String team_title=intent.getStringExtra(ChatFragment.TEAM_NAME);
+        team_title=intent.getStringExtra(ChatFragment.TEAM_NAME);
         team_label.setText(team_title);
-        String channel_title = intent.getStringExtra(ChatFragment.CHANNEL_NAME);
+        channel_title = intent.getStringExtra(ChatFragment.CHANNEL_NAME);
         channel_label.setText(channel_title);
         /*
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -163,28 +173,40 @@ public class ConversationActivity extends AppCompatActivity {
         }
         ip = sp.getServerIP_Preference(context);//getting ip
 
-        /*** Getting extra information about the current channel ***/
-        ConnectAPIs connApis = new ConnectAPIs("http://"+ip+":8065//api/v1/channels/"+channel_id+"/extra_info",token);
-        extra_info = convertInputStreamToString(connApis.getData());
-        System.out.println("Extra Information: "+extra_info);
 
-        try{
-            extraInfoObj = new JSONObject(extra_info);
-            //int n = extraInfoObj.getInt("member_count");
-            //no_of_members.setText((n>1?n+" Members":n+" Member"));
-            members=extraInfoObj.getJSONArray("members");
-        }catch(Exception e){
-            System.out.println("unable to get user extra information");
-        }
-        /*************************************************************/
-        loadHistory();//for loading entire chat history
         //last_timetamp="1456185600000";
+        Thread loadHistory = new Thread(){
+            @Override
+            public void run(){
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        /*** Getting extra information about the current channel ***/
+                        ConnectAPIs connApis = new ConnectAPIs("http://"+ip+":8065//api/v1/channels/"+channel_id+"/extra_info",token);
+                        extra_info = convertInputStreamToString(connApis.getData());
+                        System.out.println("Extra Information: "+extra_info);
+
+                        try{
+                            extraInfoObj = new JSONObject(extra_info);
+                            //int n = extraInfoObj.getInt("member_count");
+                            //no_of_members.setText((n>1?n+" Members":n+" Member"));
+                            members=extraInfoObj.getJSONArray("members");
+                        }catch(Exception e){
+                            System.out.println("unable to get user extra information");
+                        }
+                        /*************************************************************/
+                        loadHistory();//for loading entire chat history
+                    }
+                });
+            }
+        };
+        //loadHistory.start();
         thread = new Thread(){
             @Override
             public void run(){
                 try{
                     while(!isInterrupted() || !interrupt){
-                        Thread.sleep(5000);
+                        Thread.sleep(6000);
                         runOnUiThread(new Runnable(){
                             @Override
                             public void run(){
@@ -205,7 +227,16 @@ public class ConversationActivity extends AppCompatActivity {
             }
         };
         thread.start();
-        sendMessage = (ImageButton) findViewById(R.id.chatSendButton);
+
+        writeImageButton = (ImageView) findViewById(R.id.writeImageButton);
+        writeImageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openMsgDialog();
+            }
+        });
+
+        /*sendMessage = (ImageButton) findViewById(R.id.chatSendButton);
         sendMessage.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -231,7 +262,7 @@ public class ConversationActivity extends AppCompatActivity {
                                 .setAction("Action", null).show();
                     }
                 }
-            });
+            });*/
             pickImageFile = (ImageView) findViewById(R.id.pickImageFile);
             pickImageFile.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -243,8 +274,70 @@ public class ConversationActivity extends AppCompatActivity {
                     startActivityForResult(Intent.createChooser(intent,"Select a file from the gallary"),1);
                 }
             });
-        }
+        loadHistory.start();
+    }
         //initControls();
+    public  void openMsgDialog(){
+        LayoutInflater inflater = LayoutInflater.from(context);
+        View dialogView = inflater.inflate(R.layout.send_msg_layout, null);
+        //final Dialog dialog = new Dialog(context);
+        //dialog.setContentView(R.layout.send_msg_layout);
+        AlertDialog.Builder adb = new AlertDialog.Builder(context);
+        adb.setView(dialogView);
+         msgText = (EditText) dialogView.findViewById(R.id.msgText);
+        //TextView msgBox = (TextView) dialogView.findViewById(R.id.textViewMessage);
+        ImageButton sendMsgButton = (ImageButton) dialogView.findViewById(R.id.sendMsgButton);
+        //msgBox.setText(channel_title);
+        //System.out.println("Channel name: "+channel_title);
+        adb.setCancelable(true);
+        final AlertDialog alertDialog = adb.create();
+        //alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        alertDialog.show();
+        sendMsgButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String messageText = msgText.getText().toString();
+                if (TextUtils.isEmpty(messageText) || messageText.trim().length() == 0) {
+                    return;
+                }
+                try {
+                    JSONObject jsonObject = new JSONObject();
+
+                    if (filenames != null && filenames.length() > 0) {
+                        jsonObject.put("filenames", filenames);
+                    }
+                    jsonObject.put("channel_id", channel_id);
+                    jsonObject.put("root_id", "");
+                    jsonObject.put("parent_id", "");
+                    jsonObject.put("Message", messageText);
+                    sendMyMessage(jsonObject);
+                    filenames = null;
+                    alertDialog.dismiss();
+                } catch (Exception e) {
+                    System.out.print("Message Sending failed: " + e.toString());
+                    Snackbar.make(v, "Oops! Message Sending failed", Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
+                }
+            }
+        });
+        msgText.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                //
+                if(copied_msg!=null){
+                    //CustomDialogManager cdm = new CustomDialogManager(context,null,"Paste ?",true);
+                    //if(cdm.showCustomDialogWithYesNoButton()){
+                    msgText.setText(copied_msg);
+                    Toast.makeText(context, "message pasted", Toast.LENGTH_SHORT).show();
+                    //}
+                    return true;
+                }
+                else return false;
+            }
+        });
+
+        //dialog.show();
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -268,6 +361,7 @@ public class ConversationActivity extends AppCompatActivity {
     }
     @Override
     public void onBackPressed(){
+        progressDialog.setCancelable(true);
         try{
             if(thread!=null){
                 thread.interrupt();
@@ -338,7 +432,7 @@ public class ConversationActivity extends AppCompatActivity {
                     //chatMessage.setDate(DateFormat.getDateTimeInstance().format(new Date()));
                     chatMessage.setMe(true);
                     chatMessage.setSenderName("Me");
-                    messageEditText.setText("");
+                    //messageEditText.setText("");
                     System.out.println("Sending result: "+response);
                     try{
                         JSONObject json_obj= new JSONObject(response);
@@ -392,11 +486,11 @@ public class ConversationActivity extends AppCompatActivity {
             try {
                 JSONArray jsonArray = new JSONArray(res);
                 JSONObject jsonObject;
-                int i;
-                for (i = 0; i < jsonArray.length(); i++) {
+                int i=jsonArray.length()-1;
+                for (; i >= 0; i--) {
                     jsonObject = jsonArray.getJSONObject(i);
                     ChatMessage msg = new ChatMessage();
-
+                    msg.setId(jsonObject.getString("postId"));
                     if (user_id.equals(jsonObject.getString("UserId"))) {
                         msg.setMe(true);
                         msg.setSenderName("Me");
@@ -562,11 +656,9 @@ public class ConversationActivity extends AppCompatActivity {
                     bytesRead = fis.read(buffer,0,bufferSize);
                     int total = bytesAvailable;
                     while(bytesRead>0){
+                        publishProgress(""+(int)((total-bytesAvailable)*100)/total);
                         dos.write(buffer,0,bufferSize);
                         bytesAvailable = fis.available();
-                        publishProgress(""+(int)((total-bytesAvailable)*100)/total);
-                        //publishProgress(""+(int)((total*100)/total));
-
                         bufferSize = Math.min(bytesAvailable, maxBufferSize);
                         bytesRead = fis.read(buffer,0,bufferSize);
                     }
@@ -722,7 +814,8 @@ public class ConversationActivity extends AppCompatActivity {
                                 }
                                 displayMessage(currentMsg);
                             }//otherwise dont create the message
-                            last_timetamp = messageDate;
+                            if(Long.parseLong(last_timetamp)< Long.parseLong(messageDate))
+                                last_timetamp = messageDate;
                             i++;
                         }//end while loop
                     }
@@ -735,6 +828,12 @@ public class ConversationActivity extends AppCompatActivity {
 
     //class for contextual action bar
     private class ActionModeCallback implements ActionMode.Callback{
+        ChatMessage msg;
+        int position;
+        private ActionModeCallback(int msgPosition){
+            msg=adapter.getItem(msgPosition);
+            position = msgPosition;
+        }
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
             mode.getMenuInflater().inflate(R.menu.context_menu,menu);
@@ -748,6 +847,33 @@ public class ConversationActivity extends AppCompatActivity {
 
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            switch(item.getItemId()){
+                case R.id.copy: copied_msg = msg.getMessage();
+                    if(copied_msg!=null) Toast.makeText(getBaseContext(),"Message copied",Toast.LENGTH_SHORT).show();
+                    break;
+                case R.id.delete:ConnectAPIs deleteMsg =
+                        new ConnectAPIs("http://"+ip+":8065/api/v1/channels/"+channel_id+"/post/"+msg.getId()+"/delete",token);
+                    InputStream isr = deleteMsg.getData();
+                    String result = deleteMsg.convertInputStreamToString(isr);
+                    if(deleteMsg.responseCode==200){
+                        Toast.makeText(getApplicationContext(),"Message deleted",Toast.LENGTH_LONG).show();
+                        adapter.remove(position);
+                    }
+                    else{
+                        try{
+                            JSONObject jobj = new JSONObject(result);
+                            Toast.makeText(getApplicationContext(),jobj.getString("message"),Toast.LENGTH_LONG).show();
+                        }catch(Exception e){
+
+                        }
+                    }
+                    break;
+                case R.id.forward:
+                default:
+                    CustomDialogManager customDialogManager = new CustomDialogManager(context,"Under Development",
+                            "We are developing the appropriate action for this button",false);
+                    customDialogManager.showCustomDialog();
+            }
             return false;
         }
 

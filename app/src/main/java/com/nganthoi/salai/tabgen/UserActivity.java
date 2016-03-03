@@ -94,7 +94,6 @@ public class UserActivity extends AppCompatActivity
         tabLayout = (TabLayout) findViewById(R.id.tabLayout);
         Intent intent = getIntent();
         template_list = intent.getStringArrayListExtra(UserLandingActivity.templateListExtra);//gettting list of templates from the previous activity
-
         new GetTabList().execute(template_list);
         tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override

@@ -27,7 +27,7 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/enlarge_button_heigth"
             android:text="@string/CreateRole"
-            android:id="@+id/button"
+            android:id="@+id/createRoleButton"
             android:drawableRight="@drawable/greater_than_symbol"
             android:layout_gravity="center_horizontal"
             android:typeface="serif" />
@@ -36,7 +36,7 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/enlarge_button_heigth"
             android:text="@string/create_tabs"
-            android:id="@+id/button2"
+            android:id="@+id/createTabButton"
             android:drawableRight="@drawable/greater_than_symbol"
             android:layout_gravity="center_horizontal"
             android:typeface="serif" />
@@ -45,7 +45,7 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/enlarge_button_heigth"
             android:text="@string/create_tabstrips"
-            android:id="@+id/button3"
+            android:id="@+id/createTabStripsButton"
             android:drawableRight="@drawable/greater_than_symbol"
             android:layout_gravity="center_horizontal"
             android:typeface="serif" />
@@ -54,7 +54,7 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/enlarge_button_heigth"
             android:text="@string/create_user"
-            android:id="@+id/button4"
+            android:id="@+id/createUsersButton"
             android:drawableRight="@drawable/greater_than_symbol"
             android:layout_gravity="center_horizontal"
             android:typeface="serif" />

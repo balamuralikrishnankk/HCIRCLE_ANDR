@@ -1,9 +1,11 @@
 package com.nganthoi.salai.tabgen;
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -42,6 +44,8 @@ public class UserLandingActivity extends AppCompatActivity
     TemplateAdapter templateAdapter;
     public final static String templateListExtra="TEMPLATE_LIST";
     ArrayList<String> stringArray = new ArrayList<String>();
+    ProgressDialog progressDialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,6 +57,7 @@ public class UserLandingActivity extends AppCompatActivity
         TextView username = (TextView) findViewById(R.id.username);
         TextView usermail = (TextView) findViewById(R.id.user_email);
         TextView userrole = (TextView) findViewById(R.id.user_role);
+
 
         /**Getting template listview Id**/
         templateList = (ListView) findViewById(R.id.templatesLists);
@@ -66,7 +71,8 @@ public class UserLandingActivity extends AppCompatActivity
             usermail.setText(jsonObject.getString("email"));
             role = jsonObject.getString("roles");
             userrole.setText(role);
-            list = OrganisationDetails.getListOfTemplates(this,role);
+            new GetTemplates().execute(role);
+
         } catch (JSONException e) {
             System.out.println("Exception :" + e.toString());
         }
@@ -74,8 +80,7 @@ public class UserLandingActivity extends AppCompatActivity
 
         /*arrayAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, list);
         templateList.setAdapter(arrayAdapter);*/
-        templateAdapter = new TemplateAdapter(UserLandingActivity.this,list);
-        templateList.setAdapter(templateAdapter);
+
         //adding on click event for a particular item
         templateList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -161,7 +166,7 @@ public class UserLandingActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-        if (id == R.id.logout){
+        if (id == R.id.logout) {
             logout();
         }
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -188,5 +193,33 @@ public class UserLandingActivity extends AppCompatActivity
         });
         AlertDialog alertDialog = alertDialogBuilder.create();
         alertDialog.show();
+    }
+    public class GetTemplates extends AsyncTask<String,String,List<String>>{
+
+        @Override
+        protected void onPreExecute(){
+            progressDialog = new ProgressDialog(_context);
+            progressDialog.setMessage("Loading your Templates");
+            progressDialog.setIndeterminate(true);
+            progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            progressDialog.show();
+        }
+
+        @Override
+        protected List<String> doInBackground(String... role){
+            publishProgress("");
+            list = OrganisationDetails.getListOfTemplates(_context,role[0]);
+            return list;
+        }
+        protected void onProgressUpdate(String str){
+            progressDialog.show();
+        }
+
+        @Override
+        protected void onPostExecute(List<String> list){
+            templateAdapter = new TemplateAdapter(UserLandingActivity.this,list);
+            templateList.setAdapter(templateAdapter);
+            progressDialog.dismiss();
+        }
     }
 }

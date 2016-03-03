@@ -28,9 +28,8 @@ public class CreateOrg extends AppCompatActivity {
     Button createOrg;/* Button for creating organisation */
     Context _context=this;
     /* Creating an object for connecting the API at the url http://188.166.210.24:8065/api/v1/organisation/create */
-    SharedPreference sp = new SharedPreference();
-    ConnectServer connectServer=new ConnectServer("http://"+sp.getServerIP_Preference(_context)+":8065/api/v1/organisation/create");
 
+    ConnectServer connectServer;
     ProgressDialog progDialog;
     /* Creating SharedPreference object for getting the user details saved at the time of login */
     SharedPreference sharedPreference;
@@ -43,6 +42,9 @@ public class CreateOrg extends AppCompatActivity {
         getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setContentView(R.layout.activity_create_org);
+
+        SharedPreference sp = new SharedPreference();
+        connectServer=new ConnectServer("http://"+sp.getServerIP_Preference(_context)+":8065/api/v1/organisation/create");
 
         /* Getting Id references */
         org_name = (EditText) findViewById(R.id.org_name);
@@ -140,7 +142,7 @@ public class CreateOrg extends AppCompatActivity {
                                 "Organisation Name: "+jsonObject.getString("name")+"\n"+
                                 "Email: "+jsonObject.getString("email")+"\n"+
                                 "Created By: "+jsonObject.getString("createdBy");
-                        respText.setTextColor(Color.GREEN);
+                        respText.setTextColor(Color.BLUE);
                         respText.setText("Organisation created with the following details: \n"+
                                 createdOrgDetails);
                     }

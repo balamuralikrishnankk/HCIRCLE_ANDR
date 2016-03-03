@@ -18,6 +18,7 @@ import android.widget.EditText;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.support.v7.widget.Toolbar;
 
 import org.json.JSONObject;
 
@@ -32,7 +33,7 @@ public class CreateUserActivity extends AppCompatActivity {
     EditText ET_Username,ET_Password,ET_ConfPasswd,ET_Email;
     Spinner Sp_Org_Unit,Sp_User_Role;
     RadioGroup CanAlloOffer;
-    Button createUser;
+    Button createUser,back;
     TextView response;
     ProgressDialog progressDialog;
     Context _context= this;
@@ -44,8 +45,11 @@ public class CreateUserActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_user);
-        getSupportActionBar().setHomeButtonEnabled(true);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        /*getSupportActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);*/
+        Toolbar toolbar = (Toolbar) findViewById(R.id.createUserToolbar);
+        setSupportActionBar(toolbar);
+        TextView user_admin = (TextView) toolbar.findViewById(R.id.user_admin);
         /* Finding ID references */
         findIDs();
         response.setText("");
@@ -53,7 +57,8 @@ public class CreateUserActivity extends AppCompatActivity {
         sp = new SharedPreference();
         try{
             JSONObject jObj = new JSONObject(sp.getPreference(_context));
-            org_unit_list = OrganisationDetails.getListOfOrganisationUnits(jObj.getString("username"),_context);
+            user_admin.setText(jObj.getString("username"));
+            org_unit_list = OrganisationDetails.getListOfOrganisationUnits(/*jObj.getString("username")*/"thoiba",_context);
         }catch(Exception e){
             System.out.println("Exception, unable to read shared preference data: "+e.toString());
         }
@@ -64,6 +69,7 @@ public class CreateUserActivity extends AppCompatActivity {
         role_list.add("Administrator");
         role_list.add("Technicians");
         role_list.add("Radiologist");
+        role_list.add("admin");
         /***********************************/
         ArrayAdapter<String> adapter1 = new ArrayAdapter<String>(this,android.R.layout.simple_spinner_item,org_unit_list);
         adapter1.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -143,6 +149,13 @@ public class CreateUserActivity extends AppCompatActivity {
             }
         });
 
+        back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onBackPressed();
+            }
+        });
+
     }
 
     public void findIDs(){
@@ -155,6 +168,7 @@ public class CreateUserActivity extends AppCompatActivity {
         CanAlloOffer = (RadioGroup) findViewById(R.id.radioGroupCanAllowOffer);
         createUser = (Button) findViewById(R.id.create_user_button);
         response = (TextView) findViewById(R.id.response);
+        back = (Button) findViewById(R.id.back_to_adminactivity);
     }
 
     public void initiateProgressDialog(View v){
@@ -226,7 +240,7 @@ public class CreateUserActivity extends AppCompatActivity {
         @Override
         protected String doInBackground(String... data){
             SharedPreference sp = new SharedPreference();
-            connServ = new ConnectServer("http://"+sp.getServerIP_Preference(_context)+"TabGen/createUsers.php");
+            connServ = new ConnectServer("http://"+sp.getServerIP_Preference(_context)+"/TabGen/createUsers.php");
             onProgressUpdate();
             return connServ.convertInputStreamToString(connServ.putData(data[0]));
         }

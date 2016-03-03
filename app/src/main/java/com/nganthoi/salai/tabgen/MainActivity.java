@@ -35,7 +35,7 @@ public class MainActivity extends Activity {
     Button signin;
     Intent intent;
     Context context=this;
-    String msg,uname, passwd, team,server_ip;
+    String msg,uname, passwd, team,server_ip,copied_msg=null;
     EditText username,password,team_name;
     //CheckBox show_password;
     ProgressDialog progressDialog;
@@ -195,13 +195,13 @@ public class MainActivity extends Activity {
                         switch(jObj.getString("roles")){
                             case "system_admin":
                                 intent = new Intent(context,SuperAdminActivity.class);
-                                Toast.makeText(MainActivity.this, "Sucessfully login as Superadmin...", Toast.LENGTH_LONG).show();
+                                //Toast.makeText(MainActivity.this, "Sucessfully login as Superadmin...", Toast.LENGTH_LONG).show();
                                 startActivity(intent);
                                 finish();
                                 break;
                             case "admin":
                                 intent = new Intent(context,Admin.class);
-                                Toast.makeText(context,"Sucessfully login as Admin...",Toast.LENGTH_LONG).show();
+                                //Toast.makeText(context,"Sucessfully login as Admin...",Toast.LENGTH_LONG).show();
                                 startActivity(intent);
                                 finish();
                                 break;

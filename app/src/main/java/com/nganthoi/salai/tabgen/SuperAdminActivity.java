@@ -134,7 +134,7 @@ public class SuperAdminActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
         switch (id) {
-            case R.id.CreateOrganisation:
+            case R.id.CreateOrganisation://Create an Organisation
                 startActivity(new Intent(_context, CreateOrg.class));
                 break;
             case R.id.logout:

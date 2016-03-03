@@ -26,11 +26,10 @@
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"
             android:hint="@string/role_name"
-            android:paddingLeft="5dp"
-            android:paddingRight="5dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
             android:layout_below="@+id/role_name_textView"
-            android:layout_marginTop="30dp"
-            android:background="@drawable/edittext_style" />
+            android:layout_marginTop="30dp" />
 
         <LinearLayout
             android:orientation="horizontal"
@@ -85,15 +84,13 @@
         </RadioGroup>
 
         <Button
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/create"
             android:id="@+id/createRole"
             android:layout_marginTop="40dp"
             android:layout_below="@+id/CanAccessOtherOU"
-            android:layout_centerHorizontal="true"
-            android:background="@drawable/button_background"
-            android:textColor="#eeeaea" />
+            android:layout_centerHorizontal="true" />
 
         <TextView
             android:layout_width="match_parent"

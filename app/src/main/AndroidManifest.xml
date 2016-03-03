@@ -17,12 +17,14 @@
         android:windowSoftInputMode="adjustResize|stateHidden">
 
         <!--
+        android:theme="@android:style/Theme.Translucent"
         android:theme="@style/AppTheme"
         android:theme="@android:style/Theme.NoTitleBar"
         -->
         <activity
             android:name=".FirstLoginActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
+            android:theme="@style/MyFullScreenTheme"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -54,11 +56,8 @@
         </activity>
         <activity
             android:name=".CreateUserActivity"
-            android:label="@string/create_user"
-            android:parentActivityName=".SuperAdminActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".SuperAdminActivity" />
+            android:theme="@style/AppTheme.NoActionBar"
+            android:label="@string/create_user">
         </activity>
         <activity
             android:name=".TabActivity"
@@ -104,8 +103,10 @@
         <activity
             android:name=".ConversationActivity"
             android:label=""
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"
+            android:screenOrientation="portrait"/>
+        <!--android:theme="@android:style/Theme.Translucent"
+            android:theme="@style/AppTheme.NoActionBar"-->
         <activity android:name=".LandingActivity" />
         <activity
             android:name=".UserLandingActivity"
