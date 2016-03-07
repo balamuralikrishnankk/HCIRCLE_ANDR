@@ -57,15 +57,13 @@ public class ConversationActivity extends AppCompatActivity {
     //ImageButton sendMessage;
     ImageView backButton;//,conv_Icon;
     ListView messagesContainer;
-    //EditText messageEditText;
-    EditText msgText;
-    //ImageButton sendMessage;
+    EditText messageEditText;
     ImageView pickImageFile;
     private ChatAdapter adapter;
     private ArrayList<ChatMessage> chatHistory;
     SharedPreference sp;
     Context context=this;
-    String channel_id="",user_id,token,last_timetamp=null,extra_info,copied_msg=null,channel_title,team_title;
+    String channel_id="",user_id,token,last_timetamp=null,extra_info,copied_msg=null,channel_title;
     String file_path=null;
     int receiver_responseCode;
     String ip,responseMessage,errorMessage;
@@ -94,9 +92,9 @@ public class ConversationActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         /*** labels in the action abar of the activity_conversation ***/
         //TextView no_of_members = (TextView) toolbar.findViewById(R.id.no_of_members);
-        TextView channel_label = (TextView) findViewById(R.id.channel_name);
-        TextView team_label = (TextView) findViewById(R.id.teamName);
-
+        TextView channel_label = (TextView) toolbar.findViewById(R.id.channel_name);
+        //TextView team_label = (TextView) findViewById(R.id.teamName);
+        messageEditText = (EditText) findViewById(R.id.messageEditText);
         /*Setting progress dialog for uploading a file*/
         progressDialog = new ProgressDialog(context);
         progressDialog.setTitle("File Upload");
@@ -105,7 +103,6 @@ public class ConversationActivity extends AppCompatActivity {
         /*********************************************/
 
         messagesContainer = (ListView) findViewById(R.id.chatListView);
-        //messageEditText = (EditText) findViewById(R.id.messageEditText);
         //setting Chat adapter
         adapter = new ChatAdapter(ConversationActivity.this, new ArrayList<ChatMessage>());
         messagesContainer.setAdapter(adapter);
@@ -115,8 +112,6 @@ public class ConversationActivity extends AppCompatActivity {
                 //adapter.remove(position);
                 //adapter.notifyDataSetChanged();
                 //scroll();
-                //view.setBackgroundColor(Color.BLUE);
-                //view.setBackgroundColor(Color.parseColor("#fcfcfc"));
                 adapter.toggleSelection(position);
                 boolean hasCheckedItems = adapter.getSelectedCount() > 0;
                 if (hasCheckedItems && mActionMode == null) {
@@ -137,7 +132,6 @@ public class ConversationActivity extends AppCompatActivity {
 
 
         /********************************************/
-
         backButton = (ImageView) toolbar.findViewById(R.id.back_button);
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -146,8 +140,6 @@ public class ConversationActivity extends AppCompatActivity {
             }
         });
         Intent intent = getIntent();
-        team_title=intent.getStringExtra(ChatFragment.TEAM_NAME);
-        team_label.setText(team_title);
         channel_title = intent.getStringExtra(ChatFragment.CHANNEL_NAME);
         channel_label.setText(channel_title);
         /*
@@ -172,7 +164,6 @@ public class ConversationActivity extends AppCompatActivity {
             System.out.println("Unable to read user ID: "+e.toString());
         }
         ip = sp.getServerIP_Preference(context);//getting ip
-
 
         //last_timetamp="1456185600000";
         Thread loadHistory = new Thread(){
@@ -230,14 +221,6 @@ public class ConversationActivity extends AppCompatActivity {
 
         writeImageButton = (ImageView) findViewById(R.id.writeImageButton);
         writeImageButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                openMsgDialog();
-            }
-        });
-
-        /*sendMessage = (ImageButton) findViewById(R.id.chatSendButton);
-        sendMessage.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     String messageText = messageEditText.getText().toString();
@@ -255,6 +238,7 @@ public class ConversationActivity extends AppCompatActivity {
                         jsonObject.put("parent_id","");
                         jsonObject.put("Message", messageText);
                         sendMyMessage(jsonObject);
+                        messageEditText.setText(" ");
                         filenames=null;
                     } catch (Exception e) {
                         System.out.print("Message Sending failed: " + e.toString());
@@ -262,7 +246,7 @@ public class ConversationActivity extends AppCompatActivity {
                                 .setAction("Action", null).show();
                     }
                 }
-            });*/
+            });
             pickImageFile = (ImageView) findViewById(R.id.pickImageFile);
             pickImageFile.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -284,7 +268,7 @@ public class ConversationActivity extends AppCompatActivity {
         //dialog.setContentView(R.layout.send_msg_layout);
         AlertDialog.Builder adb = new AlertDialog.Builder(context);
         adb.setView(dialogView);
-         msgText = (EditText) dialogView.findViewById(R.id.msgText);
+        final EditText msgText = (EditText) dialogView.findViewById(R.id.msgText);
         //TextView msgBox = (TextView) dialogView.findViewById(R.id.textViewMessage);
         ImageButton sendMsgButton = (ImageButton) dialogView.findViewById(R.id.sendMsgButton);
         //msgBox.setText(channel_title);
@@ -604,7 +588,7 @@ public class ConversationActivity extends AppCompatActivity {
         protected String doInBackground(Void... v){
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
             StrictMode.setThreadPolicy(policy);
-            progressDialog.setCancelable(false);
+            progressDialog.setCancelable(true);
             File sourceFile = new File(fileLocation);
             if(!sourceFile.isFile()){
                 Toast.makeText(context, "Source file does not exist", Toast.LENGTH_SHORT).show();

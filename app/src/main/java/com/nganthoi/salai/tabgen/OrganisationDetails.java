@@ -85,15 +85,16 @@ public class OrganisationDetails {
         /**********************************************************/
     }
 
-    public static List<String> getListOfTemplates(Context context,String role){
+    public static List<String> getListOfTemplates(Context context,String role,String orgunit){
         //Getting list of Organisation for a particular user
         SharedPreference sp = new SharedPreference();
         String ip = sp.getServerIP_Preference(context);
         System.out.println(ip);
         List<String> list = new ArrayList<String>();
         try {
-            ConnectServer templateList = new ConnectServer("http://"+ip+"/TabGen/getTemplateListByRole.php");
-            String jsonStr = templateList.convertInputStreamToString(templateList.putData("Role="+role));
+            ConnectServer templateList = new ConnectServer("http://"+ip+"/TabGen/getTemplateListByRole.php?Role="+role+
+                    "&org_unit="+orgunit);
+            String jsonStr = templateList.convertInputStreamToString(templateList.getData());
             //System.out.println(jsonStr);
             if(jsonStr!=null){
                 try {
