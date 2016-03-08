@@ -54,19 +54,11 @@ public class MainActivity extends Activity {
         username = (EditText) findViewById(R.id.username);
         password = (EditText) findViewById(R.id.password);
         //show_password = (CheckBox) findViewById(R.id.show_password);
-        forgotPassword = (TextView) findViewById(R.id.forgotPassword);
         server_ip="128.199.111.18";
         //forgotPassword.setPaintFlags(forgotPassword.getPaintFlags()| Paint.UNDERLINE_TEXT_FLAG);
         //forgotPassword.setText(Html.fromHtml("<u><i>Forgot Password ?</i></u>"));
 
         sp = new SharedPreference();
-        backButton = (ImageView) findViewById(R.id.backButton);
-        backButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onBackPressed();
-            }
-        });
 
         signin.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -94,7 +86,7 @@ public class MainActivity extends Activity {
                 }
             }
         });
-        forgotPassword.setOnClickListener(new View.OnClickListener() {
+        /*forgotPassword.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Uri forgotPassword = Uri.parse("http://"+sp.getServerIP_Preference(context)+
@@ -104,7 +96,6 @@ public class MainActivity extends Activity {
                 startActivity(intent);
             }
         });
-        /*
         show_password.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -120,8 +111,8 @@ public class MainActivity extends Activity {
 
     @Override
     public void onBackPressed(){
-        super.onBackPressed();
-        //moveTaskToBack(true);
+        //super.onBackPressed();
+        moveTaskToBack(true);
     }
 
     public Boolean isValidate(){

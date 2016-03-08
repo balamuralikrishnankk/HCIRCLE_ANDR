@@ -21,50 +21,22 @@
         android:focusable="true"
         android:focusableInTouchMode="true"
         android:layout_gravity="center_vertical"
-        android:fillViewport="true">
-        <ImageView
-            android:layout_width="15dp"
-            android:layout_height="20dp"
-            android:id="@+id/backButton"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:background="@drawable/back_icon" />
-        <ImageView
-            android:layout_width="100dp"
-            android:layout_height="120dp"
-            android:id="@+id/imageView"
-            android:src="@drawable/logo_h_circle"
-            android:layout_alignParentTop="true"
-            android:layout_alignRight="@+id/username"
-            android:layout_alignEnd="@+id/username" />
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="Log In"
-            android:id="@+id/textView2Login"
-            android:layout_below="@+id/imageView"
-            android:layout_marginTop="10dp"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:textStyle="bold"
-            android:textColor="#434141"
-            android:textSize="30sp" />
+        android:fillViewport="true"
+    android:background="@drawable/bg_scr">
 
-        <EditText
+    <EditText
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:id="@+id/username"
             android:inputType="textEmailAddress"
             android:paddingRight="10dp"
             android:paddingLeft="10dp"
-            android:layout_below="@+id/textView2Login"
-            android:layout_marginTop="40dp"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:hint="Phone, Email or Username"
-            android:gravity="center_vertical" />
+        android:hint="Phone, Email or Username"
+            android:gravity="center_vertical"
+        android:background="@drawable/edittext_style"
+        android:layout_centerVertical="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
 
         <EditText
             android:layout_width="match_parent"
@@ -74,54 +46,50 @@
             android:id="@+id/password"
             android:paddingRight="10dp"
             android:paddingLeft="10dp"
+            android:gravity="center_vertical"
+            android:hint="Password"
+            android:background="@drawable/edittext_style"
+            android:layout_below="@+id/username"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
-            android:gravity="center_vertical"
-            android:layout_below="@+id/username"
-            android:hint="Password" />
+            android:layout_marginTop="10dp" />
 
                 <!-- style="?android:attr/buttonStyleSmall" -->
 
         <Button
-            android:layout_width="230dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/login"
+            android:text="@string/signin"
             android:id="@+id/signIn"
-            android:background="@drawable/button_blue_background"
-            android:textColor="#fcfafa"
+            android:background="@drawable/button_background"
+            android:textColor="#424141"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textStyle="normal"
-            android:layout_above="@+id/SignUp"
-            android:layout_centerHorizontal="true"
-            android:layout_marginBottom="17dp" />
+            android:layout_marginTop="46dp"
+            android:layout_below="@+id/password"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="Sign Up"
+            android:text="@string/sign_in_help"
             android:id="@+id/SignUp"
+            android:textColor="#f3ecec"
+            android:textSize="12sp"
             android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginBottom="22dp" />
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true" />
 
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Forgot Password?"
-            android:textColor="#636262"
-            android:textColorHighlight="#fba336"
-            android:textStyle="normal"
-            android:id="@+id/forgotPassword"
-            android:typeface="sans"
-            android:clickable="true"
-            android:textSize="14sp"
-            android:layout_below="@+id/password"
-            android:layout_alignRight="@+id/password"
-            android:layout_alignEnd="@+id/password" />
-
-
+    <ImageView
+        android:layout_width="158dp"
+        android:layout_height="240dp"
+        android:id="@+id/imageView10"
+        android:src="@drawable/hcircle_logo"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
 
 
 </RelativeLayout>

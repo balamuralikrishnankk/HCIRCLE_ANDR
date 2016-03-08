@@ -20,9 +20,10 @@
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
         android:listSelector="#f9ce20"
-        android:indicatorRight="@dimen/abc_action_bar_content_inset_material"
         android:nestedScrollingEnabled="true"
-        android:scrollIndicators="right" />
+        android:scrollIndicators="right"
+        android:groupIndicator="@drawable/expanded_listview_background"
+        android:indicatorRight="@dimen/abc_action_bar_default_height_material" />
 
 </RelativeLayout>
 

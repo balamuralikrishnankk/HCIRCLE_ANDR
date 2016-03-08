@@ -49,4 +49,5 @@
     <string name="title_activity_show_template">ShowTemplateActivity</string>
     <string name="title_activity_user_landing">UserLandingActivity</string>
     <string name="messageHint">Type Your Message</string>
+    <string name="sign_in_help">Need help signing in?</string>
 </resources>

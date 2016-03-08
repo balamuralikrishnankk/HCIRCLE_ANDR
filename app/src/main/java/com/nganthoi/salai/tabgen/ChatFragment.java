@@ -51,14 +51,14 @@ public class ChatFragment extends Fragment {
         chatView = layoutInflater.inflate(R.layout.chat_layout,container,false);
         expandableListView = (ExpandableListView) chatView.findViewById(R.id.chatExpandableListView);
         //expandableListView.setIndicatorBounds(expandableListView.getRight()-150, expandableListView.getWidth()-GetDipsFromPixel(10));
-        /*DisplayMetrics metrics = new DisplayMetrics();
+        DisplayMetrics metrics = new DisplayMetrics();
         getActivity().getWindowManager().getDefaultDisplay().getMetrics(metrics);
-        int width = metrics.widthPixels;*/
+        int width = metrics.widthPixels;
         //this code for adjusting the group indicator into right side of the view
-        //expandableListView.setIndicatorBounds(width - GetDipsFromPixel(250), width - GetDipsFromPixel(150));
-        /*expandableListView.setIndicatorBounds(width - UIUtils.getPxFromDp(getActivity(), 40), width - UIUtils.getPxFromDp(getActivity(),20));
+        expandableListView.setIndicatorBounds(width - GetDipsFromPixel(250), width - GetDipsFromPixel(150));
+        //expandableListView.setIndicatorBounds(width - UIUtils.getPxFromDp(getActivity(), 40), width - UIUtils.getPxFromDp(getActivity(),20));
         //.setIndicatorBounds(width - UIUtils.getPxFromDp(getActivity(), 40), width - UIUtils.getPxFromDp(getActivity(),20));
-        */
+
         showChatLists(layoutInflater);
         /*(new Handler()).post(new Runnable() {
 

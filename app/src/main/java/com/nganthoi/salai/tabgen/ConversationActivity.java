@@ -95,11 +95,22 @@ public class ConversationActivity extends AppCompatActivity {
         TextView channel_label = (TextView) toolbar.findViewById(R.id.channel_name);
         //TextView team_label = (TextView) findViewById(R.id.teamName);
         messageEditText = (EditText) findViewById(R.id.messageEditText);
-        /*Setting progress dialog for uploading a file*/
+        messageEditText.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                if(copied_msg!=null){
+                    //CustomDialogManager cdm = new CustomDialogManager(context,null,"Paste ?",true);
+                    //if(cdm.showCustomDialogWithYesNoButton()){
+                    messageEditText.setText(copied_msg);
+                    Toast.makeText(context, "message pasted", Toast.LENGTH_SHORT).show();
+                    //}
+                    return true;
+                }
+                return false;
+            }
+        });
+        /*Setting progress dialog */
         progressDialog = new ProgressDialog(context);
-        progressDialog.setTitle("File Upload");
-        progressDialog.setMessage("Uploading your file.....");
-        progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         /*********************************************/
 
         messagesContainer = (ListView) findViewById(R.id.chatListView);
@@ -124,12 +135,24 @@ public class ConversationActivity extends AppCompatActivity {
 
                 if (mActionMode != null) {
                     //mActionMode.setTitle(String.valueOf(adapter.getSelectedCount())+ " selected");
+                    if(adapter.getSelectedCount()>1){
+                        mActionMode.finish();
+                    }
                 }
                 view.setSelected(true);
                 return true;
             }
         });
-
+        messagesContainer.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                if (mActionMode != null) {
+                    if(adapter.getSelectedCount()>1){
+                        mActionMode.finish();
+                    }
+                }
+            }
+        });
 
         /********************************************/
         backButton = (ImageView) toolbar.findViewById(R.id.back_button);
@@ -260,7 +283,7 @@ public class ConversationActivity extends AppCompatActivity {
             });
         loadHistory.start();
     }
-        //initControls();
+    //initControls();
     public  void openMsgDialog(){
         LayoutInflater inflater = LayoutInflater.from(context);
         View dialogView = inflater.inflate(R.layout.send_msg_layout, null);
@@ -466,7 +489,6 @@ public class ConversationActivity extends AppCompatActivity {
         String res = convertInputStreamToString(inputStream);
         if(receiver_responseCode==200 && res!=null) {
             chatHistory = new ArrayList<ChatMessage>();
-            //ChatMessage[] msg=new ChatMessage[100];
             try {
                 JSONArray jsonArray = new JSONArray(res);
                 JSONObject jsonObject;
@@ -581,6 +603,8 @@ public class ConversationActivity extends AppCompatActivity {
         @Override
         protected void onPreExecute(){
             //Toast.makeText(context,"Sending your file now...",Toast.LENGTH_LONG).show();
+            progressDialog.setTitle("File Upload");
+            progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
             progressDialog.setMessage("Uploading your file: "+fileLocation);
             progressDialog.show();
         }
@@ -776,7 +800,8 @@ public class ConversationActivity extends AppCompatActivity {
                             System.out.println("Id: " + jObj3.getString("id") + " Message: " + jObj3.getString("message"));
                             messageDate = "" + jObj3.getString("create_at");
                             System.out.println("Message Date: " + messageDate);
-                            if(!messageDate.equals(last_timetamp)) {//it means if the message is new, which is indicated by the last timestamp
+                            //!messageDate.equals(last_timetamp)
+                            if(Long.parseLong(messageDate)>Long.parseLong(last_timetamp) && jObj3.getLong("delete_at")==0) {//it means if the message is new, which is indicated by the last timestamp
                                 ChatMessage currentMsg = new ChatMessage();
                                 currentMsg.setId(jObj3.getString("id"));
                                 currentMsg.setMessage("" + jObj3.getString("message"));
@@ -834,6 +859,7 @@ public class ConversationActivity extends AppCompatActivity {
             switch(item.getItemId()){
                 case R.id.copy: copied_msg = msg.getMessage();
                     if(copied_msg!=null) Toast.makeText(getBaseContext(),"Message copied",Toast.LENGTH_SHORT).show();
+                    mActionMode.finish();
                     break;
                 case R.id.delete:ConnectAPIs deleteMsg =
                         new ConnectAPIs("http://"+ip+":8065/api/v1/channels/"+channel_id+"/post/"+msg.getId()+"/delete",token);
@@ -851,12 +877,14 @@ public class ConversationActivity extends AppCompatActivity {
 
                         }
                     }
+                    mActionMode.finish();
                     break;
                 case R.id.forward:
                 default:
                     CustomDialogManager customDialogManager = new CustomDialogManager(context,"Under Development",
                             "We are developing the appropriate action for this button",false);
                     customDialogManager.showCustomDialog();
+                    mActionMode.finish();
             }
             return false;
         }
