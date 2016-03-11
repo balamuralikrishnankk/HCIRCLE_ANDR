@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -11,49 +11,53 @@
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="com.nganthoi.salai.tabgen.UserLandingActivity"
     tools:showIn="@layout/app_bar_user_landing">
-    <!--
-    <Button
-        android:layout_width="300dp"
-        android:layout_height="120dp"
-        android:id="@+id/chat"
-        android:background="@drawable/landing_chat"
-        android:clickable="true"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true" />
-
-    <Button
-        android:layout_width="300dp"
-        android:layout_height="120dp"
-        android:id="@+id/landing_reference"
-        android:background="@drawable/landing_reference"
-        android:layout_below="@+id/chat"
-        android:layout_alignLeft="@+id/chat"
-        android:layout_alignStart="@+id/chat" />
-
-    <Button
-        android:layout_width="300dp"
-        android:layout_height="120dp"
-        android:id="@+id/landing_cme"
-        android:background="@drawable/landing_cme"
-        android:layout_below="@+id/landing_reference"
-        android:layout_alignLeft="@+id/landing_reference"
-        android:layout_alignStart="@+id/landing_reference" />
-
-    <Button
-        android:layout_width="300dp"
-        android:layout_height="120dp"
-        android:id="@+id/landing_news"
-        android:background="@drawable/landing_news"
-        android:layout_below="@+id/landing_cme"
-        android:layout_alignLeft="@+id/landing_cme"
-        android:layout_alignStart="@+id/landing_cme" />-->
-
-    <ListView
+    <RelativeLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/templatesLists"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:divider="@android:color/transparent"
-        android:dividerHeight="3dp"/>
-</RelativeLayout>
+        android:layout_height="wrap_content">
+        <Button
+            android:layout_width="350dp"
+            android:layout_height="140dp"
+            android:id="@+id/landing_chat"
+            android:background="@drawable/landing_chat"
+            android:clickable="true"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true" />
+
+        <Button
+            android:layout_width="160dp"
+            android:layout_height="140dp"
+            android:id="@+id/landing_reference"
+            android:background="@drawable/landing_ref"
+            android:layout_below="@+id/landing_chat"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="25dp" />
+
+        <Button
+            android:layout_width="160dp"
+            android:layout_height="140dp"
+            android:id="@+id/landing_cme"
+            android:background="@drawable/landing_cme"
+            android:layout_above="@+id/landing_news"
+            android:layout_alignRight="@+id/landing_chat"
+            android:layout_alignEnd="@+id/landing_chat" />
+
+        <Button
+            android:layout_width="350dp"
+            android:layout_height="140dp"
+            android:id="@+id/landing_news"
+            android:background="@drawable/landing_news"
+            android:layout_below="@+id/landing_reference"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="25dp" />
+        <!--
+        <ListView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/templatesLists"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:divider="@android:color/transparent"
+            android:dividerHeight="3dp"/>-->
+    </RelativeLayout>
+</ScrollView>

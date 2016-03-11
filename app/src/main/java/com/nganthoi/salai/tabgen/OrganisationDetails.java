@@ -92,7 +92,7 @@ public class OrganisationDetails {
         System.out.println(ip);
         List<String> list = new ArrayList<String>();
         try {
-            ConnectServer templateList = new ConnectServer("http://"+ip+"/TabGen/getTemplateListByRole.php?Role="+role+
+            ConnectServer templateList = new ConnectServer("http://"+ip+"/TabGenAdmin/getTemplateListByRole.php?Role="+role+
                     "&org_unit="+orgunit);
             String jsonStr = templateList.convertInputStreamToString(templateList.getData());
             //System.out.println(jsonStr);
@@ -124,7 +124,7 @@ public class OrganisationDetails {
         //Getting list of Organisation for a particular user
         List<String> list = new ArrayList<String>();
         try {
-            ConnectServer channelIdList = new ConnectServer("http://128.199.111.18/TabGen/getChannelsID.php");
+            ConnectServer channelIdList = new ConnectServer("http://128.199.111.18/TabGenAdmin/getChannelsID.php");
             String jsonStr = channelIdList.convertInputStreamToString(channelIdList.putData("user_id="+user_id));
             //System.out.println(jsonStr);
             if(jsonStr!=null){

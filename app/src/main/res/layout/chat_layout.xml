@@ -22,7 +22,6 @@
         android:listSelector="#f9ce20"
         android:nestedScrollingEnabled="true"
         android:scrollIndicators="right"
-        android:groupIndicator="@drawable/expanded_listview_background"
         android:indicatorRight="@dimen/abc_action_bar_default_height_material" />
 
 </RelativeLayout>

@@ -108,6 +108,7 @@
         <activity
             android:name=".UserLandingActivity"
             android:label="HCircle"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
 
         </activity>

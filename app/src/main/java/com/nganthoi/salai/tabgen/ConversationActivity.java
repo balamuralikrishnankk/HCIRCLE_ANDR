@@ -485,7 +485,7 @@ public class ConversationActivity extends AppCompatActivity {
     }
 
     private void loadHistory(){
-        InputStream inputStream = getData("http://"+ip+"/TabGen/getPost.php?channel_id="+channel_id);
+        InputStream inputStream = getData("http://"+ip+"/TabGenAdmin/getPost.php?channel_id="+channel_id);
         String res = convertInputStreamToString(inputStream);
         if(receiver_responseCode==200 && res!=null) {
             chatHistory = new ArrayList<ChatMessage>();

@@ -179,19 +179,19 @@ public class CreateUserActivity extends AppCompatActivity {
     }
     /* Input validation method*/
     public Boolean validate(){
-        if(ET_Username.getText().toString()+""==""){
+        if(ET_Username.getText().toString().equals("")){
             response.setText("User name is blank, please fill it");
             return false;
         }
-        else if(ET_Password.getText().toString()+""==""){
+        else if(ET_Password.getText().toString().equals("")){
             response.setText("Password is blank, please fill it");
             return false;
         }
-        else if(ET_ConfPasswd.getText().toString()+""==""){
+        else if(ET_ConfPasswd.getText().toString().equals("")){
             response.setText("Confirm Password is blank, please fill it");
             return false;
         }
-        else if(ET_Email.getText().toString()+""==""){
+        else if(ET_Email.getText().toString().equals("")){
             response.setText("Email is blank, please fill it");
             return false;
         }
@@ -240,7 +240,7 @@ public class CreateUserActivity extends AppCompatActivity {
         @Override
         protected String doInBackground(String... data){
             SharedPreference sp = new SharedPreference();
-            connServ = new ConnectServer("http://"+sp.getServerIP_Preference(_context)+"/TabGen/createUsers.php");
+            connServ = new ConnectServer("http://"+sp.getServerIP_Preference(_context)+"/TabGenAdmin/createUsers.php");
             onProgressUpdate();
             return connServ.convertInputStreamToString(connServ.putData(data[0]));
         }

@@ -61,21 +61,21 @@ public class TemplateAdapter extends BaseAdapter{
         String template_name = getItem(position);
         switch(template_name){
             case "Chat Template"://check if Chat template exist
-                templateHolder.templateButton.setImageResource(R.drawable.landing_chat);
+                templateHolder.templateButton.setImageResource(R.drawable.landing_chat1);
                 //iv.setBackgroundDrawable(context.getResources().getDrawable(i.img));
                 //templateHolder.templateButton.setBackgroundDrawable(convertView.getContext().getDrawable(R.drawable.landing_chat));
 
                 break;
             case "Reference Template":
-                templateHolder.templateButton.setImageResource(R.drawable.landing_reference);
+                templateHolder.templateButton.setImageResource(R.drawable.landing_ref1);
                 //templateHolder.templateButton.setBackgroundDrawable(convertView.getContext().getDrawable(R.drawable.landing_reference));
                 break;
             case "CME Template":
-                templateHolder.templateButton.setImageResource(R.drawable.landing_cme);
+                templateHolder.templateButton.setImageResource(R.drawable.landing_cme1);
                 //templateHolder.templateButton.setBackgroundDrawable(convertView.getContext().getDrawable(R.drawable.landing_cme));
                 break;
             case "Latest News Template":
-                templateHolder.templateButton.setImageResource(R.drawable.landing_news);
+                templateHolder.templateButton.setImageResource(R.drawable.landing_news1);
                 //templateHolder.templateButton.setBackgroundDrawable(convertView.getContext().getDrawable(R.drawable.landing_news));
                 break;
         }
