@@ -267,7 +267,7 @@ public class UserLandingActivity extends AppCompatActivity
         @Override
         protected List<String> doInBackground(String... role){
             publishProgress("");
-            list = OrganisationDetails.getListOfTemplates(_context,role[0],"neworgunit");
+            list = OrganisationDetails.getListOfTemplates(_context,role[0],sp.getTeamNamePreference(_context));
             return list;
         }
         protected void onProgressUpdate(String str){

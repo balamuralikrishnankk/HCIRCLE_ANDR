@@ -35,16 +35,16 @@ public class MainActivity extends Activity {
     Button signin;
     Intent intent;
     Context context=this;
-    String msg,uname, passwd, team,server_ip,copied_msg=null;
-    EditText username,password,team_name;
+    String msg,uname, passwd, team,server_ip;
+    EditText username,password;
     //CheckBox show_password;
     ProgressDialog progressDialog;
-    TextView forgotPassword;
+    //TextView forgotPassword;
     InputStream is;
     ConnectServer cs;
     SharedPreference sp;
-    TextView signup;
-    ImageView backButton;
+    //TextView signup;
+    //ImageView backButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,18 +68,20 @@ public class MainActivity extends Activity {
                     try {
                         uname = username.getText().toString().trim();
                         passwd = password.getText().toString().trim();
-                        team = "neworgunit";
+                        new GetTeamName().execute(uname);
                         sp.saveServerIP_Preference(context,server_ip);
-                        JSONObject jsonObject= new JSONObject();
-                        jsonObject.put("name",team);
-                        jsonObject.put("username", uname);//username.getText().toString()
-                        jsonObject.put("password", passwd);//password.getText().toString()
-                        progressDialog = new ProgressDialog(v.getContext());
-                        progressDialog.setMessage("Wait Please.....");
-                        progressDialog.setIndeterminate(true);
-                        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-                        UserLogin ul = new UserLogin();
-                        ul.execute(jsonObject);
+                        if(team!=null) {
+                            JSONObject jsonObject = new JSONObject();
+                            jsonObject.put("name", team);
+                            jsonObject.put("username", uname);//username.getText().toString()
+                            jsonObject.put("password", passwd);//password.getText().toString()
+                            progressDialog = new ProgressDialog(v.getContext());
+                            progressDialog.setMessage("Wait Please.....");
+                            progressDialog.setIndeterminate(true);
+                            progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                            UserLogin ul = new UserLogin();
+                            ul.execute(jsonObject);
+                        }
                     }catch(Exception e){
                         e.printStackTrace();
                     }
@@ -168,7 +170,7 @@ public class MainActivity extends Activity {
         @Override
         protected  void onPostExecute(String json){
             if(json!=null){
-                JSONObject jObj=null;
+                JSONObject jObj;
                 try {
                     jObj=new JSONObject(json);
                     if(cs.responseCode==200){
@@ -219,7 +221,6 @@ public class MainActivity extends Activity {
             {
                 CustomDialogManager error = new CustomDialogManager(context,"Server Problem","Failed to connect server",false);
                 error.showCustomDialog();
-
             }
             progressDialog.dismiss();
         }
@@ -233,4 +234,44 @@ public class MainActivity extends Activity {
         return matcher.matches();
     }
 
+    public class GetTeamName extends AsyncTask<String,Void,String>{
+        @Override
+        protected void onPreExecute(){
+
+        }
+        @Override
+        protected String doInBackground(String... username){
+
+            ConnectServer cs = new ConnectServer("http://"+server_ip+"/TabGenAdmin/getTeamName.php?username="+username[0]);
+            String result = cs.convertInputStreamToString(cs.getData());
+            return result;
+        }
+        @Override
+        protected void onPostExecute(String result){
+            if(result!=null){
+                JSONObject jsonObject;
+                try{
+                    jsonObject = new JSONObject(result);
+                    if(cs.responseCode==200){
+                        boolean state = jsonObject.getBoolean("state");
+                        if(state){
+                            team = jsonObject.getString("team_name");
+                            sp.saveTeamnamePreference(context,team);
+                        }
+                        else{
+                            Toast.makeText(getBaseContext(),jsonObject.getString("message"),Toast.LENGTH_LONG).show();
+                            team=null;
+                        }
+                    }
+                    else{
+                        team=null;
+                    }
+                }
+                catch(JSONException jsonException){
+                    System.out.println("Team Exception: "+jsonException.toString());
+                }
+            }
+            else team=null;
+        }
+    }
 }

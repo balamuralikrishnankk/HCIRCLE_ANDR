@@ -15,8 +15,71 @@ public class SharedPreference {
     public static final String TOKEN_KEY="TOKEN_KEY";
     public static final String SERVER_IP="SERVER_IP";
     public static final String IP_KEY="IP_KEY";
+    public static final String TEAM_NAME="TEAM_NAME";
+    public static final String TEAM_KEY="TEAM_KEY";
     public SharedPreference(){
         super();
+    }
+    /*********************************************************************************/
+    public void saveChannelPreference(Context context,String text){
+        SharedPreferences sharedPreferences;
+        SharedPreferences.Editor editor;
+        sharedPreferences = context.getSharedPreferences(CHANNEL_NAME,Context.MODE_PRIVATE);
+        editor = sharedPreferences.edit();
+        editor.putString(CHANNEL_KEY,text);
+        editor.commit();
+    }
+    public String getChannelPreference(Context context){
+        String text;
+        SharedPreferences sharedPreferences;
+        sharedPreferences = context.getSharedPreferences(CHANNEL_NAME,Context.MODE_PRIVATE);
+        text = sharedPreferences.getString(CHANNEL_KEY,null);
+        return text;
+    }
+    /**************************************************************************/
+
+    public void saveServerIP_Preference(Context context,String text){
+        SharedPreferences sharedPreferences;
+        SharedPreferences.Editor editor;
+        sharedPreferences = context.getSharedPreferences(SERVER_IP,Context.MODE_PRIVATE);
+        editor = sharedPreferences.edit();
+        editor.putString(IP_KEY,text);
+        editor.commit();
+    }
+    public String getServerIP_Preference(Context context){
+        String text;
+        SharedPreferences sharedPreferences;
+        sharedPreferences = context.getSharedPreferences(SERVER_IP,Context.MODE_PRIVATE);
+        text = sharedPreferences.getString(IP_KEY,null);
+        return text;
+    }
+    /*************************************************************************************/
+
+    public void saveTeamnamePreference(Context context,String text){
+        SharedPreferences sharedPreferences;
+        SharedPreferences.Editor editor;
+        sharedPreferences = context.getSharedPreferences(TEAM_NAME,Context.MODE_PRIVATE);
+        editor = sharedPreferences.edit();
+        editor.putString(TEAM_KEY,text);
+        editor.commit();
+    }
+
+    public String getTeamNamePreference(Context context){
+        String text;
+        SharedPreferences sharedPreferences;
+        sharedPreferences = context.getSharedPreferences(TEAM_NAME,Context.MODE_PRIVATE);
+        text = sharedPreferences.getString(TEAM_KEY,null);
+        return text;
+    }
+    /******************************************************************************************/
+    /*************************************************************************/
+    public void savePreference(Context context,String key,String value){
+        SharedPreferences sharedPreferences;
+        SharedPreferences.Editor editor;
+        sharedPreferences = context.getSharedPreferences(PREFERENCE_NAME,Context.MODE_APPEND);
+        editor = sharedPreferences.edit();
+        editor.putString(key,value);
+        editor.commit();
     }
 
     public void savePreference(Context context,String text){
@@ -28,31 +91,14 @@ public class SharedPreference {
         editor.commit();
     }
 
-    public void saveChannelPreference(Context context,String text){
+    public String getPreference(Context context){
+        String text;
         SharedPreferences sharedPreferences;
-        SharedPreferences.Editor editor;
-        sharedPreferences = context.getSharedPreferences(CHANNEL_NAME,Context.MODE_PRIVATE);
-        editor = sharedPreferences.edit();
-        editor.putString(CHANNEL_KEY,text);
-        editor.commit();
-    }
-    public void saveServerIP_Preference(Context context,String text){
-        SharedPreferences sharedPreferences;
-        SharedPreferences.Editor editor;
-        sharedPreferences = context.getSharedPreferences(SERVER_IP,Context.MODE_PRIVATE);
-        editor = sharedPreferences.edit();
-        editor.putString(IP_KEY,text);
-        editor.commit();
-    }
-
-    public void savePreference(Context context,String key,String value){
-        SharedPreferences sharedPreferences;
-        SharedPreferences.Editor editor;
         sharedPreferences = context.getSharedPreferences(PREFERENCE_NAME,Context.MODE_APPEND);
-        editor = sharedPreferences.edit();
-        editor.putString(key,value);
-        editor.commit();
+        text = sharedPreferences.getString(PREFERENCE_KEY,null);
+        return text;
     }
+    /*************************************************************************************/
 
     public void saveTokenPreference(Context context,String text){
         SharedPreferences sharedPreferences;
@@ -71,28 +117,8 @@ public class SharedPreference {
         return text;
     }
 
-    public String getServerIP_Preference(Context context){
-        String text;
-        SharedPreferences sharedPreferences;
-        sharedPreferences = context.getSharedPreferences(SERVER_IP,Context.MODE_PRIVATE);
-        text = sharedPreferences.getString(IP_KEY,null);
-        return text;
-    }
+    /**************************************************************************************************/
 
-    public String getPreference(Context context){
-        String text;
-        SharedPreferences sharedPreferences;
-        sharedPreferences = context.getSharedPreferences(PREFERENCE_NAME,Context.MODE_APPEND);
-        text = sharedPreferences.getString(PREFERENCE_KEY,null);
-        return text;
-    }
-    public String getChannelPreference(Context context){
-        String text;
-        SharedPreferences sharedPreferences;
-        sharedPreferences = context.getSharedPreferences(CHANNEL_NAME,Context.MODE_PRIVATE);
-        text = sharedPreferences.getString(CHANNEL_KEY,null);
-        return text;
-    }
 
     public String getPreference(Context context,String key){
         String text;
