@@ -37,11 +37,13 @@ import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 //import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -209,7 +211,10 @@ public class ConversationActivity extends AppCompatActivity {
                             System.out.println("unable to get user extra information");
                         }
                         /*************************************************************/
-                        loadHistory();//for loading entire chat history
+                        //loadHistory();//for loading entire chat history
+                        LoadChatHistory loadChatHistory = new LoadChatHistory("http://"+ip+
+                                "/TabGenAdmin/getPost.php?channel_id=\"+channel_id",context);
+                        loadChatHistory.execute("");
                     }
                 });
             }
@@ -282,68 +287,6 @@ public class ConversationActivity extends AppCompatActivity {
                 }
             });
         loadHistory.start();
-    }
-    //initControls();
-    public  void openMsgDialog(){
-        LayoutInflater inflater = LayoutInflater.from(context);
-        View dialogView = inflater.inflate(R.layout.send_msg_layout, null);
-        //final Dialog dialog = new Dialog(context);
-        //dialog.setContentView(R.layout.send_msg_layout);
-        AlertDialog.Builder adb = new AlertDialog.Builder(context);
-        adb.setView(dialogView);
-        final EditText msgText = (EditText) dialogView.findViewById(R.id.msgText);
-        //TextView msgBox = (TextView) dialogView.findViewById(R.id.textViewMessage);
-        ImageButton sendMsgButton = (ImageButton) dialogView.findViewById(R.id.sendMsgButton);
-        //msgBox.setText(channel_title);
-        //System.out.println("Channel name: "+channel_title);
-        adb.setCancelable(true);
-        final AlertDialog alertDialog = adb.create();
-        //alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        alertDialog.show();
-        sendMsgButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String messageText = msgText.getText().toString();
-                if (TextUtils.isEmpty(messageText) || messageText.trim().length() == 0) {
-                    return;
-                }
-                try {
-                    JSONObject jsonObject = new JSONObject();
-
-                    if (filenames != null && filenames.length() > 0) {
-                        jsonObject.put("filenames", filenames);
-                    }
-                    jsonObject.put("channel_id", channel_id);
-                    jsonObject.put("root_id", "");
-                    jsonObject.put("parent_id", "");
-                    jsonObject.put("Message", messageText);
-                    sendMyMessage(jsonObject);
-                    filenames = null;
-                    alertDialog.dismiss();
-                } catch (Exception e) {
-                    System.out.print("Message Sending failed: " + e.toString());
-                    Snackbar.make(v, "Oops! Message Sending failed", Snackbar.LENGTH_LONG)
-                            .setAction("Action", null).show();
-                }
-            }
-        });
-        msgText.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                //
-                if(copied_msg!=null){
-                    //CustomDialogManager cdm = new CustomDialogManager(context,null,"Paste ?",true);
-                    //if(cdm.showCustomDialogWithYesNoButton()){
-                    msgText.setText(copied_msg);
-                    Toast.makeText(context, "message pasted", Toast.LENGTH_SHORT).show();
-                    //}
-                    return true;
-                }
-                else return false;
-            }
-        });
-
-        //dialog.show();
     }
 
     @Override
@@ -483,11 +426,75 @@ public class ConversationActivity extends AppCompatActivity {
     private void scroll() {
         messagesContainer.setSelection(messagesContainer.getCount() - 1);
     }
+    class LoadChatHistory extends AsyncTask<String,Void,InputStream>{
+        URL api_url;
+        String response_message;
+        int response_code;
+        HttpURLConnection conn;
+        ProgressDialog progressDialog;
+        InputStream isr=null;
+        Context context;
+        LoadChatHistory(String api_link,Context _context){
+            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+            StrictMode.setThreadPolicy(policy);
+            try{
+                api_url = new URL(api_link);
+                context=_context;
+                progressDialog = new ProgressDialog(context);
+                progressDialog.setMessage("Loading messages....");
+                progressDialog.setIndeterminate(true);
+                progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            }catch(MalformedURLException e){
+                System.out.println("Inappropriate URL: "+e.toString());
+            }
+        }
+        @Override
+        protected void onPreExecute(){
+            progressDialog.show();
+        }
+        @Override
+        protected InputStream doInBackground(String... str){
+            try{
+                conn = (HttpURLConnection) api_url.openConnection();
+                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                conn.setRequestMethod("GET");
+                conn.setDoInput(true);
+                conn.setDoOutput(true);
+                conn.connect();
+                response_code = conn.getResponseCode();
+                response_message = conn.getResponseMessage();
+                System.out.println("Response Code: " + response_code + "\nResponse message: " + response_message);
+                if(response_code == 200/*HttpURLConnection.HTTP_OK*/){
+                    isr = new BufferedInputStream(conn.getInputStream());
+                }
+                else {
+                    isr = new BufferedInputStream(conn.getErrorStream());
+                }
+            }catch(IOException e){
+                System.out.println("IOException in loading message");
+                isr=null;
+            }
+            return isr;
+        }
+        @Override
+        protected void onPostExecute(InputStream inputStream){
+            String result;
+            if(inputStream!=null){
+                result = convertInputStreamToString(inputStream);
+                if(response_code==200){
+                    readChatHistory(result);
+                }
+            }
+            progressDialog.dismiss();
+        }
 
-    private void loadHistory(){
-        InputStream inputStream = getData("http://"+ip+"/TabGenAdmin/getPost.php?channel_id="+channel_id);
-        String res = convertInputStreamToString(inputStream);
-        if(receiver_responseCode==200 && res!=null) {
+    }//end class LoadChatHistory
+
+
+    private void readChatHistory(String res){
+        //InputStream inputStream = getData("http://"+ip+"/TabGenAdmin/getPost.php?channel_id="+channel_id);
+        //String res = convertInputStreamToString(inputStream);
+        if(/*receiver_responseCode==200 &&*/ res!=null) {
             chatHistory = new ArrayList<ChatMessage>();
             try {
                 JSONArray jsonArray = new JSONArray(res);
@@ -526,36 +533,6 @@ public class ConversationActivity extends AppCompatActivity {
                 scroll();
             }*/
         }
-    }
-
-    public InputStream getData(String api_link){
-        InputStream isr=null;
-        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-        StrictMode.setThreadPolicy(policy);
-        try{
-            api_url = new URL(api_link);
-            conn = (HttpURLConnection) api_url.openConnection();
-            conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-            conn.setRequestMethod("GET");
-            conn.setDoInput(true);
-            conn.setDoOutput(true);
-            conn.connect();
-            receiver_responseCode = conn.getResponseCode();
-            responseMessage = conn.getResponseMessage();
-            System.out.println("Response Code: " + receiver_responseCode + "\nResponse message: " + responseMessage);
-            if(receiver_responseCode == 200/*HttpURLConnection.HTTP_OK*/){
-                isr = new BufferedInputStream(conn.getInputStream());
-            }
-            else {
-                isr = new BufferedInputStream(conn.getErrorStream());
-            }
-        }catch(Exception e){
-            e.printStackTrace();
-            errorMessage = e.toString();
-            receiver_responseCode=-1;
-            System.out.println("Exception occurs here: " + e.toString());
-        }
-        return isr;
     }
 
     public String convertInputStreamToString(InputStream inputStream){

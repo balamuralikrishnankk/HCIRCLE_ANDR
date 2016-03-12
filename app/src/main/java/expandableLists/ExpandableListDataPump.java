@@ -37,8 +37,9 @@ public class ExpandableListDataPump {
 
         channelList = new ArrayList<String>();
         try {
-            ConnectServer channelIdList = new ConnectServer("http://"+sp.getServerIP_Preference(context)+"/TabGenAdmin/getChannelsID.php");
-            String jsonStr = channelIdList.convertInputStreamToString(channelIdList.putData("user_id="+user_id));
+            ConnectServer channelIdList = new ConnectServer("http://"+sp.getServerIP_Preference(context)+"/TabGenAdmin/getChannelsID.php"+
+                    "?user_id="+user_id);
+            String jsonStr = channelIdList.convertInputStreamToString(channelIdList.getData());
             //sp.savePreference(context,"CHANNEL_DETAILS",jsonStr);
             sp.saveChannelPreference(context,jsonStr);
             //System.out.println(jsonStr);

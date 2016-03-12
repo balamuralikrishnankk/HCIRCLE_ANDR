@@ -125,9 +125,9 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         ImageView imageTitleView = (ImageView) convertView.findViewById(R.id.teamLogo);//channel Icon
         listTitleTextView.setTypeface(null, Typeface.BOLD);
         listTitleTextView.setText(listTitle);//setting channel title
+        imageTitleView.setImageResource(R.drawable.hiranandani_hospital);
+        /*if(listTitle.equals("Hiranandani Hospital")){
 
-        if(listTitle.equals("Hiranandani Hospital")){
-            imageTitleView.setImageResource(R.drawable.hiranandani_hospital);
 
         }
         else if(listTitle.equals("Lilavati Hospital")){
@@ -135,7 +135,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         }
         else if(listTitle.equals("neworgunit")){
             imageTitleView.setImageResource(R.drawable.lilavati_hospital);
-        }
+        }*/
         return convertView;
     }
 
