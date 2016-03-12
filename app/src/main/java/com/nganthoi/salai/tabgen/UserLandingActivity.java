@@ -119,17 +119,20 @@ public class UserLandingActivity extends AppCompatActivity
         });
         /**Getting template listview Id**/
         //templateList = (ListView) findViewById(R.id.templatesLists);
-        list = new ArrayList<String>();
+
         /* Getting user details from the shared preference */
         sp = new SharedPreference();
         String user_details = sp.getPreference(_context);
+
         try {
             JSONObject jsonObject = new JSONObject(user_details);
             username.setText(jsonObject.getString("username"));
             usermail.setText(jsonObject.getString("email"));
             role = jsonObject.getString("roles");
             userrole.setText(role);
-            new GetTemplates().execute(role);
+            String team = sp.getTeamNamePreference(_context);
+            System.out.println("Team Name: " + team + "\n");
+            new GetTemplates(team).execute(role);
 
         } catch (JSONException e) {
             System.out.println("Exception :" + e.toString());
@@ -253,7 +256,10 @@ public class UserLandingActivity extends AppCompatActivity
         alertDialog.show();
     }
     public class GetTemplates extends AsyncTask<String,String,List<String>>{
-
+        String team_name;
+        public GetTemplates(String team){
+            team_name = team;
+        }
         @Override
         protected void onPreExecute(){
             progressDialog = new ProgressDialog(_context);
@@ -267,7 +273,7 @@ public class UserLandingActivity extends AppCompatActivity
         @Override
         protected List<String> doInBackground(String... role){
             publishProgress("");
-            list = OrganisationDetails.getListOfTemplates(_context,role[0],sp.getTeamNamePreference(_context));
+            list = OrganisationDetails.getListOfTemplates(_context,role[0],team_name);
             return list;
         }
         protected void onProgressUpdate(String str){
@@ -278,6 +284,7 @@ public class UserLandingActivity extends AppCompatActivity
         protected void onPostExecute(List<String> list){
             /*templateAdapter = new TemplateAdapter(UserLandingActivity.this,list);
             templateList.setAdapter(templateAdapter);*/
+            stringArray = new ArrayList<String>();
             for(int i=0;i<list.size();i++){
                 stringArray.add(list.get(i));
                 switch(list.get(i)){

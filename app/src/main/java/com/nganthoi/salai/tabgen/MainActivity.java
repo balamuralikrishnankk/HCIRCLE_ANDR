@@ -35,7 +35,7 @@ public class MainActivity extends Activity {
     Button signin;
     Intent intent;
     Context context=this;
-    String msg,uname, passwd, team,server_ip;
+    String msg,uname, passwd, team_name,server_ip;
     EditText username,password;
     //CheckBox show_password;
     ProgressDialog progressDialog;
@@ -65,23 +65,22 @@ public class MainActivity extends Activity {
             public void onClick(View v) {
 
                 if(isValidate()==true){
+                    progressDialog = new ProgressDialog(v.getContext());
+                    progressDialog.setMessage("Wait Please.....");
+                    progressDialog.setIndeterminate(true);
+                    progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                    progressDialog.show();
                     try {
                         uname = username.getText().toString().trim();
                         passwd = password.getText().toString().trim();
-                        new GetTeamName().execute(uname);
-                        sp.saveServerIP_Preference(context,server_ip);
-                        if(team!=null) {
-                            JSONObject jsonObject = new JSONObject();
-                            jsonObject.put("name", team);
-                            jsonObject.put("username", uname);//username.getText().toString()
-                            jsonObject.put("password", passwd);//password.getText().toString()
-                            progressDialog = new ProgressDialog(v.getContext());
-                            progressDialog.setMessage("Wait Please.....");
-                            progressDialog.setIndeterminate(true);
-                            progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-                            UserLogin ul = new UserLogin();
-                            ul.execute(jsonObject);
-                        }
+                        sp.saveServerIP_Preference(context, server_ip);
+                        JSONObject jsonObject = new JSONObject();
+                        //jsonObject.put("name", team_name);
+                        jsonObject.put("username", uname);//username.getText().toString()
+                        jsonObject.put("password", passwd);//password.getText().toString()
+                        UserLogin ul = new UserLogin();
+                        ul.execute(jsonObject);
+
                     }catch(Exception e){
                         e.printStackTrace();
                     }
@@ -156,10 +155,24 @@ public class MainActivity extends Activity {
 
         @Override
         protected String doInBackground(JSONObject... jObj){
+            String result;
             String ip = sp.getServerIP_Preference(context);
-            cs = new ConnectServer("http://"+ip+":8065/api/v1/users/login");
-            is = cs.putData(jObj[0]);
-            String result = cs.convertInputStreamToString(is);
+            GetTeamName getTeam = new GetTeamName();
+            team_name = getTeam.getTeam(getTeam.connectServer(uname));
+            System.out.println("Team name: "+team_name);
+            if(team_name!=null) {
+                sp.saveTeamNamePreference(context, team_name);
+                try {
+                    jObj[0].put("name", team_name);
+                    cs = new ConnectServer("http://" + ip + ":8065/api/v1/users/login");
+                    is = cs.putData(jObj[0]);
+                    result = cs.convertInputStreamToString(is);
+                }catch(JSONException e){
+                    System.out.println("Unable to put team name:"+e.toString());
+                    result=null;
+                }
+            }
+            else result=null;
             return result;
         }
 
@@ -234,29 +247,25 @@ public class MainActivity extends Activity {
         return matcher.matches();
     }
 
-    public class GetTeamName extends AsyncTask<String,Void,String>{
-        @Override
-        protected void onPreExecute(){
+    public class GetTeamName{
+        ConnectServer conn;
+        String team=null;
 
-        }
-        @Override
-        protected String doInBackground(String... username){
-
-            ConnectServer cs = new ConnectServer("http://"+server_ip+"/TabGenAdmin/getTeamName.php?username="+username[0]);
-            String result = cs.convertInputStreamToString(cs.getData());
+        protected String connectServer(String username){
+            conn = new ConnectServer("http://"+server_ip+"/TabGenAdmin/getTeamName.php?username="+username);
+            String result = conn.convertInputStreamToString(conn.getData());
             return result;
         }
-        @Override
-        protected void onPostExecute(String result){
+
+        protected String getTeam(String result){
             if(result!=null){
                 JSONObject jsonObject;
                 try{
                     jsonObject = new JSONObject(result);
-                    if(cs.responseCode==200){
+                    if(conn.responseCode==200){
                         boolean state = jsonObject.getBoolean("state");
                         if(state){
                             team = jsonObject.getString("team_name");
-                            sp.saveTeamnamePreference(context,team);
                         }
                         else{
                             Toast.makeText(getBaseContext(),jsonObject.getString("message"),Toast.LENGTH_LONG).show();
@@ -272,6 +281,7 @@ public class MainActivity extends Activity {
                 }
             }
             else team=null;
+            return team;
         }
     }
 }

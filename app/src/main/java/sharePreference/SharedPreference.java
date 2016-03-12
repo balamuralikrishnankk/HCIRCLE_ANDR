@@ -55,7 +55,7 @@ public class SharedPreference {
     }
     /*************************************************************************************/
 
-    public void saveTeamnamePreference(Context context,String text){
+    public void saveTeamNamePreference(Context context,String text){
         SharedPreferences sharedPreferences;
         SharedPreferences.Editor editor;
         sharedPreferences = context.getSharedPreferences(TEAM_NAME,Context.MODE_PRIVATE);
