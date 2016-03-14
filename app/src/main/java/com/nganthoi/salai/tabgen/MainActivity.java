@@ -155,24 +155,43 @@ public class MainActivity extends Activity {
 
         @Override
         protected String doInBackground(JSONObject... jObj){
-            String result;
+            String result=null;
             String ip = sp.getServerIP_Preference(context);
             GetTeamName getTeam = new GetTeamName();
-            team_name = getTeam.getTeam(getTeam.connectServer(uname));
-            System.out.println("Team name: "+team_name);
-            if(team_name!=null) {
-                sp.saveTeamNamePreference(context, team_name);
+            String team_details = getTeam.getTeamDetails(uname);
+            if(team_details!=null) {
+                JSONObject jsonObject;
                 try {
-                    jObj[0].put("name", team_name);
-                    cs = new ConnectServer("http://" + ip + ":8065/api/v1/users/login");
-                    is = cs.putData(jObj[0]);
-                    result = cs.convertInputStreamToString(is);
-                }catch(JSONException e){
-                    System.out.println("Unable to put team name:"+e.toString());
-                    result=null;
+                    jsonObject = new JSONObject(team_details);
+                    if (getTeam.conn.responseCode == 200) {
+                        boolean state = jsonObject.getBoolean("state");
+                        if (state) {
+                            team_name = jsonObject.getString("team_name");
+                        } else {
+                            //Toast.makeText(getBaseContext(),jsonObject.getString("message"),Toast.LENGTH_LONG).show();
+                            team_name = null;
+                        }
+                    } else {
+                        team_name = null;
+                    }
+                } catch (JSONException jsonException) {
+                    System.out.println("Team Exception: " + jsonException.toString());
+                    team_name = null;
+                }
+                if(team_name!=null) {
+                    System.out.println("Team name: " + team_name);
+                    sp.saveTeamNamePreference(context, team_name);
+                    try {
+                        jObj[0].put("name", team_name);
+                        cs = new ConnectServer("http://" + ip + ":8065/api/v1/users/login");
+                        is = cs.putData(jObj[0]);
+                        result = cs.convertInputStreamToString(is);
+                    } catch (JSONException e) {
+                        System.out.println("Unable to put team name:" + e.toString());
+                        result = null;
+                    }
                 }
             }
-            else result=null;
             return result;
         }
 
@@ -181,58 +200,61 @@ public class MainActivity extends Activity {
         }
 
         @Override
-        protected  void onPostExecute(String json){
-            if(json!=null){
-                JSONObject jObj;
-                try {
-                    jObj=new JSONObject(json);
-                    if(cs.responseCode==200){
-                        progressDialog.dismiss();
-                        sp.savePreference(context, json);
-                        //Getting Token Id
-                        String TokenId = cs.conn.getHeaderField("Token");
-                        if(TokenId==null) System.out.println("Token is null");
-                        else {
-                            System.out.println("Token ID: "+TokenId);
-                            //Toast.makeText(MainActivity.this,"Token ID: "+TokenId,Toast.LENGTH_SHORT).show();
-                            sp.saveTokenPreference(context,TokenId);
-                        }
-                        System.out.println(jObj.getString("id"));
-                        switch(jObj.getString("roles")){
-                            case "system_admin":
-                                intent = new Intent(context,SuperAdminActivity.class);
-                                //Toast.makeText(MainActivity.this, "Sucessfully login as Superadmin...", Toast.LENGTH_LONG).show();
-                                startActivity(intent);
-                                finish();
-                                break;
-                            case "admin":
-                                intent = new Intent(context,Admin.class);
-                                //Toast.makeText(context,"Sucessfully login as Admin...",Toast.LENGTH_LONG).show();
-                                startActivity(intent);
-                                finish();
-                                break;
-                            default:
-                                intent = new Intent(context,UserLandingActivity.class);
-                                Toast.makeText(context,"You have sucessfully login",Toast.LENGTH_LONG).show();
-                                startActivity(intent);
-                                finish();
-                                break;
+        protected  void onPostExecute(String json) {
+            if (team_name != null) {
+                if (json != null) {
+                    JSONObject jObj;
+                    try {
+                        jObj = new JSONObject(json);
+                        if (cs.responseCode == 200) {
+                            progressDialog.dismiss();
+                            sp.savePreference(context, json);
+                            //Getting Token Id
+                            String TokenId = cs.conn.getHeaderField("Token");
+                            if (TokenId == null) System.out.println("Token is null");
+                            else {
+                                System.out.println("Token ID: " + TokenId);
+                                //Toast.makeText(MainActivity.this,"Token ID: "+TokenId,Toast.LENGTH_SHORT).show();
+                                sp.saveTokenPreference(context, TokenId);
+                            }
+                            System.out.println(jObj.getString("id"));
+                            switch (jObj.getString("roles")) {
+                                case "system_admin":
+                                    intent = new Intent(context, SuperAdminActivity.class);
+                                    //Toast.makeText(MainActivity.this, "Sucessfully login as Superadmin...", Toast.LENGTH_LONG).show();
+                                    startActivity(intent);
+                                    finish();
+                                    break;
+                                case "admin":
+                                    intent = new Intent(context, Admin.class);
+                                    //Toast.makeText(context,"Sucessfully login as Admin...",Toast.LENGTH_LONG).show();
+                                    startActivity(intent);
+                                    finish();
+                                    break;
+                                default:
+                                    intent = new Intent(context, UserLandingActivity.class);
+                                    Toast.makeText(context, "You have sucessfully login", Toast.LENGTH_LONG).show();
+                                    startActivity(intent);
+                                    finish();
+                                    break;
                             /*default:
                                 Toast.makeText(context,"Status Code: "+jObj.getInt("Status_code"),Toast.LENGTH_LONG).show();*/
+                            }
+                        } else {
+                            progressDialog.dismiss();
+                            CustomDialogManager error = new CustomDialogManager(context, "Login Failed", jObj.getString("message"), false);
+                            error.showCustomDialog();
                         }
+                    } catch (JSONException e) {
+                        System.out.println("JSON Exception occurs here: " + e.toString());
                     }
-                    else {
-                        progressDialog.dismiss();
-                        CustomDialogManager error = new CustomDialogManager(context,"Login Failed",jObj.getString("message"),false);
-                        error.showCustomDialog();
-                    }
-                }catch(JSONException e){
-                    System.out.println("JSON Exception occurs here: " + e.toString());
+                } else {
+                    CustomDialogManager error = new CustomDialogManager(context, "Server Problem", "Failed to connect server", false);
+                    error.showCustomDialog();
                 }
-            }
-            else
-            {
-                CustomDialogManager error = new CustomDialogManager(context,"Server Problem","Failed to connect server",false);
+            }else{
+                CustomDialogManager error = new CustomDialogManager(context, "Invalid Username",
+                        "the username you have entered does not belong to any team", false);
                 error.showCustomDialog();
             }
             progressDialog.dismiss();
@@ -249,39 +271,10 @@ public class MainActivity extends Activity {
 
     public class GetTeamName{
         ConnectServer conn;
-        String team=null;
-
-        protected String connectServer(String username){
+        protected String getTeamDetails(String username){
             conn = new ConnectServer("http://"+server_ip+"/TabGenAdmin/getTeamName.php?username="+username);
             String result = conn.convertInputStreamToString(conn.getData());
             return result;
-        }
-
-        protected String getTeam(String result){
-            if(result!=null){
-                JSONObject jsonObject;
-                try{
-                    jsonObject = new JSONObject(result);
-                    if(conn.responseCode==200){
-                        boolean state = jsonObject.getBoolean("state");
-                        if(state){
-                            team = jsonObject.getString("team_name");
-                        }
-                        else{
-                            Toast.makeText(getBaseContext(),jsonObject.getString("message"),Toast.LENGTH_LONG).show();
-                            team=null;
-                        }
-                    }
-                    else{
-                        team=null;
-                    }
-                }
-                catch(JSONException jsonException){
-                    System.out.println("Team Exception: "+jsonException.toString());
-                }
-            }
-            else team=null;
-            return team;
         }
     }
 }
