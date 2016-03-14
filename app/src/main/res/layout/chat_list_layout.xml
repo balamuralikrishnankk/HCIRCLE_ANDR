@@ -60,7 +60,7 @@
                         android:id="@+id/chatReplies"
                         android:src="@drawable/icon_reply_gray"
                         android:adjustViewBounds="true"
-                        android:background="@drawable/my_custom_selector"
+                        android:background="@drawable/icon_reply_gray"
                         android:layout_alignBottom="@+id/sender"
                         android:layout_toLeftOf="@+id/chatLove"
                         android:layout_toStartOf="@+id/chatLove"
