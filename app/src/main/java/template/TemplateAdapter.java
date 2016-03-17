@@ -67,11 +67,11 @@ public class TemplateAdapter extends BaseAdapter{
 
                 break;
             case "Reference Template":
-                templateHolder.templateButton.setImageResource(R.drawable.landing_ref1);
+                templateHolder.templateButton.setImageResource(R.drawable.landing_reference_bg);
                 //templateHolder.templateButton.setBackgroundDrawable(convertView.getContext().getDrawable(R.drawable.landing_reference));
                 break;
             case "CME Template":
-                templateHolder.templateButton.setImageResource(R.drawable.landing_cme1);
+                templateHolder.templateButton.setImageResource(R.drawable.landing_cme_bg);
                 //templateHolder.templateButton.setBackgroundDrawable(convertView.getContext().getDrawable(R.drawable.landing_cme));
                 break;
             case "Latest News Template":

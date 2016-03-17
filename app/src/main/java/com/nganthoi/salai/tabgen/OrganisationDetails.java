@@ -85,17 +85,16 @@ public class OrganisationDetails {
         /**********************************************************/
     }
 
-    public static List<String> getListOfTemplates(Context context,String role,String orgunit){
+    public static List<String> getListOfTemplates(Context context,String user_id){
         //Getting list of Organisation for a particular user
         SharedPreference sp = new SharedPreference();
         String ip = sp.getServerIP_Preference(context);
         System.out.println(ip);
         List<String> list = new ArrayList<String>();
         try {
-            ConnectServer templateList = new ConnectServer("http://"+ip+"/TabGenAdmin/getTemplateListByRole.php?Role="+role+
-                    "&org_unit="+orgunit);
+            ConnectServer templateList = new ConnectServer("http://"+ip+"/TabGenAdmin/getTemplateListByUserId.php?user_id="+user_id);
             String jsonStr = templateList.convertInputStreamToString(templateList.getData());
-            //System.out.println(jsonStr);
+            System.out.println(jsonStr);
             if(jsonStr!=null){
                 try {
                     JSONArray jsonArray = new JSONArray(jsonStr);
@@ -150,27 +149,34 @@ public class OrganisationDetails {
         return list;
         /**********************************************************/
     }
-    public static String getChannelId(String channel_name,Context context){
+    public static String getChannelId(String team_name,String channel_name,Context context){
         String channel_id=null;
         SharedPreference sp = new SharedPreference();
         String channelDetails = sp.getChannelPreference(context);
         if(channelDetails!=null) {
             System.out.println("Channel is not null: " + channelDetails);
             try {
-                JSONArray jsonArray = new JSONArray(channelDetails);
-                JSONObject jsonObject;
-                for (int i = 0; i < jsonArray.length(); i++) {
-                    jsonObject = jsonArray.getJSONObject(i);
-               /*System.out.println("Title: "+title+"------->Channel name: "+jsonObject.getString("Channel_name")+" ---->ID: "+
-                        jsonObject.getString("Channel_ID"));*/
-                    if (channel_name.equals(jsonObject.getString("Channel_name"))) {
-                        channel_id = jsonObject.getString("Channel_ID");// setting channel id
-                        break;
-                    }
-                }
+                JSONObject jsonObj1 = new JSONObject(channelDetails);
+                JSONArray jsonArray1 = jsonObj1.getJSONArray("team_list");
+                JSONArray jsonArray2 = jsonObj1.getJSONArray("channels");
+                for(int i=0;i<jsonArray1.length();i++){//for every item(team) in the team list
+                    JSONObject jsonObj2 = jsonArray1.getJSONObject(i);
+                    String teamName = jsonObj2.getString("team_name");//getting the team name
 
-            } catch (Exception e) {
-                System.out.println(e.toString());
+                    JSONObject jsonObj3 = jsonArray2.getJSONObject(i);//getting json objects for channels
+                    JSONArray jsonArray3 = jsonObj3.getJSONArray(teamName);
+                    //List<String> channelList = new ArrayList<String>();
+                    for(int j=0;j<jsonArray3.length();j++){
+                        JSONObject jsonObj4 = jsonArray3.getJSONObject(j);
+                        if (channel_name.equals(jsonObj4.getString("Channel_name")) && team_name.equals(teamName)) {
+                            channel_id = jsonObj4.getString("Channel_ID");// setting channel id
+                            break;
+                        }
+                    }
+                    if(channel_id!=null) break;
+                }
+            }catch(Exception e){
+                System.out.print("Channel ID Exception occurs here: " + e.toString());
             }
         }
         return channel_id;

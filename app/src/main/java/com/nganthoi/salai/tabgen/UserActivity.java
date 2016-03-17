@@ -124,6 +124,9 @@ public class UserActivity extends AppCompatActivity
 
             }
         });
+
+
+        //mViewPager.setCurrentItem(tab_position);
     }
 
     @Override
@@ -192,22 +195,23 @@ public class UserActivity extends AppCompatActivity
         }
         @Override
         protected void onPostExecute(List<String> list){
-
             setupViewPager(mViewPager, list);
             tabLayout.setupWithViewPager(mViewPager);
-
             try{
                 setTabLayoutIcons(tabLayout,list);
             }catch(Exception e){
                 System.out.println("Layout Exception: "+e.toString());
             }
+
+            Intent mIntent = getIntent();
+            int tab_position = mIntent.getIntExtra(UserLandingActivity.tabPosition,0);
+            tabLayout.getTabAt(tab_position).select();
             progressDialog.dismiss();
              /*
             tabLayout.getTabAt(0).setIcon(R.drawable.chat);
             tabLayout.getTabAt(1).setIcon(R.drawable.reference);
             tabLayout.getTabAt(2).setIcon(R.drawable.cme);
             tabLayout.getTabAt(3).setIcon(R.drawable.latest_news);*/
-
         }
     }
 
@@ -272,7 +276,6 @@ public class UserActivity extends AppCompatActivity
         }catch(Exception e){
             System.out.println("Exception: "+e.toString());
         }
-
     }
 
     class ViewPagerAdapter extends FragmentPagerAdapter {

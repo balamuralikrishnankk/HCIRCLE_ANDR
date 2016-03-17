@@ -137,7 +137,7 @@ public class ConversationActivity extends AppCompatActivity {
 
                 if (mActionMode != null) {
                     //mActionMode.setTitle(String.valueOf(adapter.getSelectedCount())+ " selected");
-                    if(adapter.getSelectedCount()>1){
+                    if (adapter.getSelectedCount() > 1) {
                         mActionMode.finish();
                     }
                 }
@@ -167,6 +167,7 @@ public class ConversationActivity extends AppCompatActivity {
         Intent intent = getIntent();
         channel_title = intent.getStringExtra(ChatFragment.CHANNEL_NAME);
         channel_label.setText(channel_title);
+        String team_name = intent.getStringExtra(ChatFragment.TEAM_NAME);
         /*
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -179,8 +180,8 @@ public class ConversationActivity extends AppCompatActivity {
         sp = new SharedPreference();
         //channelDetails = sp.getChannelPreference(context);
         token=sp.getTokenPreference(context);
-        channel_id=OrganisationDetails.getChannelId(channel_title,context);
-        System.out.println("Channel Title: "+channel_title+" ---> Channel Id: "+channel_id+"\nToken Id: "+token);
+        channel_id=OrganisationDetails.getChannelId(team_name,channel_title,context);
+        System.out.println("Team Name: "+team_name+" Channel Title: "+channel_title+" ---> Channel Id: "+channel_id+"\nToken Id: "+token);
         String user_details=sp.getPreference(context);
         try{
             JSONObject jObj = new JSONObject(user_details);
@@ -213,7 +214,7 @@ public class ConversationActivity extends AppCompatActivity {
                         /*************************************************************/
                         //loadHistory();//for loading entire chat history
                         LoadChatHistory loadChatHistory = new LoadChatHistory("http://"+ip+
-                                "/TabGenAdmin/getPost.php?channel_id=\"+channel_id",context);
+                                "/TabGenAdmin/getPost.php?channel_id="+channel_id,context);
                         loadChatHistory.execute("");
                     }
                 });
@@ -426,6 +427,7 @@ public class ConversationActivity extends AppCompatActivity {
     private void scroll() {
         messagesContainer.setSelection(messagesContainer.getCount() - 1);
     }
+
     class LoadChatHistory extends AsyncTask<String,Void,InputStream>{
         URL api_url;
         String response_message;
@@ -495,6 +497,7 @@ public class ConversationActivity extends AppCompatActivity {
         //InputStream inputStream = getData("http://"+ip+"/TabGenAdmin/getPost.php?channel_id="+channel_id);
         //String res = convertInputStreamToString(inputStream);
         if(/*receiver_responseCode==200 &&*/ res!=null) {
+            //System.out.println(res);
             chatHistory = new ArrayList<ChatMessage>();
             try {
                 JSONArray jsonArray = new JSONArray(res);

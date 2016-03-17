@@ -8,12 +8,6 @@
     android:paddingBottom="10dp"
     android:paddingRight="10dp"
     android:paddingTop="10dp">
-    <ImageView
-        android:id="@+id/teamLogo"
-        android:layout_gravity="center"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:src="@drawable/ic_launcher" />
 
     <TextView
         android:id="@+id/listTitle"
@@ -26,7 +20,8 @@
         android:layout_gravity="center_vertical"
         android:textSize="20sp"
         android:text="@string/ListTitle"
-        android:textStyle="normal" />
+        android:textStyle="normal"
+        android:paddingLeft="5dp" />
     <!--
         android:paddingRight="?android:attr/expandableListPreferredItemIndicatorRight"-->
 

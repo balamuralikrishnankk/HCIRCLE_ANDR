@@ -83,14 +83,5 @@
             android:layout_alignParentEnd="true" />
 
 
-    <ImageView
-        android:layout_width="158dp"
-        android:layout_height="240dp"
-        android:id="@+id/imageView10"
-        android:src="@drawable/hcircle_logo"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true" />
-
-
 </RelativeLayout>
 <!--</ScrollView>-->

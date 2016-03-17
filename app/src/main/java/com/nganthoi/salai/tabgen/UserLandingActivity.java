@@ -40,14 +40,17 @@ public class UserLandingActivity extends AppCompatActivity
     String role;//user role
     Context _context=this;
     List<String> list;
-    //ListView templateList;
-    //ArrayAdapter<String> arrayAdapter;
-    //TemplateAdapter templateAdapter;
+    ListView templateList;
+    ArrayAdapter<String> arrayAdapter;
+    TemplateAdapter templateAdapter;
     public final static String templateListExtra="TEMPLATE_LIST";
+    public final static String tabPosition="TAB_POSITION";
     ArrayList<String> stringArray;
     ProgressDialog progressDialog;
     Boolean chat_available=false,cme_available=false,ref_available=false,news_available=false;
-    Button chat,cme,ref,news;
+    //Button chat,cme,ref,news;
+    String team,user_id;//team name
+    Intent intent;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,7 +64,7 @@ public class UserLandingActivity extends AppCompatActivity
         TextView userrole = (TextView) findViewById(R.id.user_role);
 
         //Getting Button Ids
-        chat = (Button) findViewById(R.id.landing_chat);
+        /*chat = (Button) findViewById(R.id.landing_chat);
         chat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -116,9 +119,9 @@ public class UserLandingActivity extends AppCompatActivity
                     Toast.makeText(getBaseContext(),"You don't have appropriate permission",Toast.LENGTH_LONG).show();
                 }
             }
-        });
+        });*/
         /**Getting template listview Id**/
-        //templateList = (ListView) findViewById(R.id.templatesLists);
+        templateList = (ListView) findViewById(R.id.templatesLists);
 
         /* Getting user details from the shared preference */
         sp = new SharedPreference();
@@ -129,10 +132,11 @@ public class UserLandingActivity extends AppCompatActivity
             username.setText(jsonObject.getString("username"));
             usermail.setText(jsonObject.getString("email"));
             role = jsonObject.getString("roles");
+            user_id=jsonObject.getString("id");
             userrole.setText(role);
-            String team = sp.getTeamNamePreference(_context);
+            team = sp.getTeamNamePreference(_context);
             System.out.println("Team Name: " + team + "\n");
-            new GetTemplates(team).execute(role);
+            new GetTemplates(team).execute(user_id);
 
         } catch (JSONException e) {
             System.out.println("Exception :" + e.toString());
@@ -143,41 +147,52 @@ public class UserLandingActivity extends AppCompatActivity
         templateList.setAdapter(arrayAdapter);*/
 
         //adding on click event for a particular item
-        /*templateList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        templateList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String template_name = templateAdapter.getItem(position);
                 switch(template_name){
                     case "Chat Template"://check if Chat template exist
                         Toast.makeText(_context,"You have selected chat template",Toast.LENGTH_SHORT).show();
-                        Intent intent = new Intent(_context,UserActivity.class);
-                        for(int i=0;i<list.size();i++){
-                            stringArray.add(list.get(i));
-                        }
+                        intent = new Intent(_context,UserActivity.class);
                         intent.putStringArrayListExtra(templateListExtra,stringArray);
+                        intent.putExtra(tabPosition, position);
                         startActivity(intent);
                         break;
                     case "Reference Template":
                         Toast.makeText(_context,"You have selected reference template",Toast.LENGTH_SHORT).show();
+                        intent = new Intent(_context,UserActivity.class);
+                        intent.putStringArrayListExtra(templateListExtra,stringArray);
+                        intent.putExtra(tabPosition, position);
+                        startActivity(intent);
                         break;
                     case "CME Template":
                         Toast.makeText(_context,"You have selected CME template",Toast.LENGTH_SHORT).show();
+                        intent = new Intent(_context,UserActivity.class);
+                        intent.putStringArrayListExtra(templateListExtra,stringArray);
+                        intent.putExtra(tabPosition, position);
+                        startActivity(intent);
                         break;
                     case "Latest News Template":
                         Toast.makeText(_context,"You have selected News template",Toast.LENGTH_SHORT).show();
+                        intent = new Intent(_context,UserActivity.class);
+                        intent.putStringArrayListExtra(templateListExtra,stringArray);
+                        intent.putExtra(tabPosition, position);
+                        startActivity(intent);
                         break;
                 }
             }
         });
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+        Button refreshTemplate = (Button) findViewById(R.id.refreshTemplate);
+        refreshTemplate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "No action yet.", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                /*Snackbar.make(view, "No action yet.", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();*/
+                new GetTemplates(team).execute(user_id);
             }
-        });*/
+        });
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -271,9 +286,9 @@ public class UserLandingActivity extends AppCompatActivity
         }
 
         @Override
-        protected List<String> doInBackground(String... role){
+        protected List<String> doInBackground(String... user_id){
             publishProgress("");
-            list = OrganisationDetails.getListOfTemplates(_context,role[0],team_name);
+            list = OrganisationDetails.getListOfTemplates(_context,user_id[0]);
             return list;
         }
         protected void onProgressUpdate(String str){
@@ -282,11 +297,12 @@ public class UserLandingActivity extends AppCompatActivity
 
         @Override
         protected void onPostExecute(List<String> list){
-            /*templateAdapter = new TemplateAdapter(UserLandingActivity.this,list);
-            templateList.setAdapter(templateAdapter);*/
+            templateAdapter = new TemplateAdapter(UserLandingActivity.this,list);
+            templateList.setAdapter(templateAdapter);
             stringArray = new ArrayList<String>();
             for(int i=0;i<list.size();i++){
                 stringArray.add(list.get(i));
+                System.out.println("Template name "+i+": "+list.get(i));
                 switch(list.get(i)){
                     case "Chat Template"://check if Chat template exist
                         chat_available=true;

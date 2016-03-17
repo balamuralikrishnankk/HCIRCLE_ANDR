@@ -61,10 +61,10 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         }
         TextView expandedListTextView = (TextView) convertView
                 .findViewById(R.id.expandedListItem);
-        ImageView imageList = (ImageView) convertView.findViewById(R.id.imageView2);
-        TextView count = (TextView) convertView.findViewById(R.id.count);//count the number of members for each channel in organisation unit
+        //ImageView imageList = (ImageView) convertView.findViewById(R.id.imageView2);
+        //TextView count = (TextView) convertView.findViewById(R.id.count);//count the number of members for each channel in organisation unit
         expandedListTextView.setText(expandedListText);
-        count.setText("0");
+        //count.setText("0");
         /*
         SharedPreference sp = new SharedPreference();
         String token = sp.getTokenPreference(context);
@@ -84,12 +84,12 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
             System.out.println("unable to get user extra information");
         }
         /*************************************************************/
-        if(expandedListText.equals("Town Square")){
+        /*if(expandedListText.equals("Town Square")){
             imageList.setImageResource(R.drawable.laboratory_group);
         }
         else if(expandedListText.equals("Off-Topic")){
             imageList.setImageResource(R.drawable.cardiology_dept);
-        }
+        }*/
         return convertView;
     }
 
@@ -122,10 +122,10 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
             convertView = layoutInflater.inflate(R.layout.list_group, null);
         }
         TextView listTitleTextView = (TextView) convertView.findViewById(R.id.listTitle);//channel Title
-        ImageView imageTitleView = (ImageView) convertView.findViewById(R.id.teamLogo);//channel Icon
+        //ImageView imageTitleView = (ImageView) convertView.findViewById(R.id.teamLogo);//channel Icon
         listTitleTextView.setTypeface(null, Typeface.BOLD);
         listTitleTextView.setText(listTitle);//setting channel title
-        imageTitleView.setImageResource(R.drawable.hiranandani_hospital);
+        //imageTitleView.setImageResource(R.drawable.hiranandani_hospital);
         /*if(listTitle.equals("Hiranandani Hospital")){
 
 

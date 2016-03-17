@@ -14,8 +14,9 @@ import sharePreference.SharedPreference;
 
 public class ExpandableListDataPump {
     static String user_id="";
-    static String teamName;
+    static String team_name;
     static List<String> channelList;
+    static List<String> channel_ids;
 
 
     public static HashMap<String, List<String>> getData(Context context) {
@@ -35,7 +36,6 @@ public class ExpandableListDataPump {
         //getting list of Channel lists
         //channelList = OrganisationDetails.getListOfChannel(user_id);
 
-        channelList = new ArrayList<String>();
         try {
             ConnectServer channelIdList = new ConnectServer("http://"+sp.getServerIP_Preference(context)+"/TabGenAdmin/getChannelsID.php"+
                     "?user_id="+user_id);
@@ -45,15 +45,23 @@ public class ExpandableListDataPump {
             //System.out.println(jsonStr);
             if(jsonStr!=null){
                 try {
-                    JSONArray jsonArray = new JSONArray(jsonStr);
-                    if (channelIdList.responseCode == 200) {
-                        JSONObject jsonObject;
-                        for(int i=0;i<jsonArray.length();i++){
-                            jsonObject = jsonArray.getJSONObject(i);
-                            if(jsonObject.getString("Channel_name").trim().length()!=0)
-                                channelList.add(jsonObject.getString("Channel_name"));
-                            teamName=(jsonObject.getString("Team_Name"));
+                    JSONObject jsonObj1 = new JSONObject(jsonStr);
+                    JSONArray jsonArray1 = jsonObj1.getJSONArray("team_list");
+                    JSONArray jsonArray2 = jsonObj1.getJSONArray("channels");
+                    for(int i=0;i<jsonArray1.length();i++){//for every item(team) in the team list
+                        JSONObject jsonObj2 = jsonArray1.getJSONObject(i);
+                        team_name = jsonObj2.getString("team_name");//getting the team name
+
+                        JSONObject jsonObj3 = jsonArray2.getJSONObject(i);//getting json objects for channels
+                        JSONArray jsonArray3 = jsonObj3.getJSONArray(team_name);
+                        channelList = new ArrayList<String>();
+                        channel_ids = new ArrayList<String>();
+                        for(int j=0;j<jsonArray3.length();j++){
+                            JSONObject jsonObj4 = jsonArray3.getJSONObject(j);
+                            channelList.add(jsonObj4.getString("Channel_name"));
+                            channel_ids.add(jsonObj4.getString("Channel_ID"));
                         }
+                        expandableListDetail.put(team_name, channelList);
                     }
                 }catch(Exception e){
                     System.out.print("An Exception occurs here: "+e.toString());
@@ -83,7 +91,7 @@ public class ExpandableListDataPump {
         sublist4.add("Cardiology Dept");
         sublist4.add("ENT");
         */
-        expandableListDetail.put(teamName, channelList);
+
         //expandableListDetail.put("Lilavati Hospital", sublist2);
 
         //expandableListDetail.put("RIMS", sublist3);
