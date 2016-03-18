@@ -23,13 +23,13 @@
 
     <include layout="@layout/content_user_landing" />
 
-    <Button
+    <!--<Button
         android:id="@+id/refreshTemplate"
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
         android:src="@drawable/refresh_button"
-        android:background="@drawable/refresh_button" />
+        android:background="@drawable/refresh_button" />-->
 
 </android.support.design.widget.CoordinatorLayout>

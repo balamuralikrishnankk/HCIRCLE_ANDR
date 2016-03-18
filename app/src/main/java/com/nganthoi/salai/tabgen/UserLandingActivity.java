@@ -106,10 +106,6 @@ public class UserLandingActivity extends AppCompatActivity
                     startActivity(intent);
             }
         });
-        /**Getting template listview Id**/
-        //templateList = (ListView) findViewById(R.id.templatesLists);
-
-        /* Getting user details from the shared preference */
         sp = new SharedPreference();
         String user_details = sp.getPreference(_context);
 
@@ -127,58 +123,6 @@ public class UserLandingActivity extends AppCompatActivity
         } catch (JSONException e) {
             System.out.println("Exception :" + e.toString());
         }
-
-
-        /*arrayAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1, list);
-        templateList.setAdapter(arrayAdapter);*/
-
-        //adding on click event for a particular item
-        /*templateList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String template_name = templateAdapter.getItem(position);
-                switch(template_name){
-                    case "Chat Template"://check if Chat template exist
-                        Toast.makeText(_context,"You have selected chat template",Toast.LENGTH_SHORT).show();
-                        intent = new Intent(_context,UserActivity.class);
-                        intent.putStringArrayListExtra(templateListExtra,stringArray);
-                        intent.putExtra(tabPosition, position);
-                        startActivity(intent);
-                        break;
-                    case "Reference Template":
-                        Toast.makeText(_context,"You have selected reference template",Toast.LENGTH_SHORT).show();
-                        intent = new Intent(_context,UserActivity.class);
-                        intent.putStringArrayListExtra(templateListExtra,stringArray);
-                        intent.putExtra(tabPosition, position);
-                        startActivity(intent);
-                        break;
-                    case "CME Template":
-                        Toast.makeText(_context,"You have selected CME template",Toast.LENGTH_SHORT).show();
-                        intent = new Intent(_context,UserActivity.class);
-                        intent.putStringArrayListExtra(templateListExtra,stringArray);
-                        intent.putExtra(tabPosition, position);
-                        startActivity(intent);
-                        break;
-                    case "Latest News Template":
-                        Toast.makeText(_context,"You have selected News template",Toast.LENGTH_SHORT).show();
-                        intent = new Intent(_context,UserActivity.class);
-                        intent.putStringArrayListExtra(templateListExtra,stringArray);
-                        intent.putExtra(tabPosition, position);
-                        startActivity(intent);
-                        break;
-                }
-            }
-        });*/
-
-        Button refreshTemplate = (Button) findViewById(R.id.refreshTemplate);
-        refreshTemplate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                /*Snackbar.make(view, "No action yet.", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();*/
-                new GetTemplates(team).execute(user_id);
-            }
-        });
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -287,7 +231,6 @@ public class UserLandingActivity extends AppCompatActivity
             stringArray = new ArrayList<String>();
             for(int i=0;i<list.size();i++){
                 stringArray.add(list.get(i));
-                //System.out.println("Template name "+i+": "+list.get(i));
             }
             progressDialog.dismiss();
         }

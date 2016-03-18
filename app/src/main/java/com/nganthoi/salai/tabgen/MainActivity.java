@@ -148,6 +148,8 @@ public class MainActivity extends Activity {
     }
 
     public class UserLogin extends AsyncTask<JSONObject,Void,String>{
+
+        String error_msg;
         @Override
         protected void onPreExecute(){
             progressDialog.show();
@@ -170,9 +172,11 @@ public class MainActivity extends Activity {
                         } else {
                             //Toast.makeText(getBaseContext(),jsonObject.getString("message"),Toast.LENGTH_LONG).show();
                             team_name = null;
+                            error_msg = jsonObject.getString("message");
                         }
                     } else {
                         team_name = null;
+                        error_msg = "An unknown problem occurs, please try again later.";
                     }
                 } catch (JSONException jsonException) {
                     System.out.println("Team Exception: " + jsonException.toString());
@@ -254,7 +258,7 @@ public class MainActivity extends Activity {
                 }
             }else{
                 CustomDialogManager error = new CustomDialogManager(context, "Invalid Username",
-                        "the username you have entered does not belong to any team", false);
+                        error_msg, false);
                 error.showCustomDialog();
             }
             progressDialog.dismiss();
