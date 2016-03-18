@@ -40,15 +40,14 @@ public class UserLandingActivity extends AppCompatActivity
     String role;//user role
     Context _context=this;
     List<String> list;
-    ListView templateList;
-    ArrayAdapter<String> arrayAdapter;
-    TemplateAdapter templateAdapter;
+    //ListView templateList;
+    //ArrayAdapter<String> arrayAdapter;
+    //TemplateAdapter templateAdapter;
     public final static String templateListExtra="TEMPLATE_LIST";
     public final static String tabPosition="TAB_POSITION";
     ArrayList<String> stringArray;
     ProgressDialog progressDialog;
-    Boolean chat_available=false,cme_available=false,ref_available=false,news_available=false;
-    //Button chat,cme,ref,news;
+    Button chat,cme,ref,news;
     String team,user_id;//team name
     Intent intent;
     @Override
@@ -64,64 +63,51 @@ public class UserLandingActivity extends AppCompatActivity
         TextView userrole = (TextView) findViewById(R.id.user_role);
 
         //Getting Button Ids
-        /*chat = (Button) findViewById(R.id.landing_chat);
+        chat = (Button) findViewById(R.id.landing_chat);
         chat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(chat_available){
                     Intent intent = new Intent(_context,UserActivity.class);
                     intent.putStringArrayListExtra(templateListExtra,stringArray);
+                    intent.putExtra(tabPosition, 0);
                     startActivity(intent);
-                }
-                else{
-                    Toast.makeText(getBaseContext(),"You don't have appropriate permission",Toast.LENGTH_LONG).show();
-                }
             }
         });
-        cme = (Button) findViewById(R.id.landing_cme);
-        cme.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(cme_available){
-                    Intent intent = new Intent(_context,UserActivity.class);
-                    intent.putStringArrayListExtra(templateListExtra,stringArray);
-                    startActivity(intent);
-                }
-                else{
-                    Toast.makeText(getBaseContext(),"You don't have appropriate permission",Toast.LENGTH_LONG).show();
-                }
-            }
-        });
+
         ref = (Button) findViewById(R.id.landing_reference);
         ref.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(ref_available){
                     Intent intent = new Intent(_context,UserActivity.class);
                     intent.putStringArrayListExtra(templateListExtra,stringArray);
+                    intent.putExtra(tabPosition, 1);
                     startActivity(intent);
-                }
-                else{
-                    Toast.makeText(getBaseContext(),"You don't have appropriate permission",Toast.LENGTH_LONG).show();
-                }
             }
         });
+
+        cme = (Button) findViewById(R.id.landing_cme);
+        cme.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                    Intent intent = new Intent(_context,UserActivity.class);
+                    intent.putStringArrayListExtra(templateListExtra,stringArray);
+                    intent.putExtra(tabPosition, 2);
+                    startActivity(intent);
+            }
+        });
+
         news = (Button) findViewById(R.id.landing_news);
         news.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(news_available){
                     Intent intent = new Intent(_context,UserActivity.class);
                     intent.putStringArrayListExtra(templateListExtra,stringArray);
+                    intent.putExtra(tabPosition, 3);
                     startActivity(intent);
-                }
-                else{
-                    Toast.makeText(getBaseContext(),"You don't have appropriate permission",Toast.LENGTH_LONG).show();
-                }
             }
-        });*/
+        });
         /**Getting template listview Id**/
-        templateList = (ListView) findViewById(R.id.templatesLists);
+        //templateList = (ListView) findViewById(R.id.templatesLists);
 
         /* Getting user details from the shared preference */
         sp = new SharedPreference();
@@ -147,7 +133,7 @@ public class UserLandingActivity extends AppCompatActivity
         templateList.setAdapter(arrayAdapter);*/
 
         //adding on click event for a particular item
-        templateList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        /*templateList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String template_name = templateAdapter.getItem(position);
@@ -182,7 +168,7 @@ public class UserLandingActivity extends AppCompatActivity
                         break;
                 }
             }
-        });
+        });*/
 
         Button refreshTemplate = (Button) findViewById(R.id.refreshTemplate);
         refreshTemplate.setOnClickListener(new View.OnClickListener() {
@@ -282,7 +268,6 @@ public class UserLandingActivity extends AppCompatActivity
             progressDialog.setIndeterminate(true);
             progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
             progressDialog.show();
-            chat_available=false;cme_available=false;ref_available=false;news_available=false;
         }
 
         @Override
@@ -297,26 +282,12 @@ public class UserLandingActivity extends AppCompatActivity
 
         @Override
         protected void onPostExecute(List<String> list){
-            templateAdapter = new TemplateAdapter(UserLandingActivity.this,list);
-            templateList.setAdapter(templateAdapter);
+            //templateAdapter = new TemplateAdapter(UserLandingActivity.this,list);
+            //templateList.setAdapter(templateAdapter);
             stringArray = new ArrayList<String>();
             for(int i=0;i<list.size();i++){
                 stringArray.add(list.get(i));
-                System.out.println("Template name "+i+": "+list.get(i));
-                switch(list.get(i)){
-                    case "Chat Template"://check if Chat template exist
-                        chat_available=true;
-                        break;
-                    case "Reference Template":
-                        ref_available=true;
-                        break;
-                    case "CME Template":
-                        cme_available=true;
-                        break;
-                    case "Latest News Template":
-                        news_available=true;
-                        break;
-                }
+                //System.out.println("Template name "+i+": "+list.get(i));
             }
             progressDialog.dismiss();
         }

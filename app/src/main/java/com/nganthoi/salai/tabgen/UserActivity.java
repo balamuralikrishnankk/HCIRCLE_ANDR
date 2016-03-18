@@ -98,25 +98,38 @@ public class UserActivity extends AppCompatActivity
         tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                switch (tab.getText().toString()) {
-                    case "chat":
-                        Toast.makeText(_context, "Chat is selected", Toast.LENGTH_SHORT).show();
+                switch (tab.getPosition()) {
+                    case 0:
+                        tab.setIcon(R.drawable.chat_orange);
                         break;
-                    case "reference":
-                        Toast.makeText(_context, "Reference is selected", Toast.LENGTH_SHORT).show();
+                    case 1:
+                        tab.setIcon(R.drawable.ref_orange);
                         break;
-                    case "cme":
-                        Toast.makeText(_context, "CME is selected", Toast.LENGTH_SHORT).show();
+                    case 2:
+                        tab.setIcon(R.drawable.cme_orange);
                         break;
-                    case "news":
-                        Toast.makeText(_context, "News is selected", Toast.LENGTH_SHORT).show();
+                    case 3:
+                        tab.setIcon(R.drawable.news_orange);
                         break;
                 }
             }
 
             @Override
             public void onTabUnselected(TabLayout.Tab tab) {
-
+                switch (tab.getPosition()) {
+                    case 0:
+                        tab.setIcon(R.drawable.icon_chat);
+                        break;
+                    case 1:
+                        tab.setIcon(R.drawable.icon_reference);
+                        break;
+                    case 2:
+                        tab.setIcon(R.drawable.icon_cme);
+                        break;
+                    case 3:
+                        tab.setIcon(R.drawable.icon_news);
+                        break;
+                }
             }
 
             @Override
@@ -197,51 +210,92 @@ public class UserActivity extends AppCompatActivity
         protected void onPostExecute(List<String> list){
             setupViewPager(mViewPager, list);
             tabLayout.setupWithViewPager(mViewPager);
-            try{
+            /*try{
                 setTabLayoutIcons(tabLayout,list);
             }catch(Exception e){
                 System.out.println("Layout Exception: "+e.toString());
-            }
+            }*/
+            tabLayout.getTabAt(0).setIcon(R.drawable.icon_chat);
+            tabLayout.getTabAt(1).setIcon(R.drawable.icon_reference);
+            tabLayout.getTabAt(2).setIcon(R.drawable.icon_cme);
+            tabLayout.getTabAt(3).setIcon(R.drawable.icon_news);
 
             Intent mIntent = getIntent();
             int tab_position = mIntent.getIntExtra(UserLandingActivity.tabPosition,0);
             tabLayout.getTabAt(tab_position).select();
             progressDialog.dismiss();
-             /*
-            tabLayout.getTabAt(0).setIcon(R.drawable.chat);
-            tabLayout.getTabAt(1).setIcon(R.drawable.reference);
-            tabLayout.getTabAt(2).setIcon(R.drawable.cme);
-            tabLayout.getTabAt(3).setIcon(R.drawable.latest_news);*/
+
         }
     }
 
     private void setupViewPager(ViewPager viewPager,List<String> list) {
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
-
-        for(int i=0;i<list.size();i++){
+        Boolean chat_available=false,cme_available=false,ref_available=false,news_available=false;
+        for(int i=0;i<list.size();i++) {
             /*Adding tabs and fragments according to the Templates from the server*/
-            switch(list.get(i)){
+            switch (list.get(i)) {
                 case "Chat Template"://check if Chat template exist
-                    adapter.addFragment(new ChatFragment(), "CHAT");
+                    chat_available = true;
                     break;
                 case "Reference Template":
-                    adapter.addFragment(new ReferenceFragment(), "REFERENCE");
+                    ref_available = true;
                     break;
                 case "CME Template":
-                    adapter.addFragment(new CmeFragment(),"CME");
+                    cme_available = true;
                     break;
                 case "Latest News Template":
-                    adapter.addFragment(new LatestNewsFragment(),"LATEST NEWS");
+                    news_available = true;
                     break;
             }
+        }
+        if(chat_available){
+            adapter.addFragment(new ChatFragment(), "");
+        }else{
+            adapter.addFragment(new UnauthorisedFragment(), "");
+        }
+        if(ref_available) {
+            adapter.addFragment(new ReferenceFragment(), "");
+        }else{
+            adapter.addFragment(new UnauthorisedFragment(), "");
+        }
+        if(cme_available) {
+            adapter.addFragment(new CmeFragment(),"");
+        }else{
+            adapter.addFragment(new UnauthorisedFragment(),"");
+        }
+        if(news_available){
+            adapter.addFragment(new LatestNewsFragment(),"");
+        }else{
+            adapter.addFragment(new UnauthorisedFragment(),"");
         }
         viewPager.setAdapter(adapter);
     }
 
     private void setTabLayoutIcons(TabLayout tabLayout,List<String> list) throws Exception{
+
         try {
-            for (int i = 0; i < list.size(); i++) {
-            /*Adding tabs and fragments according to the Templates from the server*/
+            /*for chat*/
+            TextView chatView = (TextView) LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
+            chatView.setText(" ");//chatView.setText("CHAT");
+            chatView.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.icon_chat, 0, 0);
+            tabLayout.getTabAt(0).setCustomView(chatView);
+
+            TextView refView = (TextView) LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
+            refView.setText(" ");//refView.setText("REFERENCE");
+            refView.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.icon_reference, 0, 0);
+            tabLayout.getTabAt(1).setCustomView(refView);
+
+            TextView cmeView = (TextView) LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
+            cmeView.setText(" ");//cmeView.setText("CME");
+            cmeView.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.icon_cme, 0, 0);
+            tabLayout.getTabAt(2).setCustomView(cmeView);
+
+            TextView newsView = (TextView) LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
+            newsView.setText(" ");//newsView.setText("LATEST NEWS");
+            newsView.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.icon_news, 0, 0);
+            tabLayout.getTabAt(3).setCustomView(newsView);
+
+            /*for (int i = 0; i < list.size(); i++) {
                 switch (list.get(i)) {
                     case "Chat Template"://check if Chat template exist
                         TextView chatView = (TextView) LayoutInflater.from(this).inflate(R.layout.custom_tab, null);
@@ -272,7 +326,7 @@ public class UserActivity extends AppCompatActivity
                         tabLayout.getTabAt(i).setText("news");
                         break;
                 }
-            }
+            }*/
         }catch(Exception e){
             System.out.println("Exception: "+e.toString());
         }

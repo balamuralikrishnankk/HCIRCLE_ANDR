@@ -67,10 +67,8 @@ public class ConversationActivity extends AppCompatActivity {
     Context context=this;
     String channel_id="",user_id,token,last_timetamp=null,extra_info,copied_msg=null,channel_title;
     String file_path=null;
-    int receiver_responseCode;
-    String ip,responseMessage,errorMessage;
+    String ip;
     HttpURLConnection conn=null;
-    URL api_url=null;
     Thread thread;
     public Boolean interrupt=false;
     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy' at 'h:mm a");
