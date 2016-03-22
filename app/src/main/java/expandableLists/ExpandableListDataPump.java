@@ -3,12 +3,14 @@ package expandableLists;
 import android.content.Context;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import connectServer.ConnectAPIs;
 import connectServer.ConnectServer;
 import sharePreference.SharedPreference;
 
@@ -22,6 +24,9 @@ public class ExpandableListDataPump {
         HashMap<String, List<String>> expandableListDetail = new HashMap<String, List<String>>();
         SharedPreference sp = new SharedPreference();
         String user_details = sp.getPreference(context);
+        String ip = sp.getServerIP_Preference(context);
+        String token=sp.getTokenPreference(context);
+        String extra_info;
 
         try{
             JSONObject jObj = new JSONObject(user_details);
