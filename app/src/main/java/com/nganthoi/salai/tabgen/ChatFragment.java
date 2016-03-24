@@ -50,12 +50,13 @@ public class ChatFragment extends Fragment {
     public View onCreateView(LayoutInflater layoutInflater,ViewGroup container,Bundle savedInstanceState){
         chatView = layoutInflater.inflate(R.layout.chat_layout,container,false);
         expandableListView = (ExpandableListView) chatView.findViewById(R.id.chatExpandableListView);
-        //expandableListView.setIndicatorBounds(expandableListView.getRight()-150, expandableListView.getWidth()-GetDipsFromPixel(10));
+
         DisplayMetrics metrics = new DisplayMetrics();
         getActivity().getWindowManager().getDefaultDisplay().getMetrics(metrics);
         int width = metrics.widthPixels;
+        //expandableListView.setIndicatorBounds(expandableListView.getRight()-150, expandableListView.getWidth()-GetDipsFromPixel(10));
         //this code for adjusting the group indicator into right side of the view
-        expandableListView.setIndicatorBounds(width - GetDipsFromPixel(250), width - GetDipsFromPixel(150));
+        expandableListView.setIndicatorBounds(width - GetDipsFromPixel(500), width - GetDipsFromPixel(260));
         //expandableListView.setIndicatorBounds(width - UIUtils.getPxFromDp(getActivity(), 40), width - UIUtils.getPxFromDp(getActivity(),20));
         //.setIndicatorBounds(width - UIUtils.getPxFromDp(getActivity(), 40), width - UIUtils.getPxFromDp(getActivity(),20));
 
