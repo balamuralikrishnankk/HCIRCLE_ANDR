@@ -48,6 +48,9 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+
+import Channel.Channel;
+import Channel.GetChannelDetails;
 import chattingEngine.ChatAdapter;
 import chattingEngine.ChatMessage;
 import customDialogManager.CustomDialogManager;
@@ -178,7 +181,9 @@ public class ConversationActivity extends AppCompatActivity {
         sp = new SharedPreference();
         //channelDetails = sp.getChannelPreference(context);
         token=sp.getTokenPreference(context);
-        channel_id=OrganisationDetails.getChannelId(team_name,channel_title,context);
+        GetChannelDetails channelDetails = new GetChannelDetails();
+        Channel channel = channelDetails.getChannel(team_name,channel_title,context);
+        channel_id=channel.getChannel_id();
         System.out.println("Team Name: "+team_name+" Channel Title: "+channel_title+" ---> Channel Id: "+channel_id+"\nToken Id: "+token);
         String user_details=sp.getPreference(context);
         try{
@@ -852,7 +857,7 @@ public class ConversationActivity extends AppCompatActivity {
                             JSONObject jobj = new JSONObject(result);
                             Toast.makeText(getApplicationContext(),jobj.getString("message"),Toast.LENGTH_LONG).show();
                         }catch(Exception e){
-
+                            Toast.makeText(getApplicationContext(),e.toString(),Toast.LENGTH_LONG).show();
                         }
                     }
                     mActionMode.finish();

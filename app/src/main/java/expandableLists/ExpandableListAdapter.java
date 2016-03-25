@@ -18,6 +18,8 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.List;
 
+import Channel.Channel;
+import Channel.*;
 import connectServer.ConnectAPIs;
 import sharePreference.SharedPreference;
 
@@ -69,7 +71,10 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         TextView count = (TextView) convertView.findViewById(R.id.title_count);//count the number of members for each channel in organisation unit
         expandedListTextView.setText(expandedListText);
         //count.setText("0");
-
+        GetChannelDetails channelDteails = new GetChannelDetails();
+        Channel channel = channelDteails.getChannel(getTeamTitle(listPosition),expandedListText, context);
+        count.setText(""+channel.getMember_count());
+        /*
         SharedPreference sp = new SharedPreference();
         String token = sp.getTokenPreference(context);
         String channel_id = OrganisationDetails.getChannelId(getTeamTitle(listPosition),expandedListText, context);

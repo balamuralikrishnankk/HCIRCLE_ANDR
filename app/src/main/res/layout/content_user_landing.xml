@@ -16,13 +16,14 @@
         android:layout_height="match_parent"
         android:layout_gravity="center_horizontal|top">
         <Button
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="140dp"
             android:id="@+id/landing_chat"
             android:background="@drawable/landing_chat"
             android:clickable="true"
             android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true" />
+            android:layout_centerHorizontal="true"
+            android:maxWidth="400dp" />
 
         <Button
             android:layout_width="160dp"
@@ -44,13 +45,14 @@
             android:layout_alignEnd="@+id/landing_chat" />
 
         <Button
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="140dp"
             android:id="@+id/landing_news"
             android:background="@drawable/landing_news"
             android:layout_below="@+id/landing_reference"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="25dp" />
+            android:layout_marginTop="25dp"
+            android:maxWidth="400dp" />
     </RelativeLayout>
     <!--<ListView
         android:layout_width="wrap_content"
