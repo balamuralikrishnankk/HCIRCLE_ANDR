@@ -13,9 +13,10 @@
     tools:showIn="@layout/app_bar_user_landing">
     <RelativeLayout
         android:layout_width="wrap_content"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_gravity="center_horizontal|top">
         <Button
-            android:layout_width="350dp"
+            android:layout_width="match_parent"
             android:layout_height="140dp"
             android:id="@+id/landing_chat"
             android:background="@drawable/landing_chat"
@@ -43,7 +44,7 @@
             android:layout_alignEnd="@+id/landing_chat" />
 
         <Button
-            android:layout_width="350dp"
+            android:layout_width="match_parent"
             android:layout_height="140dp"
             android:id="@+id/landing_news"
             android:background="@drawable/landing_news"

@@ -22,7 +22,7 @@
             <!--android:background="?attr/colorPrimary"
             android:layout_height="?attr/actionBarSize"-->
             <ImageView
-                android:layout_width="25dp"
+                android:layout_width="40dp"
                 android:layout_height="wrap_content"
                 android:src="@drawable/back"
                 android:paddingRight="10dp"

@@ -49,6 +49,10 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         return expandedListPosition;
     }
 
+    public String getTeamTitle(int position){
+        return this.expandableListTitle.get(position);
+    }
+
     @Override
     public View getChildView(int listPosition, final int expandedListPosition,
                              boolean isLastChild, View convertView, ViewGroup parent) {
@@ -62,13 +66,13 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         TextView expandedListTextView = (TextView) convertView
                 .findViewById(R.id.expandedListItem);
         //ImageView imageList = (ImageView) convertView.findViewById(R.id.imageView2);
-        //TextView count = (TextView) convertView.findViewById(R.id.count);//count the number of members for each channel in organisation unit
+        TextView count = (TextView) convertView.findViewById(R.id.title_count);//count the number of members for each channel in organisation unit
         expandedListTextView.setText(expandedListText);
         //count.setText("0");
-        /*
+
         SharedPreference sp = new SharedPreference();
         String token = sp.getTokenPreference(context);
-        String channel_id = OrganisationDetails.getChannelId(expandedListText, context);
+        String channel_id = OrganisationDetails.getChannelId(getTeamTitle(listPosition),expandedListText, context);
         String ip = sp.getServerIP_Preference(context);
         System.out.println("Title: "+expandedListText+" ---> Channel Id: "+channel_id+"\nToken Id: "+token);
         //*** Getting extra information about the current channel ***
