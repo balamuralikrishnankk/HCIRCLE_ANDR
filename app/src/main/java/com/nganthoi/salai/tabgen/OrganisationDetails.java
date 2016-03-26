@@ -10,7 +10,6 @@ import java.util.List;
 
 import connectServer.ConnectServer;
 import sharePreference.SharedPreference;
-import Channel.Channel;
 
 /**
  * Created by Lenovo on 28-Dec-15.

@@ -74,27 +74,10 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         GetChannelDetails channelDteails = new GetChannelDetails();
         Channel channel = channelDteails.getChannel(getTeamTitle(listPosition),expandedListText, context);
         count.setText(""+channel.getMember_count());
-        /*
-        SharedPreference sp = new SharedPreference();
-        String token = sp.getTokenPreference(context);
-        String channel_id = OrganisationDetails.getChannelId(getTeamTitle(listPosition),expandedListText, context);
-        String ip = sp.getServerIP_Preference(context);
-        System.out.println("Title: "+expandedListText+" ---> Channel Id: "+channel_id+"\nToken Id: "+token);
-        //*** Getting extra information about the current channel ***
-        ConnectAPIs connApis = new ConnectAPIs("http://"+ip+":8065//api/v1/channels/"+channel_id+"/extra_info",token);
-        String extra_info = connApis.convertInputStreamToString(connApis.getData());
-        System.out.println("Extra Information: "+extra_info);
 
-        try{
-            JSONObject extraInfoObj = new JSONObject(extra_info);
-            int n = extraInfoObj.getInt("member_count");
-            count.setText(""+n);
-        }catch(Exception e){
-            System.out.println("unable to get user extra information");
-        }
         /*************************************************************/
         /*if(expandedListText.equals("Town Square")){
-            imageList.setImageResource(R.drawable.laboratory_group);
+            imageList.setImageResource(R.drawable.laboratory_group);s
         }
         else if(expandedListText.equals("Off-Topic")){
             imageList.setImageResource(R.drawable.cardiology_dept);
