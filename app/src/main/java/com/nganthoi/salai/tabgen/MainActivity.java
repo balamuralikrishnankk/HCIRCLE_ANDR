@@ -53,8 +53,8 @@ public class MainActivity extends Activity {
         signin = (Button) findViewById(R.id.signIn);
         username = (EditText) findViewById(R.id.username);
         password = (EditText) findViewById(R.id.password);
-        //show_password = (CheckBox) findViewById(R.id.show_password);
-        server_ip="207.46.235.5";
+        //show_password = (CheckBox) findViewyId(R.id.show_password);
+        server_ip="10.0.2.2";
         //forgotPassword.setPaintFlags(forgotPassword.getPaintFlags()| Paint.UNDERLINE_TEXT_FLAG);
         //forgotPassword.setText(Html.fromHtml("<u><i>Forgot Password ?</i></u>"));
 

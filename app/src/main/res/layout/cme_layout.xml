@@ -5,33 +5,10 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin">
 
-    <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="250dp"
-        android:id="@+id/imageView3"
+    <ExpandableListView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/expandableListViewCME"
         android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:src="@drawable/cme1" />
-
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@+id/imageView3"
-        android:layout_centerHorizontal="true">
-
-        <ImageView
-            android:layout_width="180dp"
-            android:layout_height="250dp"
-            android:id="@+id/imageView4"
-            android:src="@drawable/cme2"
-            android:layout_centerHorizontal="true"/>
-
-        <ImageView
-            android:layout_width="180dp"
-            android:layout_height="250dp"
-            android:id="@+id/imageView5"
-            android:src="@drawable/cme3"
-            android:layout_centerHorizontal="true"/>
-    </LinearLayout>
+        android:layout_centerHorizontal="true" />
 </RelativeLayout>

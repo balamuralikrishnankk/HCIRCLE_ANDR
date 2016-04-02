@@ -34,7 +34,7 @@ public class ChatFragment extends Fragment {
     ExpandableListAdapter expandableListAdapter;
     List<String> expandableListTitle;
     HashMap<String, List<String>> expandableListDetail;
-    View chatView,layoutGroupHeader;
+    View chatView;//,layoutGroupHeader;
 
     public final static String CHANNEL_NAME = "com.nganthoi.salai.tabgen.MESSAGE";
     public final static String TEAM_NAME="team_name";
@@ -54,20 +54,13 @@ public class ChatFragment extends Fragment {
         DisplayMetrics metrics = new DisplayMetrics();
         getActivity().getWindowManager().getDefaultDisplay().getMetrics(metrics);
         int width = metrics.widthPixels;
+        expandableListView.setIndicatorBounds(width-120, width);
         //expandableListView.setIndicatorBounds(expandableListView.getRight()-150, expandableListView.getWidth()-GetDipsFromPixel(10));
         //this code for adjusting the group indicator into right side of the view
-        expandableListView.setIndicatorBounds(width-120, width);
         //expandableListView.setIndicatorBounds(width - UIUtils.getPxFromDp(getActivity(), 40), width - UIUtils.getPxFromDp(getActivity(),20));
         //.setIndicatorBounds(width - UIUtils.getPxFromDp(getActivity(), 40), width - UIUtils.getPxFromDp(getActivity(),20));
 
         showChatLists(layoutInflater);
-        /*(new Handler()).post(new Runnable() {
-
-            @Override
-            public void run() {
-
-            }
-        });*/
         return chatView;
     }
 
@@ -77,7 +70,7 @@ public class ChatFragment extends Fragment {
         expandableListTitle = new ArrayList<String>(expandableListDetail.keySet());
         expandableListAdapter= new ExpandableListAdapter(chatView.getContext(),expandableListTitle,expandableListDetail);
         expandableListView.setAdapter(expandableListAdapter);
-        layoutGroupHeader = layoutInflater.inflate(R.layout.list_group, null);
+        //layoutGroupHeader = layoutInflater.inflate(R.layout.list_group, null);
         expandableListView.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
             @Override
             public void onGroupExpand(int groupPosition) {
