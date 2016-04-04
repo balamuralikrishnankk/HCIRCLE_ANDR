@@ -16,6 +16,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -51,6 +52,7 @@ import java.util.Date;
 
 import Channel.Channel;
 import Channel.GetChannelDetails;
+import Utils.Methods;
 import chattingEngine.ChatAdapter;
 import chattingEngine.ChatMessage;
 import customDialogManager.CustomDialogManager;
@@ -58,142 +60,55 @@ import readData.ReadFile;
 import sharePreference.SharedPreference;
 import connectServer.ConnectAPIs;
 
-public class ConversationActivity extends AppCompatActivity {
-    //ImageButton sendMessage;
-    ImageView backButton;//,conv_Icon;
-    ListView messagesContainer;
-    EditText messageEditText;
-    ImageView pickImageFile;
+public class ConversationActivity extends AppCompatActivity implements View.OnClickListener,View.OnLongClickListener,AdapterView.OnItemClickListener,AdapterView.OnItemLongClickListener{
+    private static final int REQUEST_CODE=111;
+    private Toolbar toolbar;
+    private TextView channel_label;
+    private ImageView backButton,pickImageFile,writeImageButton;//,conv_Icon;
+    private ListView messagesContainer;
+    private EditText messageEditText;
     private ChatAdapter adapter;
     private ArrayList<ChatMessage> chatHistory;
-    SharedPreference sp;
-    Context context=this;
-    String channel_id="",user_id,token,last_timetamp=null,extra_info,copied_msg=null,channel_title;
-    String file_path=null;
-    String ip;
-    HttpURLConnection conn=null;
-    Thread thread;
+    private SharedPreference sharedPreference;
+    private Context context=this;
+    private String channel_id="",user_id,token,last_timetamp=null,extra_info,copied_msg=null,channel_title;
+    private String file_path=null;
+    private String ip;
+    private HttpURLConnection conn=null;
+    private Thread currentMessageTaskThread;
     public Boolean interrupt=false;
-    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy' at 'h:mm a");
-    JSONArray filenames=null;// A JSON variable that contains list of file names returned from the mattermost APIs
-    ProgressDialog progressDialog;
-    JSONObject extraInfoObj;
-    JSONArray members;
-    /****for contextual action Bar ****/
-    Activity activity=this;
+    private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy' at 'h:mm a");
+    private JSONArray filenames=null;// A JSON variable that contains list of file names returned from the mattermost APIs
+    private ProgressDialog progressDialog;
+    private JSONObject extraInfoObj;
+    private JSONArray members;
+    private Activity activity=this;
     private ActionMode mActionMode;
-    /******************************************/
-
-    /*****************Writing message task*******************/
-    ImageView writeImageButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_conversation);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbarConversation);
+        toolbar = (Toolbar) findViewById(R.id.toolbarConversation);
         setSupportActionBar(toolbar);
-        /*** labels in the action abar of the activity_conversation ***/
-        //TextView no_of_members = (TextView) toolbar.findViewById(R.id.no_of_members);
-        TextView channel_label = (TextView) toolbar.findViewById(R.id.channel_name);
-        //TextView team_label = (TextView) findViewById(R.id.teamName);
-        messageEditText = (EditText) findViewById(R.id.messageEditText);
-        messageEditText.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                if(copied_msg!=null){
-                    //CustomDialogManager cdm = new CustomDialogManager(context,null,"Paste ?",true);
-                    //if(cdm.showCustomDialogWithYesNoButton()){
-                    messageEditText.setText(copied_msg);
-                    Toast.makeText(context, "message pasted", Toast.LENGTH_SHORT).show();
-                    //}
-                    return true;
-                }
-                return false;
-            }
-        });
-        /*Setting progress dialog */
-        progressDialog = new ProgressDialog(context);
-        /*********************************************/
-
-        messagesContainer = (ListView) findViewById(R.id.chatListView);
-        //setting Chat adapter
-        adapter = new ChatAdapter(ConversationActivity.this, new ArrayList<ChatMessage>());
-        messagesContainer.setAdapter(adapter);
-        messagesContainer.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                //adapter.remove(position);
-                //adapter.notifyDataSetChanged();
-                //scroll();
-                adapter.toggleSelection(position);
-                boolean hasCheckedItems = adapter.getSelectedCount() > 0;
-                if (hasCheckedItems && mActionMode == null) {
-                    //if there are some selected items, then start the action mode
-                    mActionMode = ConversationActivity.this.startActionMode(new ActionModeCallback(position));
-                } else if (!hasCheckedItems && mActionMode != null) {
-                    //if there are no selecte items then finish the action mode
-                    mActionMode.finish();
-                }
-
-                if (mActionMode != null) {
-                    //mActionMode.setTitle(String.valueOf(adapter.getSelectedCount())+ " selected");
-                    if (adapter.getSelectedCount() > 1) {
-                        mActionMode.finish();
-                    }
-                }
-                view.setSelected(true);
-                return true;
-            }
-        });
-        messagesContainer.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (mActionMode != null) {
-                    if(adapter.getSelectedCount()>1){
-                        mActionMode.finish();
-                    }
-                }
-            }
-        });
-
-        /********************************************/
-        backButton = (ImageView) toolbar.findViewById(R.id.back_button);
-        backButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onBackPressed();//move back to the previous activity (screen)
-            }
-        });
         Intent intent = getIntent();
         channel_title = intent.getStringExtra(ChatFragment.CHANNEL_NAME);
-        channel_label.setText(channel_title);
         String team_name = intent.getStringExtra(ChatFragment.TEAM_NAME);
-        /*
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });*/
-        sp = new SharedPreference();
-        //channelDetails = sp.getChannelPreference(context);
-        token=sp.getTokenPreference(context);
+        initComponent();
+        sharedPreference = new SharedPreference();
+        token=sharedPreference.getTokenPreference(context);
         GetChannelDetails channelDetails = new GetChannelDetails();
         Channel channel = channelDetails.getChannel(team_name,channel_title,context);
         channel_id=channel.getChannel_id();
         System.out.println("Team Name: "+team_name+" Channel Title: "+channel_title+" ---> Channel Id: "+channel_id+"\nToken Id: "+token);
-        String user_details=sp.getPreference(context);
+        String user_details=sharedPreference.getPreference(context);
         try{
             JSONObject jObj = new JSONObject(user_details);
             user_id=jObj.getString("id");
         }catch(Exception e){
             System.out.println("Unable to read user ID: "+e.toString());
         }
-        ip = sp.getServerIP_Preference(context);//getting ip
-
+        ip = sharedPreference.getServerIP_Preference(context);//getting ip
         //last_timetamp="1456185600000";
         Thread loadHistory = new Thread(){
             @Override
@@ -205,17 +120,12 @@ public class ConversationActivity extends AppCompatActivity {
                         ConnectAPIs connApis = new ConnectAPIs("http://"+ip+":8065//api/v1/channels/"+channel_id+"/extra_info",token);
                         extra_info = convertInputStreamToString(connApis.getData());
                         System.out.println("Extra Information: "+extra_info);
-
                         try{
                             extraInfoObj = new JSONObject(extra_info);
-                            //int n = extraInfoObj.getInt("member_count");
-                            //no_of_members.setText((n>1?n+" Members":n+" Member"));
                             members=extraInfoObj.getJSONArray("members");
                         }catch(Exception e){
                             System.out.println("unable to get user extra information");
                         }
-                        /*************************************************************/
-                        //loadHistory();//for loading entire chat history
                         LoadChatHistory loadChatHistory = new LoadChatHistory("http://"+ip+
                                 "/TabGenAdmin/getPost.php?channel_id="+channel_id,context);
                         loadChatHistory.execute("");
@@ -224,7 +134,7 @@ public class ConversationActivity extends AppCompatActivity {
             }
         };
         //loadHistory.start();
-        thread = new Thread(){
+        currentMessageTaskThread = new Thread(){
             @Override
             public void run(){
                 try{
@@ -249,49 +159,129 @@ public class ConversationActivity extends AppCompatActivity {
                 }
             }
         };
-        thread.start();
-
-        writeImageButton = (ImageView) findViewById(R.id.writeImageButton);
-        writeImageButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    String messageText = messageEditText.getText().toString();
-                    if (TextUtils.isEmpty(messageText)||messageText.trim().length()==0) {
-                        return;
-                    }
-                    try {
-                        JSONObject jsonObject = new JSONObject();
-
-                        if(filenames!=null && filenames.length()>0){
-                            jsonObject.put("filenames",filenames);
-                        }
-                        jsonObject.put("channel_id", channel_id);
-                        jsonObject.put("root_id", "");
-                        jsonObject.put("parent_id","");
-                        jsonObject.put("Message", messageText);
-                        sendMyMessage(jsonObject);
-                        messageEditText.setText(" ");
-                        filenames=null;
-                    } catch (Exception e) {
-                        System.out.print("Message Sending failed: " + e.toString());
-                        Snackbar.make(v, "Oops! Message Sending failed", Snackbar.LENGTH_LONG)
-                                .setAction("Action", null).show();
-                    }
-                }
-            });
-            pickImageFile = (ImageView) findViewById(R.id.pickImageFile);
-            pickImageFile.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent();
-                    //Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-                    intent.setType("*/*");
-                    intent.setAction(Intent.ACTION_GET_CONTENT);
-                    startActivityForResult(Intent.createChooser(intent,"Select a file from the gallary"),1);
-                }
-            });
+        currentMessageTaskThread.start();
         loadHistory.start();
     }
+
+//-----initializing the xml components
+    public void initComponent(){
+        /*** labels in the action abar of the activity_conversation ***/
+        channel_label = (TextView) toolbar.findViewById(R.id.channel_name);
+        channel_label.setText(channel_title);
+        messageEditText = (EditText) findViewById(R.id.messageEditText);
+        progressDialog = new ProgressDialog(context);
+        backButton = (ImageView) toolbar.findViewById(R.id.backButton);
+        messagesContainer = (ListView) findViewById(R.id.messagesContainer);
+        writeImageButton = (ImageView) findViewById(R.id.writeImageButton);
+        writeImageButton.setOnClickListener(this);
+        //setting Chat adapter
+        adapter = new ChatAdapter(ConversationActivity.this, new ArrayList<ChatMessage>());
+        messagesContainer.setAdapter(adapter);
+        messageEditText.setOnLongClickListener(this);
+        messagesContainer.setOnItemLongClickListener(this);
+        messagesContainer.setOnItemClickListener(this);
+        pickImageFile = (ImageView) findViewById(R.id.pickImageFile);
+        pickImageFile.setOnClickListener(this);
+
+    }
+
+//----OnClick Listeners
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.backButton:
+                onBackPressed();
+                break;
+            case R.id.writeImageButton:
+                String messageText = messageEditText.getText().toString();
+                if (TextUtils.isEmpty(messageText)||messageText.trim().length()==0) {
+                    return;
+                }
+                try {
+                    JSONObject jsonObject = new JSONObject();
+
+                    if(filenames!=null && filenames.length()>0){
+                        jsonObject.put("filenames",filenames);
+                    }
+                    jsonObject.put("channel_id", channel_id);
+                    jsonObject.put("root_id", "");
+                    jsonObject.put("parent_id","");
+                    jsonObject.put("Message", messageText);
+                    sendMyMessage(jsonObject);
+                    messageEditText.setText(" ");
+                    filenames=null;
+                } catch (Exception e) {
+                    System.out.print("Message Sending failed: " + e.toString());
+                    Snackbar.make(v, "Oops! Message Sending failed", Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
+                }
+                break;
+            case R.id.pickImageFile:
+                Intent intent = new Intent();
+                //Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.setType("*/*");
+                intent.setAction(Intent.ACTION_GET_CONTENT);
+                startActivityForResult(Intent.createChooser(intent, "Select a file from the gallary"), REQUEST_CODE);
+                break;
+        }
+    }
+
+//-----OnLongClick Listener for EditText
+    @Override
+    public boolean onLongClick(View v) {
+
+        switch (v.getId()){
+            case R.id.messageEditText:
+                if(copied_msg!=null){
+                    messageEditText.setText(copied_msg);
+                    Toast.makeText(context, "message pasted", Toast.LENGTH_SHORT).show();
+                    return true;
+                }
+                break;
+        }
+        return false;
+    }
+//-----OnItemClick Listener for ListView
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            switch (view.getId()){
+                case R.id.messagesContainer:
+                    if (mActionMode != null) {
+                        if(adapter.getSelectedCount()>1){
+                            mActionMode.finish();
+                        }
+                    }
+                    break;
+            }
+    }
+
+//-----onItemLongClick Lstener for Listview
+    @Override
+    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+        switch (view.getId()){
+            case R.id.messagesContainer:
+                adapter.toggleSelection(position);
+                boolean hasCheckedItems = adapter.getSelectedCount() > 0;
+                if (hasCheckedItems && mActionMode == null) {
+                    //if there are some selected items, then start the action mode
+                    mActionMode = ConversationActivity.this.startActionMode(new ActionModeCallback(position));
+                } else if (!hasCheckedItems && mActionMode != null) {
+                    //if there are no selecte items then finish the action mode
+                    mActionMode.finish();
+                }
+
+                if (mActionMode != null) {
+                    //mActionMode.setTitle(String.valueOf(adapter.getSelectedCount())+ " selected");
+                    if (adapter.getSelectedCount() > 1) {
+                        mActionMode.finish();
+                    }
+                }
+                view.setSelected(true);
+                return true;
+        }
+        return false;
+    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -317,8 +307,8 @@ public class ConversationActivity extends AppCompatActivity {
     public void onBackPressed(){
         progressDialog.setCancelable(true);
         try{
-            if(thread!=null){
-                thread.interrupt();
+            if(currentMessageTaskThread!=null){
+                currentMessageTaskThread.interrupt();
                 interrupt=true;
             }
         }catch(Exception e){
@@ -333,11 +323,12 @@ public class ConversationActivity extends AppCompatActivity {
         Uri fileUri = data.getData();
         //ReadFile readFile = new ReadFile();
         switch(requestCode){
-            case 1: //file_path = readFile.getFilePath(fileUri,context);
+            case REQUEST_CODE: //file_path = readFile.getFilePath(fileUri,context);
                 file_path = ReadFile.getPath(fileUri,context);
                 if(file_path!=null){
                     //System.out.println("File has been selected: "+file_path);
                     Toast.makeText(context, "You have selected: "+file_path, Toast.LENGTH_SHORT).show();
+                    Log.e("CONVERSATION","ONACTIVITY_RESULT.");
                         new Thread(new Runnable(){
                             public void run(){
                                 runOnUiThread(new Runnable() {
@@ -497,10 +488,7 @@ public class ConversationActivity extends AppCompatActivity {
 
 
     private void readChatHistory(String res){
-        //InputStream inputStream = getData("http://"+ip+"/TabGenAdmin/getPost.php?channel_id="+channel_id);
-        //String res = convertInputStreamToString(inputStream);
-        if(/*receiver_responseCode==200 &&*/ res!=null) {
-            //System.out.println(res);
+        if(res!=null) {
             chatHistory = new ArrayList<ChatMessage>();
             try {
                 JSONArray jsonArray = new JSONArray(res);
@@ -517,6 +505,17 @@ public class ConversationActivity extends AppCompatActivity {
                         msg.setMe(false);
                         msg.setSenderName(jsonObject.getString("messaged_by"));
                     }
+                    try {
+                        if (jsonObject.getString("filenames") != null) {
+                            String file=jsonObject.getString("filenames");
+                            JSONArray fileArray=new JSONArray(file);
+                            msg.setFileList(fileArray);
+                            Log.e("ARRAY", "ARRAY:::" + fileArray.get(0));
+                        }
+                    }catch (Exception e){
+                        Log.e("ERROR","ERROR:::"+e.getMessage());
+                    }
+
                     msg.setMessage(jsonObject.getString("Message"));
                     Long chatTime = Long.parseLong(jsonObject.getString("CreateAt"));
                     Date date = new Date(chatTime);
@@ -580,6 +579,7 @@ public class ConversationActivity extends AppCompatActivity {
         InputStream isr=null;
 
         public UploadFile(String sourceFileUri,String serverUploadPath){
+        Log.e("CONVERSATION","UPLOAD FILE");
             fileLocation = sourceFileUri;
             file_upload_uri = serverUploadPath;
         }
@@ -693,7 +693,7 @@ public class ConversationActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String result){
             if(result!=null){
-                System.out.println("Result: "+result);//printing out the server results
+                Log.e("RESULT","Result: "+result);//printing out the server results
 
                 try{
                     JSONObject fileObject = new JSONObject(result);
@@ -701,7 +701,7 @@ public class ConversationActivity extends AppCompatActivity {
                         //assign the list of filenames in the global JSON array filename
                         filenames=fileObject.getJSONArray("filenames");
                         for (int i = 0; i < filenames.length(); i++) {
-                            System.out.println("file name: " + filenames.getString(i));
+                            Log.e("FILE::::","file name: " + filenames.getString(i));
                         }
                         progressDialog.setMessage("Upload Completed, send the file with a message");
                         progressDialog.show();

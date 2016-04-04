@@ -4,15 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="30dp"
+    android:padding="20dp"
+    android:scrollbars="none"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="com.nganthoi.salai.tabgen.UserLandingActivity"
     tools:showIn="@layout/app_bar_user_landing">
-    <RelativeLayout
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center_horizontal|top">
         <Button
@@ -21,29 +20,32 @@
             android:id="@+id/landing_chat"
             android:background="@drawable/landing_chat"
             android:clickable="true"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
             android:maxWidth="400dp" />
-
+    <LinearLayout
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="2"
+        >
         <Button
-            android:layout_width="160dp"
+            android:layout_weight="1"
+            android:layout_width="0dp"
             android:layout_height="150dp"
             android:id="@+id/landing_reference"
             android:background="@drawable/landing_ref"
-            android:layout_below="@+id/landing_chat"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_marginTop="25dp" />
+             />
 
         <Button
-            android:layout_width="160dp"
+            android:layout_marginLeft="5dp"
+            android:layout_weight="1"
+            android:layout_width="0dp"
             android:layout_height="150dp"
             android:id="@+id/landing_cme"
             android:background="@drawable/landing_cme"
-            android:layout_above="@+id/landing_news"
-            android:layout_alignRight="@+id/landing_chat"
-            android:layout_alignEnd="@+id/landing_chat" />
-
+             />
+</LinearLayout>
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -51,9 +53,8 @@
             android:background="@drawable/landing_news"
             android:layout_below="@+id/landing_reference"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="25dp"
             android:maxWidth="400dp" />
-    </RelativeLayout>
+    </LinearLayout>
     <!--<ListView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

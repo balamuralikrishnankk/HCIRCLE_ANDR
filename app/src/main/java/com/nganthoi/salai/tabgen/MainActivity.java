@@ -31,7 +31,7 @@ import connectServer.ConnectServer;
 import customDialogManager.CustomDialogManager;
 import sharePreference.SharedPreference;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements View.OnClickListener{
     Button signin;
     Intent intent;
     Context context=this;
@@ -54,39 +54,13 @@ public class MainActivity extends Activity {
         username = (EditText) findViewById(R.id.username);
         password = (EditText) findViewById(R.id.password);
         //show_password = (CheckBox) findViewById(R.id.show_password);
-        server_ip="207.46.235.5";
+//        server_ip="207.46.235.5";
+        server_ip="128.199.111.18";
         //forgotPassword.setPaintFlags(forgotPassword.getPaintFlags()| Paint.UNDERLINE_TEXT_FLAG);
         //forgotPassword.setText(Html.fromHtml("<u><i>Forgot Password ?</i></u>"));
 
         sp = new SharedPreference();
-
-        signin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                if(isValidate()==true){
-                    progressDialog = new ProgressDialog(v.getContext());
-                    progressDialog.setMessage("Wait Please.....");
-                    progressDialog.setIndeterminate(true);
-                    progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-                    progressDialog.show();
-                    try {
-                        uname = username.getText().toString().trim();
-                        passwd = password.getText().toString().trim();
-                        sp.saveServerIP_Preference(context, server_ip);
-                        JSONObject jsonObject = new JSONObject();
-                        //jsonObject.put("name", team_name);
-                        jsonObject.put("username", uname);//username.getText().toString()
-                        jsonObject.put("password", passwd);//password.getText().toString()
-                        UserLogin ul = new UserLogin();
-                        ul.execute(jsonObject);
-
-                    }catch(Exception e){
-                        e.printStackTrace();
-                    }
-                }
-            }
-        });
+        signin.setOnClickListener(this);
         /*forgotPassword.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -145,6 +119,35 @@ public class MainActivity extends Activity {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.signIn:
+                if(isValidate()==true){
+                    progressDialog = new ProgressDialog(v.getContext());
+                    progressDialog.setMessage("Wait Please.....");
+                    progressDialog.setIndeterminate(true);
+                    progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                    progressDialog.show();
+                    try {
+                        uname = username.getText().toString().trim();
+                        passwd = password.getText().toString().trim();
+                        sp.saveServerIP_Preference(context, server_ip);
+                        JSONObject jsonObject = new JSONObject();
+                        //jsonObject.put("name", team_name);
+                        jsonObject.put("username", uname);//username.getText().toString()
+                        jsonObject.put("password", passwd);//password.getText().toString()
+                        UserLogin ul = new UserLogin();
+                        ul.execute(jsonObject);
+
+                    }catch(Exception e){
+                        e.printStackTrace();
+                    }
+                }
+                break;
+        }
     }
 
     public class UserLogin extends AsyncTask<JSONObject,Void,String>{

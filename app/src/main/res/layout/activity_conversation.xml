@@ -26,7 +26,7 @@
                 android:layout_height="wrap_content"
                 android:src="@drawable/back"
                 android:paddingRight="10dp"
-                android:id="@+id/back_button"/>
+                android:id="@+id/backButton"/>
             <TextView
                 android:paddingLeft="8dp"
                 android:paddingRight="8dp"

@@ -3,12 +3,8 @@
     android:orientation="horizontal"
     android:layout_width="wrap_content"
     android:layout_height="match_parent"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="5dp"
-    android:paddingBottom="5dp"
-    android:minWidth="25dp"
-    android:minHeight="25dp">
+    android:padding="10dp"
+   >
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
@@ -19,7 +15,7 @@
             android:layout_width="60dp"
             android:layout_height="60dp"
             android:id="@+id/list_title_image"
-            android:src="@drawable/image"
+            android:background="@drawable/image"
             android:layout_gravity="center_vertical" />
         <TextView
             android:layout_width="wrap_content"
@@ -39,14 +35,11 @@
             android:layout_gravity="center_vertical|center_horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
-            android:layout_alignParentRight="true"
+            android:padding="10dp"
             android:layout_weight="1"
             android:text="@string/SubListItems"
-            android:paddingRight="10dp"
             android:textSize="16sp"
-            android:paddingLeft="10dp" />
+             />
 
     </LinearLayout>
 
