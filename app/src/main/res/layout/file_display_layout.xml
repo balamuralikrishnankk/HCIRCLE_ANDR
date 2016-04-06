@@ -1,37 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:padding="10dp"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content">
 
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/attachmentView"
-        android:src="@drawable/attach"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="File Details"
-        android:id="@+id/fileInformation"
-        android:layout_alignParentTop="true"
-        android:layout_toRightOf="@+id/attachmentView"
-        android:layout_toEndOf="@+id/attachmentView"
-        android:layout_alignBottom="@+id/attachmentView"
-        android:gravity="center_vertical"
-        android:paddingLeft="5dp" />
 
     <ImageButton
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:id="@+id/downloadButton"
+        android:layout_gravity="center"
         android:src="@android:drawable/ic_menu_more"
         android:background="@drawable/button_blue_background"
-        android:layout_alignBottom="@+id/attachmentView"
-        android:layout_toLeftOf="@+id/fileInformation"
-        android:layout_toStartOf="@+id/fileInformation" />
-</RelativeLayout>
+         />
+    <LinearLayout
+        android:weightSum="2"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <ImageView
+            android:id="@+id/imgDetails"
+            android:layout_weight="1"
+            android:src="@drawable/attach"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp" />
+        <TextView
+            android:layout_weight="1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="File Details"
+            android:id="@+id/fileInformation"
+            android:layout_gravity="center"
+            android:paddingLeft="5dp" />
+    </LinearLayout>
+
+
+</LinearLayout>

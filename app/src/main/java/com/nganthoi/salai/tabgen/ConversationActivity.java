@@ -6,26 +6,35 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.StrictMode;
+import android.provider.MediaStore;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.webkit.MimeTypeMap;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -49,23 +58,35 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import Channel.Channel;
 import Channel.GetChannelDetails;
+import ListenerClasses.ListviewListeners;
+import Utils.FileUtils;
 import Utils.Methods;
 import chattingEngine.ChatAdapter;
 import chattingEngine.ChatMessage;
 import customDialogManager.CustomDialogManager;
+import io.codetail.animation.SupportAnimator;
+import io.codetail.animation.ViewAnimationUtils;
+import io.codetail.widget.RevealFrameLayout;
 import readData.ReadFile;
 import sharePreference.SharedPreference;
 import connectServer.ConnectAPIs;
 
-public class ConversationActivity extends AppCompatActivity implements View.OnClickListener,View.OnLongClickListener,AdapterView.OnItemClickListener,AdapterView.OnItemLongClickListener{
+public class ConversationActivity extends AppCompatActivity implements View.OnClickListener,View.OnLongClickListener,AdapterView.OnItemLongClickListener, ListviewListeners{
     private static final int REQUEST_CODE=111;
+    public static final int UPLOAD_REQUEST_CODE=112;
+    public static final int RESULT_CODE=113;
+    public static final int REQUEST_CODE_CAMERA=114;
+    SupportAnimator animator_reverse;
+    LinearLayout reveal_items,llAudios,llVideos,llPhotos;
     private Toolbar toolbar;
+    private Button writeImageButton;
     private TextView channel_label;
-    private ImageView backButton,pickImageFile,writeImageButton;//,conv_Icon;
-    private ListView messagesContainer;
+    private ImageView backButton,pickImageFile,imgPhotos,imgVideos,imgAudios,imgDocuments,imgCamera;//,imgCamera,conv_Icon;
+    private ListView messagesContainerListview;
     private EditText messageEditText;
     private ChatAdapter adapter;
     private ArrayList<ChatMessage> chatHistory;
@@ -84,6 +105,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
     private JSONArray members;
     private Activity activity=this;
     private ActionMode mActionMode;
+    boolean hidden=true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -166,22 +188,34 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
 //-----initializing the xml components
     public void initComponent(){
         /*** labels in the action abar of the activity_conversation ***/
+        reveal_items=(LinearLayout)findViewById(R.id.reveal_items);
         channel_label = (TextView) toolbar.findViewById(R.id.channel_name);
         channel_label.setText(channel_title);
         messageEditText = (EditText) findViewById(R.id.messageEditText);
         progressDialog = new ProgressDialog(context);
         backButton = (ImageView) toolbar.findViewById(R.id.backButton);
-        messagesContainer = (ListView) findViewById(R.id.messagesContainer);
-        writeImageButton = (ImageView) findViewById(R.id.writeImageButton);
+        messagesContainerListview = (ListView) findViewById(R.id.messagesContainerListview);
+        writeImageButton = (Button) findViewById(R.id.writeImageButton);
         writeImageButton.setOnClickListener(this);
         //setting Chat adapter
         adapter = new ChatAdapter(ConversationActivity.this, new ArrayList<ChatMessage>());
-        messagesContainer.setAdapter(adapter);
+        messagesContainerListview.setAdapter(adapter);
         messageEditText.setOnLongClickListener(this);
-        messagesContainer.setOnItemLongClickListener(this);
-        messagesContainer.setOnItemClickListener(this);
-        pickImageFile = (ImageView) findViewById(R.id.pickImageFile);
-        pickImageFile.setOnClickListener(this);
+        messagesContainerListview.setOnItemLongClickListener(this);
+//        messagesContainerListview.setOnItemClickListener(this);
+//        pickImageFile = (ImageView) findViewById(R.id.pickImageFile);
+//        pickImageFile.setOnClickListener(this);
+        imgPhotos=(ImageView)findViewById(R.id.imgPhotos);
+        imgPhotos.setOnClickListener(this);
+        imgAudios=(ImageView)findViewById(R.id.imgAudios);
+        imgAudios.setOnClickListener(this);
+        imgVideos=(ImageView)findViewById(R.id.imgVideos);
+        imgVideos.setOnClickListener(this);
+        imgDocuments=(ImageView)findViewById(R.id.imgDocuments);
+        imgDocuments.setOnClickListener(this);
+        imgCamera=(ImageView)findViewById(R.id.imgCamera);
+        imgCamera.setOnClickListener(this);
+
 
     }
 
@@ -193,6 +227,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
                 onBackPressed();
                 break;
             case R.id.writeImageButton:
+                Methods.toastShort("CLICKED",this);
                 String messageText = messageEditText.getText().toString();
                 if (TextUtils.isEmpty(messageText)||messageText.trim().length()==0) {
                     return;
@@ -216,12 +251,48 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
                             .setAction("Action", null).show();
                 }
                 break;
-            case R.id.pickImageFile:
-                Intent intent = new Intent();
-                //Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-                intent.setType("*/*");
-                intent.setAction(Intent.ACTION_GET_CONTENT);
-                startActivityForResult(Intent.createChooser(intent, "Select a file from the gallary"), REQUEST_CODE);
+//            case R.id.pickImageFile:
+//                Intent intent = new Intent(Intent.ACTION_PICK);
+//                intent.setType("*/*");
+//                intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+//                intent.setAction(Intent.ACTION_GET_CONTENT);
+//                startActivityForResult(Intent.createChooser(intent, "Select a file from the gallary"), REQUEST_CODE);
+//                break;
+            case R.id.imgAudios:
+                hidePopupWindow();
+                Intent intent1 = new Intent(Intent.ACTION_PICK);
+                intent1.setType("audio/*");
+                intent1.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+                intent1.setAction(Intent.ACTION_GET_CONTENT);
+                startActivityForResult(Intent.createChooser(intent1, "Select a file from music player"), REQUEST_CODE);
+                break;
+            case R.id.imgVideos:
+                hidePopupWindow();
+                Intent intent3 = new Intent(Intent.ACTION_PICK,
+                        MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
+                intent3.setType("video/*");
+                startActivityForResult(Intent.createChooser(intent3, "Select a file from vidoes"), REQUEST_CODE);
+                break;
+            case R.id.imgPhotos:
+                hidePopupWindow();
+                Intent intent2 = new Intent(Intent.ACTION_PICK,
+                        android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                intent2.setType("image/*");
+                startActivityForResult(Intent.createChooser(intent2, "Select a file photos"), REQUEST_CODE);
+                break;
+            case R.id.imgDocuments:
+                hidePopupWindow();
+                Intent intent4 = new Intent(Intent.ACTION_PICK,
+                        MediaStore.Files.getContentUri("application/*"));
+                intent4.setType("application/*");
+                intent4.setAction(Intent.ACTION_GET_CONTENT);
+                startActivityForResult(Intent.createChooser(intent4, "Select a file from documents"), REQUEST_CODE);
+                break;
+            case R.id.imgCamera:
+                Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
+                File file = new File(Environment.getExternalStorageDirectory()+File.separator + "image.jpg");
+                intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(file));
+                startActivityForResult(intent, REQUEST_CODE_CAMERA);
                 break;
         }
     }
@@ -242,24 +313,24 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
         return false;
     }
 //-----OnItemClick Listener for ListView
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            switch (view.getId()){
-                case R.id.messagesContainer:
-                    if (mActionMode != null) {
-                        if(adapter.getSelectedCount()>1){
-                            mActionMode.finish();
-                        }
-                    }
-                    break;
-            }
-    }
+//    @Override
+//    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//            switch (view.getId()){
+//                case R.id.messagesContainerListview:
+//                    if (mActionMode != null) {
+//                        if(adapter.getSelectedCount()>1){
+//                            mActionMode.finish();
+//                        }
+//                    }
+//                    break;
+//            }
+//    }
 
 //-----onItemLongClick Lstener for Listview
     @Override
     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
         switch (view.getId()){
-            case R.id.messagesContainer:
+            case R.id.messagesContainerListview:
                 adapter.toggleSelection(position);
                 boolean hasCheckedItems = adapter.getSelectedCount() > 0;
                 if (hasCheckedItems && mActionMode == null) {
@@ -296,12 +367,82 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        switch (id){
+            case R.id.aeroplane:
+                opentheAttachmentMenu();
+//                int cy = (reveal_items.getTop() + reveal_items.getBottom())/2;
+                break;
         }
         return super.onOptionsItemSelected(item);
+    }
+    public void opentheAttachmentMenu(){
+
+        int cx = (reveal_items.getLeft() + reveal_items.getRight());
+        int cy = reveal_items.getTop();
+        int radius = Math.max(reveal_items.getWidth(), reveal_items.getHeight());
+        SupportAnimator animator =
+                ViewAnimationUtils.createCircularReveal(reveal_items, cx, cy, 0, radius);
+        animator.setInterpolator(new AccelerateDecelerateInterpolator());
+        animator.setDuration(400);
+        animator_reverse = animator.reverse();
+        if (hidden) {
+            reveal_items.setVisibility(View.VISIBLE);
+            animator.start();
+            hidden = false;
+        } else {
+            animator_reverse.addListener(new SupportAnimator.AnimatorListener() {
+
+                @Override
+                public void onAnimationStart() {
+
+                }
+
+                @Override
+                public void onAnimationEnd() {
+                    reveal_items.setVisibility(View.GONE);
+                    hidden = true;
+                }
+
+                @Override
+                public void onAnimationCancel() {
+
+                }
+
+                @Override
+                public void onAnimationRepeat() {
+
+                }
+            });
+            animator_reverse.start();
+        }
+    }
+    public void hidePopupWindow(){
+        if(!hidden) {
+            animator_reverse.addListener(new SupportAnimator.AnimatorListener() {
+
+                @Override
+                public void onAnimationStart() {
+
+                }
+
+                @Override
+                public void onAnimationEnd() {
+                    reveal_items.setVisibility(View.GONE);
+                    hidden = true;
+                }
+
+                @Override
+                public void onAnimationCancel() {
+
+                }
+
+                @Override
+                public void onAnimationRepeat() {
+
+                }
+            });
+            animator_reverse.start();
+        }
     }
     @Override
     public void onBackPressed(){
@@ -317,18 +458,29 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
         super.onBackPressed();
         finish();
     }
+    private static String getMimeType(String fileUrl) {
+        String extension = MimeTypeMap.getFileExtensionFromUrl(fileUrl);
+        return MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+    }
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data){
-        if(resultCode!=RESULT_OK || data==null) return;
-        Uri fileUri = data.getData();
+
+//        if(resultCode!=RESULT_OK || data==null) return;
+        Uri fileUri;
         //ReadFile readFile = new ReadFile();
         switch(requestCode){
+
             case REQUEST_CODE: //file_path = readFile.getFilePath(fileUri,context);
+                fileUri = data.getData();
                 file_path = ReadFile.getPath(fileUri,context);
+                String mimetype=getMimeType(file_path);
+
+                Methods.toastShort(mimetype,this);
                 if(file_path!=null){
                     //System.out.println("File has been selected: "+file_path);
-                    Toast.makeText(context, "You have selected: "+file_path, Toast.LENGTH_SHORT).show();
-                    Log.e("CONVERSATION","ONACTIVITY_RESULT.");
+//                    Toast.makeText(context, "You have selected: "+file_path, Toast.LENGTH_SHORT).show();
+                    if(file_path.contains(".mp3"))
+                    {
                         new Thread(new Runnable(){
                             public void run(){
                                 runOnUiThread(new Runnable() {
@@ -336,11 +488,108 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
                                     public void run() {
                                         UploadFile uploadFile = new UploadFile(file_path,"http://"+ip+":8065/api/v1/files/upload");
                                         uploadFile.execute();
+
                                     }
                                 });
                             }
                         }).start();
+
+                    }else if(mimetype.contains("application/"))
+                    {
+                        new Thread(new Runnable(){
+                            public void run(){
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        UploadFile uploadFile = new UploadFile(file_path,"http://"+ip+":8065/api/v1/files/upload");
+                                        uploadFile.execute();
+
+                                    }
+                                });
+                            }
+                        }).start();
+                    }else if(mimetype.contains("image/")){
+
+                        Intent intent=new Intent(ConversationActivity.this,UploadActivity.class);
+                        Bundle bundle=new Bundle();
+                        bundle.putString("IP_VALUE",ip);
+                        bundle.putString("FILE_PATH",file_path);
+                        bundle.putString("TOKEN",token);
+                        bundle.putString("CHANNEL_ID",channel_id);
+                        bundle.putString("TYPE","IMAGE");
+                        intent.putExtras(bundle);
+                        startActivityForResult(intent, UPLOAD_REQUEST_CODE);
+                    }else if(mimetype.contains("video/")){
+//
+                        Intent intent=new Intent(ConversationActivity.this,UploadActivity.class);
+                        Bundle bundle=new Bundle();
+                        bundle.putString("IP_VALUE",ip);
+                        bundle.putString("FILE_PATH",file_path);
+                        bundle.putString("TOKEN",token);
+                        bundle.putString("CHANNEL_ID",channel_id);
+                        bundle.putString("TYPE","VIDEO");
+                        intent.putExtras(bundle);
+                        startActivityForResult(intent, UPLOAD_REQUEST_CODE);
+                    }
+                    Log.e("CONVERSATION", "ONACTIVITY_RESULT.");
                 }
+                break;
+            case REQUEST_CODE_CAMERA:
+//                file_path = ReadFile.getPath(fileUri,context);
+//                mImage = (ImageView) findViewById(R.id.imageView1);
+//                mImage.setImageBitmap(decodeSampledBitmapFromFile(file.getAbsolutePath(), 500, 250));
+//                Methods.toastShort("CAMERA",this);
+//                file_path = ReadFile.getPath(fileUri,context);
+//                Methods.toastShort(file_path, this);
+                Intent intent=new Intent(ConversationActivity.this,UploadActivity.class);
+                Bundle bundle=new Bundle();
+                bundle.putString("IP_VALUE",ip);
+//                bundle.putString("FILE_PATH",);
+                bundle.putString("TOKEN",token);
+                bundle.putString("CHANNEL_ID",channel_id);
+                bundle.putString("TYPE","CAMERA");
+                intent.putExtras(bundle);
+                startActivityForResult(intent, UPLOAD_REQUEST_CODE);
+////                Bitmap mFeedbackBitmap = BitmapUtils.setImage(profilePic, galleryURi1.getPath());
+////                Log.v("PATH", "" + galleryURi1.getPath());
+//                if (file_path == null) {
+//                    // showToast("Image not found.");
+//                    return;
+//                }
+//                Intent mediaScannerIntent = new Intent(Intent.ACTION_VIEW);
+//                mediaScannerIntent.setDataAndType(fileUri, "image/jpeg");
+//                startActivity(mediaScannerIntent);
+//                sendBroadcast(mediaScannerIntent);
+
+
+                break;
+            case UPLOAD_REQUEST_CODE:
+                try{
+                String result=data.getStringExtra("RESULT_STRING");
+                String caption=data.getStringExtra("CAPTION");
+                JSONObject fileObject = new JSONObject(result);
+                filenames=fileObject.getJSONArray("filenames");
+//                String messageText = messageEditText.getText().toString();
+                    JSONObject jsonObject = new JSONObject();
+
+                    if(filenames!=null && filenames.length()>0){
+                        jsonObject.put("filenames",filenames);
+                    }
+                    jsonObject.put("channel_id", channel_id);
+                    jsonObject.put("root_id", "");
+                    jsonObject.put("parent_id","");
+                    jsonObject.put("Message", caption);
+                    sendMyMessage(jsonObject);
+//                    messageEditText.setText(" ");
+                    filenames=null;
+                } catch (Exception e) {
+                    System.out.print("Message Sending failed: " + e.toString());
+//                    Snackbar.make(v, "Oops! Message Sending failed", Snackbar.LENGTH_LONG)
+//                            .setAction("Action", null).show();
+                }
+//                Methods.toastShort("CONVERSATION CALLED::" + result, this);
+//                sendMyMessage(result);
+//                sendMyMessage();
                 break;
             default:
                 Toast.makeText(context, "Invalid request code. You haven't selected any file", Toast.LENGTH_SHORT).show();
@@ -387,8 +636,12 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
                         Long timestamp = Long.parseLong(last_timetamp);
                         Date date = new Date(timestamp);
                         chatMessage.setDate(simpleDateFormat.format(date));
+
                         JSONArray files = json_obj.getJSONArray("filenames");
-                        chatMessage.setFileList(files);
+                        if(files.length()!=0){
+                            chatMessage.setFileList(files.getString(0));
+                        }
+
                         displayMessage(chatMessage);
                     }catch(Exception e){
                         System.out.print("Chat Exception: "+e.toString());
@@ -419,7 +672,32 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
     }
 
     private void scroll() {
-        messagesContainer.setSelection(messagesContainer.getCount() - 1);
+        messagesContainerListview.setSelection(messagesContainerListview.getCount() - 1);
+    }
+
+    @Override
+    public void updateListview(String filename, boolean flag) {
+        if(flag){
+            Methods.toastShort("CALLBACK",this);
+            try{
+                JSONObject fileObject = new JSONObject(filename);
+//                if(serverRespCode==200) {
+                    //assign the list of filenames in the global JSON array filename
+                    filenames=fileObject.getJSONArray("filenames");
+                    for (int i = 0; i < filenames.length(); i++) {
+                        Log.e("FILE::::", "file name: " + filenames.getString(i));
+
+//                    }
+                }
+                sendMyMessage(fileObject);
+                //end if statement
+//                else{
+////
+//                }
+            }catch(Exception e){
+//
+            }
+        }
     }
 
     class LoadChatHistory extends AsyncTask<String,Void,InputStream>{
@@ -509,7 +787,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
                         if (jsonObject.getString("filenames") != null) {
                             String file=jsonObject.getString("filenames");
                             JSONArray fileArray=new JSONArray(file);
-                            msg.setFileList(fileArray);
+                            msg.setFileList(fileArray.getString(0));
                             Log.e("ARRAY", "ARRAY:::" + fileArray.get(0));
                         }
                     }catch (Exception e){
@@ -585,11 +863,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
         }
         @Override
         protected void onPreExecute(){
-            //Toast.makeText(context,"Sending your file now...",Toast.LENGTH_LONG).show();
-            progressDialog.setTitle("File Upload");
-            progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-            progressDialog.setMessage("Uploading your file: "+fileLocation);
-            progressDialog.show();
+            Methods.showProgressDialog(ConversationActivity.this,"Please wait..");
         }
         @Override
         protected String doInBackground(Void... v){
@@ -686,42 +960,51 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
             return convertInputStreamToString(isr);
         }
         protected void onProgressUpdate(String... progress){
-            //setProgressPercent(progress[0]);
-            progressDialog.setProgress(Integer.parseInt(progress[0]));
-            progressDialog.show();
+
         }
         @Override
         protected void onPostExecute(String result){
+            Methods.closeProgressDialog();
             if(result!=null){
-                Log.e("RESULT","Result: "+result);//printing out the server results
-
                 try{
                     JSONObject fileObject = new JSONObject(result);
                     if(serverRespCode==200) {
-                        //assign the list of filenames in the global JSON array filename
                         filenames=fileObject.getJSONArray("filenames");
+                        if(file_path.contains(".mp3")){
+                            try{
+                                filenames=fileObject.getJSONArray("filenames");
+                                JSONObject jsonObject = new JSONObject();
+
+                                if(filenames!=null && filenames.length()>0){
+                                    jsonObject.put("filenames",filenames);
+                                }
+                                jsonObject.put("channel_id", channel_id);
+                                jsonObject.put("root_id", "");
+                                jsonObject.put("parent_id","");
+                                jsonObject.put("Message", " ");
+                                sendMyMessage(jsonObject);
+                                filenames=null;
+                            } catch (Exception e) {
+                                System.out.print("Message Sending failed: " + e.toString());
+                            }
+                        }
                         for (int i = 0; i < filenames.length(); i++) {
+
                             Log.e("FILE::::","file name: " + filenames.getString(i));
                         }
-                        progressDialog.setMessage("Upload Completed, send the file with a message");
-                        progressDialog.show();
+
                     }//end if statement
-                    else{
-                        progressDialog.setCancelable(true);
-                        progressDialog.setMessage("Upload failed, please try again.");
-                        progressDialog.show();
+                    else {
+
                     }
                 }catch(Exception e){
-                    System.out.println("Unable to read file details: "+e.toString());
-                    progressDialog.setMessage("Upload failed, please try again.");
-                    progressDialog.show();
+                    System.out.println("Unable to read file details: " + e.toString());
+
                 }
             }
             else {
                 System.out.println("Response is null");
-                progressDialog.setCancelable(true);
-                progressDialog.setMessage("Upload failed, please try again.");
-                progressDialog.show();
+
             }
             //Toast.makeText(context,result,Toast.LENGTH_LONG).show();
         }
@@ -794,7 +1077,8 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
 
                                 /*If the post contains files*/
                                 JSONArray files = jObj3.getJSONArray("filenames");
-                                currentMsg.setFileList(files);
+                                currentMsg.setFileList(files.getString(0));
+//                                currentMsg.setFileList(files);
 
                                 if (user_id.equals("" + jObj3.getString("user_id"))) {
                                     currentMsg.setMe(true);
@@ -878,5 +1162,6 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
             mActionMode=null;
         }
     }
+
 }
 
