@@ -68,7 +68,7 @@ public class ConversationActivity extends AppCompatActivity {
     private ArrayList<ChatMessage> chatHistory;
     SharedPreference sp;
     Context context=this;
-    String channel_id="",user_id,token,last_timetamp=null,extra_info,copied_msg=null,channel_title;
+    String channel_id="",user_id,token,last_timetamp="000000000",extra_info,copied_msg=null,channel_title;
     String file_path=null;
     String ip;
     HttpURLConnection conn=null;
@@ -91,6 +91,12 @@ public class ConversationActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_conversation);
+
+        progressDialog = new ProgressDialog(context);
+        progressDialog.setMessage("Loading messages....");
+        progressDialog.setIndeterminate(true);
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbarConversation);
         setSupportActionBar(toolbar);
         /*** labels in the action abar of the activity_conversation ***/
@@ -215,10 +221,12 @@ public class ConversationActivity extends AppCompatActivity {
                             System.out.println("unable to get user extra information");
                         }
                         /*************************************************************/
-                        //loadHistory();//for loading entire chat history
-                        LoadChatHistory loadChatHistory = new LoadChatHistory("http://"+ip+
+                        /*LoadChatHistory loadChatHistory = new LoadChatHistory("http://"+ip+
                                 "/TabGenAdmin/getPost.php?channel_id="+channel_id,context);
-                        loadChatHistory.execute("");
+                        loadChatHistory.execute("");*/
+                        new GetMessageHistoryTask().execute("http://"+ip+
+                                ":8065//api/v1/channels/"+channel_id+
+                                "/posts/0/60");
                     }
                 });
             }
@@ -817,6 +825,104 @@ public class ConversationActivity extends AppCompatActivity {
             }//end if
         }//end on post execution
     }//end of GetCurrentMessageTask class
+
+    //class for getting instant message
+    class GetMessageHistoryTask extends AsyncTask<String,Void,String>{
+        InputStream isr=null;
+        HttpURLConnection conn;
+        URL api_url;
+        int responseCode=-1;
+        String respMsg;
+        String resp=null;
+
+        @Override
+        protected void onPreExecute(){
+            progressDialog.show();
+        }
+
+        @Override
+        protected String doInBackground(String... messageUrl){
+            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+            StrictMode.setThreadPolicy(policy);
+            try{
+                api_url = new URL(messageUrl[0]);
+                conn = (HttpURLConnection) api_url.openConnection();
+                conn.setRequestProperty("Authorization", "Bearer " + token);
+                conn.setRequestMethod("POST");
+                conn.setDoInput(true);
+                conn.setDoOutput(true);
+                conn.connect();
+                responseCode = conn.getResponseCode();
+                respMsg = conn.getResponseMessage();
+                System.out.println("Response Code: " + responseCode + "\nResponse message: " + respMsg);
+                if(responseCode == 200)/*HttpURLConnection.HTTP_OK*/{
+                    isr = new BufferedInputStream(conn.getInputStream());
+                }
+                else {
+                    isr = new BufferedInputStream(conn.getErrorStream());
+                }
+                resp = convertInputStreamToString(isr);
+            }catch(Exception e){
+                e.printStackTrace();
+                System.out.println("Exception in getMessage(): " + e.toString());
+                return null;
+            }
+            System.out.println(resp);
+            return resp;
+        }
+        @Override
+        protected void onPostExecute(String resp){
+            if(resp!=null && responseCode==200) {
+                try {
+
+                    JSONObject jObj1 = new JSONObject(resp);
+                    JSONArray jsonArray = jObj1.getJSONArray("order");
+                    JSONObject jObj2;
+                    if (jsonArray.length() > 0) {
+                        jObj2 = jObj1.getJSONObject("posts");
+                        int i = 0;
+                        String messageDate;
+                        while (i < jsonArray.length()) {
+                            //System.out.println(jsonArray.getString(i));
+                            JSONObject jObj3 = jObj2.getJSONObject(jsonArray.getString(i));
+                            System.out.println("Id: " + jObj3.getString("id") + " Message: " + jObj3.getString("message"));
+                            messageDate = "" + jObj3.getString("create_at");
+                            System.out.println("Message Date: " + messageDate);
+                            //!messageDate.equals(last_timetamp)
+                            if(jObj3.getLong("delete_at")==0) {//it means if the message is new, which is indicated by the last timestamp
+                                ChatMessage currentMsg = new ChatMessage();
+                                currentMsg.setId(jObj3.getString("id"));
+                                currentMsg.setMessage("" + jObj3.getString("message"));
+                                Long timeStamp = Long.parseLong(messageDate);
+                                Date date = new Date(timeStamp);
+                                currentMsg.setDate(simpleDateFormat.format(date));
+
+                                /*If the post contains files*/
+                                JSONArray files = jObj3.getJSONArray("filenames");
+                                currentMsg.setFileList(files);
+
+                                if (user_id.equals("" + jObj3.getString("user_id"))) {
+                                    currentMsg.setMe(true);
+                                    currentMsg.setSenderName("Me");
+                                } else {
+                                    currentMsg.setMe(false);
+                                    getUsernameById(jObj3.getString("user_id"));
+                                    currentMsg.setSenderName(getUsernameById(jObj3.getString("user_id")));
+                                }
+                                displayMessage(currentMsg);
+                            }//otherwise dont create the message
+                            if(Long.parseLong(last_timetamp)< Long.parseLong(messageDate))
+                                last_timetamp = messageDate;
+                            i++;
+                        }//end while loop
+                    }
+                } catch (Exception e) {
+                    System.out.println("Error in parsing JSON: " + e.toString());
+                }
+            }//end if
+            progressDialog.dismiss();
+        }//end on post execution
+    }//end of GetMessageHistoryTask class
 
     //class for contextual action bar
     private class ActionModeCallback implements ActionMode.Callback{

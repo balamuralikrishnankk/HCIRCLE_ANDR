@@ -1,7 +1,10 @@
 package connectServer;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
 import android.os.StrictMode;
@@ -16,10 +19,12 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import readData.ReadFile;
+
 /**
  * Created by SALAI on 2/17/2016.
  */
-public class DownloadFiles extends AsyncTask<String,String,String> {
+public class DownloadFiles extends AsyncTask<String,String,String>{
     URL api_url;
     HttpURLConnection conn;
     public Context context;
@@ -27,6 +32,7 @@ public class DownloadFiles extends AsyncTask<String,String,String> {
     public String responseMessage,errorMessage;
     String TokenId;
     private ProgressDialog mProgressDialog;
+    public String file_name=null;
 
     public DownloadFiles(String url_path,Context _context,String token_id){
         try{
@@ -50,6 +56,7 @@ public class DownloadFiles extends AsyncTask<String,String,String> {
     protected String doInBackground(String... filename){
         InputStream isr;
         int count;
+        file_name = filename[0];
         try{
             conn = (HttpURLConnection) api_url.openConnection();
             conn.setRequestProperty("Authorization", "Bearer " + TokenId);
@@ -74,7 +81,7 @@ public class DownloadFiles extends AsyncTask<String,String,String> {
                 File SDCardRoot = new File(Environment.getExternalStorageDirectory()+"/HCircle");
                 if(!SDCardRoot.isDirectory())//if directory does not exists
                     SDCardRoot.mkdirs();//then make the directory
-                File file = new File(SDCardRoot,filename[0]);
+                File file = new File(SDCardRoot,file_name);
                 FileOutputStream output = new FileOutputStream(file);
 
                 byte data[] = new byte[1024];
@@ -110,12 +117,41 @@ public class DownloadFiles extends AsyncTask<String,String,String> {
     }
     @Override
     protected void onPostExecute(String res){
-        if(responseCode==200)
+        if(responseCode==200) {
             mProgressDialog.dismiss();
-        else{
+            String destination_path = Environment.getExternalStorageDirectory()+"/HCircle";
+            openFolder();
+        }else{
             mProgressDialog.setMessage(res);
             mProgressDialog.setCancelable(true);
         }
+    }
+
+    public void openFolder()
+    {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        Uri uri = Uri.parse(Environment.getExternalStorageDirectory().getPath()
+                + "/HCircle/");
+        intent.setDataAndType(uri, "*/*");
+        Activity my_activity = new Activity(){
+            @Override
+            public void onActivityResult(int requestCode, int resultCode, Intent data){
+                if(data==null) return;
+                Uri fileUri = data.getData();
+                //ReadFile readFile = new ReadFile();
+                switch(requestCode){
+                    case 1: //file_path = readFile.getFilePath(fileUri,context);
+                        String file_path = ReadFile.getPath(fileUri, context);
+                        if(file_path!=null){
+
+                        }
+                        break;
+                    default:
+                        Toast.makeText(context, "Invalid request code. You haven't selected any file", Toast.LENGTH_SHORT).show();
+                }
+            }
+        };
+        my_activity.startActivity(Intent.createChooser(intent, "Open folder"));
     }
 
 }
