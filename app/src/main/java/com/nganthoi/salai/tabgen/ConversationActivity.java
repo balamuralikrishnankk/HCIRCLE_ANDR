@@ -880,9 +880,9 @@ public class ConversationActivity extends AppCompatActivity {
                     JSONObject jObj2;
                     if (jsonArray.length() > 0) {
                         jObj2 = jObj1.getJSONObject("posts");
-                        int i = 0;
+                        int i = jsonArray.length()-1;
                         String messageDate;
-                        while (i < jsonArray.length()) {
+                        while (i >=0) {
                             //System.out.println(jsonArray.getString(i));
                             JSONObject jObj3 = jObj2.getJSONObject(jsonArray.getString(i));
                             System.out.println("Id: " + jObj3.getString("id") + " Message: " + jObj3.getString("message"));
@@ -913,7 +913,7 @@ public class ConversationActivity extends AppCompatActivity {
                             }//otherwise dont create the message
                             if(Long.parseLong(last_timetamp)< Long.parseLong(messageDate))
                                 last_timetamp = messageDate;
-                            i++;
+                            i--;
                         }//end while loop
                     }
                 } catch (Exception e) {
