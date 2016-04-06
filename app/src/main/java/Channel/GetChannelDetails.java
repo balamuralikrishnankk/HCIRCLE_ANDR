@@ -27,15 +27,19 @@ public class GetChannelDetails {
                     String teamName = jsonObj2.getString("team_name");//getting the team name
 
                     JSONObject jsonObj3 = jsonArray2.getJSONObject(i);//getting json objects for channels
-                    JSONArray jsonArray3 = jsonObj3.getJSONArray(teamName);
-                    //List<String> channelList = new ArrayList<String>();
-                    for(int j=0;j<jsonArray3.length();j++){
-                        JSONObject jsonObj4 = jsonArray3.getJSONObject(j);
-                        if (channel_name.equals(jsonObj4.getString("Channel_name")) && team_name.equals(teamName)) {
-                            channel_id = jsonObj4.getString("Channel_ID");// setting channel id
-                            channel.setChannel(channel_id,channel_name,Integer.parseInt(jsonObj4.getString("members_count")),teamName);
-                            break;
+                    try {
+                        JSONArray jsonArray3 = jsonObj3.getJSONArray(teamName);
+                        //List<String> channelList = new ArrayList<String>();
+                        for (int j = 0; j < jsonArray3.length(); j++) {
+                            JSONObject jsonObj4 = jsonArray3.getJSONObject(j);
+                            if (channel_name.equals(jsonObj4.getString("Channel_name")) && team_name.equals(teamName)) {
+                                channel_id = jsonObj4.getString("Channel_ID");// setting channel id
+                                channel.setChannel(channel_id, channel_name, Integer.parseInt(jsonObj4.getString("members_count")), teamName);
+                                break;
+                            }
                         }
+                    }catch(Exception e){
+                        System.out.println("Exception occurs in getting channel id in GetChannelDetails.java: "+e.toString());
                     }
                     if(channel_id!=null) break;
                 }

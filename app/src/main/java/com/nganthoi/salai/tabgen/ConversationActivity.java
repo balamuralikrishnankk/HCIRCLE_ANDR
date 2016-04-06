@@ -83,7 +83,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
     SupportAnimator animator_reverse;
     LinearLayout reveal_items,llAudios,llVideos,llPhotos;
     private Toolbar toolbar;
-    private Button writeImageButton;
+    private ImageView writeImageButton;
     private TextView channel_label;
     private ImageView backButton,pickImageFile,imgPhotos,imgVideos,imgAudios,imgDocuments,imgCamera;//,imgCamera,conv_Icon;
     private ListView messagesContainerListview;
@@ -195,7 +195,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
         progressDialog = new ProgressDialog(context);
         backButton = (ImageView) toolbar.findViewById(R.id.backButton);
         messagesContainerListview = (ListView) findViewById(R.id.messagesContainerListview);
-        writeImageButton = (Button) findViewById(R.id.writeImageButton);
+        writeImageButton = (ImageView) findViewById(R.id.writeImageButton);
         writeImageButton.setOnClickListener(this);
         //setting Chat adapter
         adapter = new ChatAdapter(ConversationActivity.this, new ArrayList<ChatMessage>());

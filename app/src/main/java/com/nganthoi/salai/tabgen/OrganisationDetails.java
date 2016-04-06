@@ -100,7 +100,7 @@ public class OrganisationDetails {
                     JSONArray jsonArray = new JSONArray(jsonStr);
                     if (templateList.responseCode == 200) {
                         JSONObject jsonObject;
-                        for(int i=0;i<jsonArray.length();i++){
+                            for(int i=0;i<jsonArray.length();i++){
                             jsonObject = jsonArray.getJSONObject(i);
                             list.add(jsonObject.getString("Template_Name"));
                         }
@@ -119,3 +119,4 @@ public class OrganisationDetails {
         /**********************************************************/
     }
 }
+
