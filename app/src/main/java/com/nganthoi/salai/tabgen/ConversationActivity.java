@@ -95,7 +95,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
     private ArrayList<ChatMessage> chatHistory;
     private SharedPreference sharedPreference;
     private Context context=this;
-    private String channel_id="",user_id,token,last_timetamp=null,extra_info,copied_msg=null,channel_title;
+    private String channel_id="",user_id,token,last_timetamp="000000000",extra_info,copied_msg=null,channel_title;
     private String file_path=null;
     private String ip;
     private HttpURLConnection conn=null;
@@ -616,7 +616,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
 
                         JSONArray files = json_obj.getJSONArray("filenames");
                         if(files.length()!=0){
-                            chatMessage.setFileList(files.getString(0));
+                            chatMessage.setFileList(files);
                         }
 
                         displayMessage(chatMessage);
@@ -764,7 +764,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
                         if (jsonObject.getString("filenames") != null) {
                             String file=jsonObject.getString("filenames");
                             JSONArray fileArray=new JSONArray(file);
-                            msg.setFileList(fileArray.getString(0));
+                            msg.setFileList(fileArray);
                             Log.e("ARRAY", "ARRAY:::" + fileArray.get(0));
                         }
                     }catch (Exception e){
@@ -1048,7 +1048,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
 
                                 /*If the post contains files*/
                                 JSONArray files = jObj3.getJSONArray("filenames");
-                                currentMsg.setFileList(files.getString(0));
+                                currentMsg.setFileList(files);
 //                                currentMsg.setFileList(files);
 
                                 if (user_id.equals("" + jObj3.getString("user_id"))) {
@@ -1128,7 +1128,8 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
                         jObj2 = jObj1.getJSONObject("posts");
                         int i = jsonArray.length()-1;
                         String messageDate;
-                        while (i >=0) {
+                        System.out.print("length : "+i);
+                        while (i>=0) {
                             //System.out.println(jsonArray.getString(i));
                             JSONObject jObj3 = jObj2.getJSONObject(jsonArray.getString(i));
                             System.out.println("Id: " + jObj3.getString("id") + " Message: " + jObj3.getString("message"));
@@ -1145,7 +1146,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
 
                                 /*If the post contains files*/
                                 JSONArray files = jObj3.getJSONArray("filenames");
-                                currentMsg.setFileList(files.getString(0));
+                                currentMsg.setFileList(files);
 
                                 if (user_id.equals("" + jObj3.getString("user_id"))) {
                                     currentMsg.setMe(true);
@@ -1163,7 +1164,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
                         }//end while loop
                     }
                 } catch (Exception e) {
-                    System.out.println("Error in parsing JSON: " + e.toString());
+                    System.out.println("Something is wrong error in parsing JSON: " + e.toString());
                 }
             }//end if
             progressDialog.dismiss();

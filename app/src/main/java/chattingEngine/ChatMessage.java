@@ -16,16 +16,17 @@ public class ChatMessage {
     private String dateTime;
     private String sender_name;
     private String fileInfo;
+    private List<String> fileList;
 
-    public String getFileList() {
-        return fileList;
-    }
+    /*public String getFileList() {
+        return this.fileList;
+    }*/
 
-    public void setFileList(String fileList) {
+    /*public void setFileList(String fileList) {
         this.fileList = fileList;
-    }
+    }*/
 
-    private String fileList;
+
     public ChatMessage(){
         message=null;
         fileInfo=null;
@@ -68,17 +69,17 @@ public class ChatMessage {
     public void setDate(String dateTime) {
         this.dateTime = dateTime;
     }
-//    public void setFileList(JSONArray filenames){
-//        try {
-//            for (int i = 0; i < filenames.length(); i++) {
-//                fileList.add(filenames.getString(i));
-//            }
-//        }catch(Exception e){
-//            System.out.println("Unable to store file lists: "+e.toString());
-//            fileList=null;
-//        }
-//    }
-//    public List<String> getFileList(){
-//        return this.fileList;
-//    }
+    public void setFileList(JSONArray filenames){
+       try {
+            for (int i = 0; i < filenames.length(); i++) {
+                fileList.add(filenames.getString(i));
+            }
+        }catch(Exception e){
+            System.out.println("Unable to store file lists: "+e.toString());
+            fileList=null;
+        }
+   }
+   public List<String> getFileList(){
+        return this.fileList;
+   }
 }
