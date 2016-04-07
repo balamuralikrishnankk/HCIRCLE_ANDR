@@ -21,8 +21,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 //import android.widget.Toast;
 
+import com.nganthoi.salai.tabgen.BuildConfig;
 import com.nganthoi.salai.tabgen.R;
+import com.squareup.okhttp.Interceptor;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
+import com.squareup.picasso.MemoryPolicy;
+import com.squareup.picasso.NetworkPolicy;
+import com.squareup.picasso.OkHttpDownloader;
 import com.squareup.picasso.Picasso;
+
 
 /*import java.util.ArrayList;
 import java.util.Collection;
@@ -30,6 +39,7 @@ import java.util.Iterator;*/
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
@@ -106,16 +116,33 @@ public class ChatAdapter extends BaseAdapter implements View.OnClickListener{
             try {
                 holder.txtAttachmentDetails.setVisibility(View.VISIBLE);
                 holder.imgDownloads.setVisibility(View.VISIBLE);
-//                Log.v("VALUE"+)
-                //System.out.println("File Information: "+convertInputStreamToString(isr));
+                holder.imgImages.setVisibility(View.VISIBLE);
                 JSONObject jsonfileInfo = new JSONObject(connectAPIs.convertInputStreamToString(isr));
-                Log.v("JSONFILENAME", "JSONFILENAME::::" + jsonfileInfo);
                 String file_name = jsonfileInfo.getString("filename");
                 int lastOccurance = file_name.lastIndexOf('/');
                 only_filename = file_name.substring(lastOccurance + 1);
                 fileInfo = only_filename + " \n" + InpuStreamConversion.humanReadableByteCount(Long.parseLong(jsonfileInfo.getString("size")), true);
                 holder.txtAttachmentDetails.setText(fileInfo);
-//                Picasso.with(context).load("http://128.199.111.18:8065/api/v1/files/get/8uq5js8z6tdjmnwk7mw55uuhko/j7r9nopox7rrtfqdbcr3w66zih/9hixmccmsjnkdeoy6f3yo7kxbo/IMG_20160402_201804.jpg?session_token_index=1").resize(200,200).into(holder.imgDetails);
+                OkHttpClient picassoClient = new OkHttpClient();
+                picassoClient.networkInterceptors().add(new Interceptor() {
+                    @Override
+                    public Response intercept(Chain chain) throws IOException {
+                        Request newRequest = chain.request().newBuilder()
+                                .addHeader("Content-Type", "application/json")
+                                .addHeader("Accept", "application/json")
+                                .addHeader("Authorization", "Bearer " + token)
+                                .build();
+                        return chain.proceed(newRequest);
+                    }
+                });
+                Picasso.with(context).setIndicatorsEnabled(true);
+                new Picasso.Builder(context).loggingEnabled(BuildConfig.DEBUG)
+                        .indicatorsEnabled(BuildConfig.DEBUG)
+                        .downloader(new OkHttpDownloader(picassoClient)).build()
+                        .load("http://"+ip+":8065/api/v1/files/get"+chatMessage.getFileList())
+                        .resize(600,300).error(R.drawable.place_holder)
+                        .memoryPolicy(MemoryPolicy.NO_CACHE)
+                        .networkPolicy(NetworkPolicy.NO_CACHE).into(holder.imgImages);
             } catch (JSONException e) {
                 System.out.println("JSON Exception in FileAdapter: " + e.toString());
                 holder.txtAttachmentDetails.setText(null);
@@ -125,6 +152,7 @@ public class ChatAdapter extends BaseAdapter implements View.OnClickListener{
         }else{
             holder.txtAttachmentDetails.setVisibility(View.GONE);
             holder.imgDownloads.setVisibility(View.GONE);
+            holder.imgImages.setVisibility(View.GONE);
         }
 //            FileAdapter fileAdapter = new FileAdapter(files,context);
 //            //ArrayAdapter<String> fileAdapter = new ArrayAdapter<String>(context,android.R.layout.simple_list_item_1,files);
@@ -262,6 +290,7 @@ public class ChatAdapter extends BaseAdapter implements View.OnClickListener{
         holder.txtAttachmentDetails=(TextView)v.findViewById(R.id.txtAttachmentDetails);
         holder.contentWithBG = (LinearLayout) v.findViewById(R.id.contentWithBackground);
         holder.dateInfo = (TextView) v.findViewById(R.id.dateInfo);
+        holder.imgImages=(ImageView)v.findViewById(R.id.imgImages);
 //        holder.fileList = (ListView) v.findViewById(R.id.fileList);
         return holder;
     }
@@ -286,7 +315,7 @@ public class ChatAdapter extends BaseAdapter implements View.OnClickListener{
         public TextView dateInfo,txtAttachmentDetails;
         public LinearLayout contentWithBG;
         public LinearLayout content;
-        public ImageView imgDownloads;
+        public ImageView imgDownloads,imgImages;
         public ListView fileList;
     }
 }

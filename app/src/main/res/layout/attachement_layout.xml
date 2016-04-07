@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <io.codetail.widget.RevealFrameLayout
-    android:layout_marginTop="?android:actionBarSize"
     android:background="@android:color/white"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:android="http://schemas.android.com/apk/res/android">
+
     <LinearLayout
+
         android:padding="10dp"
         android:visibility="gone"
         android:id="@+id/reveal_items"
@@ -115,4 +116,5 @@
         </LinearLayout>
     </LinearLayout>
     </LinearLayout>
+
 </io.codetail.widget.RevealFrameLayout>

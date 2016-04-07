@@ -29,6 +29,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.webkit.MimeTypeMap;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -38,6 +39,8 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -85,7 +88,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
     private Toolbar toolbar;
     private ImageView writeImageButton;
     private TextView channel_label;
-    private ImageView backButton,pickImageFile,imgPhotos,imgVideos,imgAudios,imgDocuments,imgCamera;//,imgCamera,conv_Icon;
+    private ImageView backButton,pickImageFile,imgPhotos,imgVideos,imgAudios,imgDocuments,imgCamera,cameraImageButton;//,imgCamera,conv_Icon;
     private ListView messagesContainerListview;
     private EditText messageEditText;
     private ChatAdapter adapter;
@@ -96,6 +99,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
     private String file_path=null;
     private String ip;
     private HttpURLConnection conn=null;
+    Uri cameraUri;
     private Thread currentMessageTaskThread;
     public Boolean interrupt=false;
     private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy' at 'h:mm a");
@@ -195,16 +199,20 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
         progressDialog = new ProgressDialog(context);
         backButton = (ImageView) toolbar.findViewById(R.id.backButton);
         messagesContainerListview = (ListView) findViewById(R.id.messagesContainerListview);
+
         writeImageButton = (ImageView) findViewById(R.id.writeImageButton);
         writeImageButton.setOnClickListener(this);
+        cameraImageButton=(ImageView)findViewById(R.id.cameraImageButton);
+        cameraImageButton.setOnClickListener(this);
         //setting Chat adapter
         adapter = new ChatAdapter(ConversationActivity.this, new ArrayList<ChatMessage>());
         messagesContainerListview.setAdapter(adapter);
+        messagesContainerListview.setOnScrollListener(new SampleScrollListener(this));
         messageEditText.setOnLongClickListener(this);
         messagesContainerListview.setOnItemLongClickListener(this);
 //        messagesContainerListview.setOnItemClickListener(this);
-//        pickImageFile = (ImageView) findViewById(R.id.pickImageFile);
-//        pickImageFile.setOnClickListener(this);
+        pickImageFile = (ImageView) findViewById(R.id.pickImageFile);
+        pickImageFile.setOnClickListener(this);
         imgPhotos=(ImageView)findViewById(R.id.imgPhotos);
         imgPhotos.setOnClickListener(this);
         imgAudios=(ImageView)findViewById(R.id.imgAudios);
@@ -251,13 +259,17 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
                             .setAction("Action", null).show();
                 }
                 break;
-//            case R.id.pickImageFile:
-//                Intent intent = new Intent(Intent.ACTION_PICK);
-//                intent.setType("*/*");
-//                intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-//                intent.setAction(Intent.ACTION_GET_CONTENT);
-//                startActivityForResult(Intent.createChooser(intent, "Select a file from the gallary"), REQUEST_CODE);
-//                break;
+            case R.id.cameraImageButton:
+                hidePopupWindow();
+                Intent intent5 = new Intent("android.media.action.IMAGE_CAPTURE");
+                File file1 =FileUtils.getImageFile();
+                cameraUri=Uri.fromFile(file1);
+                intent5.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(file1));
+                startActivityForResult(intent5, REQUEST_CODE_CAMERA);
+                break;
+            case R.id.pickImageFile:
+                opentheAttachmentMenu();
+                break;
             case R.id.imgAudios:
                 hidePopupWindow();
                 Intent intent1 = new Intent(Intent.ACTION_PICK);
@@ -289,8 +301,10 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
                 startActivityForResult(Intent.createChooser(intent4, "Select a file from documents"), REQUEST_CODE);
                 break;
             case R.id.imgCamera:
+                hidePopupWindow();
                 Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
-                File file = new File(Environment.getExternalStorageDirectory()+File.separator + "image.jpg");
+                File file = FileUtils.getImageFile();
+                cameraUri=Uri.fromFile(file);
                 intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(file));
                 startActivityForResult(intent, REQUEST_CODE_CAMERA);
                 break;
@@ -312,19 +326,6 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
         }
         return false;
     }
-//-----OnItemClick Listener for ListView
-//    @Override
-//    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//            switch (view.getId()){
-//                case R.id.messagesContainerListview:
-//                    if (mActionMode != null) {
-//                        if(adapter.getSelectedCount()>1){
-//                            mActionMode.finish();
-//                        }
-//                    }
-//                    break;
-//            }
-//    }
 
 //-----onItemLongClick Lstener for Listview
     @Override
@@ -369,7 +370,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
         int id = item.getItemId();
         switch (id){
             case R.id.aeroplane:
-                opentheAttachmentMenu();
+
 //                int cy = (reveal_items.getTop() + reveal_items.getBottom())/2;
                 break;
         }
@@ -378,10 +379,10 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
     public void opentheAttachmentMenu(){
 
         int cx = (reveal_items.getLeft() + reveal_items.getRight());
-        int cy = reveal_items.getTop();
+        int cy = reveal_items.getBottom();
         int radius = Math.max(reveal_items.getWidth(), reveal_items.getHeight());
         SupportAnimator animator =
-                ViewAnimationUtils.createCircularReveal(reveal_items, cx, cy, 0, radius);
+                ViewAnimationUtils.createCircularReveal(reveal_items, cx, cy, radius, 0);
         animator.setInterpolator(new AccelerateDecelerateInterpolator());
         animator.setDuration(400);
         animator_reverse = animator.reverse();
@@ -535,33 +536,15 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
                 }
                 break;
             case REQUEST_CODE_CAMERA:
-//                file_path = ReadFile.getPath(fileUri,context);
-//                mImage = (ImageView) findViewById(R.id.imageView1);
-//                mImage.setImageBitmap(decodeSampledBitmapFromFile(file.getAbsolutePath(), 500, 250));
-//                Methods.toastShort("CAMERA",this);
-//                file_path = ReadFile.getPath(fileUri,context);
-//                Methods.toastShort(file_path, this);
                 Intent intent=new Intent(ConversationActivity.this,UploadActivity.class);
                 Bundle bundle=new Bundle();
                 bundle.putString("IP_VALUE",ip);
-//                bundle.putString("FILE_PATH",);
+                bundle.putString("FILE_PATH",cameraUri.getPath());
                 bundle.putString("TOKEN",token);
                 bundle.putString("CHANNEL_ID",channel_id);
                 bundle.putString("TYPE","CAMERA");
                 intent.putExtras(bundle);
                 startActivityForResult(intent, UPLOAD_REQUEST_CODE);
-////                Bitmap mFeedbackBitmap = BitmapUtils.setImage(profilePic, galleryURi1.getPath());
-////                Log.v("PATH", "" + galleryURi1.getPath());
-//                if (file_path == null) {
-//                    // showToast("Image not found.");
-//                    return;
-//                }
-//                Intent mediaScannerIntent = new Intent(Intent.ACTION_VIEW);
-//                mediaScannerIntent.setDataAndType(fileUri, "image/jpeg");
-//                startActivity(mediaScannerIntent);
-//                sendBroadcast(mediaScannerIntent);
-
-
                 break;
             case UPLOAD_REQUEST_CODE:
                 try{
@@ -580,16 +563,10 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
                     jsonObject.put("parent_id","");
                     jsonObject.put("Message", caption);
                     sendMyMessage(jsonObject);
-//                    messageEditText.setText(" ");
                     filenames=null;
                 } catch (Exception e) {
                     System.out.print("Message Sending failed: " + e.toString());
-//                    Snackbar.make(v, "Oops! Message Sending failed", Snackbar.LENGTH_LONG)
-//                            .setAction("Action", null).show();
                 }
-//                Methods.toastShort("CONVERSATION CALLED::" + result, this);
-//                sendMyMessage(result);
-//                sendMyMessage();
                 break;
             default:
                 Toast.makeText(context, "Invalid request code. You haven't selected any file", Toast.LENGTH_SHORT).show();
@@ -809,12 +786,6 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
             adapter.add(chatHistory);
             adapter.notifyDataSetChanged();
             scroll();
-            /*for (int i = 0; i < chatHistory.size(); i++) {
-                ChatMessage message = chatHistory.get(i);
-                adapter.add(message);
-                adapter.notifyDataSetChanged();
-                scroll();
-            }*/
         }
     }
 
@@ -1162,6 +1133,31 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
             mActionMode=null;
         }
     }
+
+    public class SampleScrollListener implements AbsListView.OnScrollListener {
+        private final Context context;
+
+        public SampleScrollListener(Context context) {
+            this.context = context;
+        }
+
+        @Override
+        public void onScrollStateChanged(AbsListView view, int scrollState) {
+            final Picasso picasso = Picasso.with(context);
+            if (scrollState == SCROLL_STATE_IDLE || scrollState == SCROLL_STATE_TOUCH_SCROLL) {
+                picasso.resumeTag(context);
+            } else {
+                picasso.pauseTag(context);
+            }
+        }
+
+        @Override
+        public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount,
+                             int totalItemCount) {
+            // Do nothing.
+        }
+    }
+
 
 }
 

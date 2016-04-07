@@ -37,7 +37,7 @@ dependencies {
     compile files('src/main/java/httpclient-osgi-4.2.1.jar')
     compile files('src/main/java/httpclient-4.2.3.jar')
     compile files('src/main/java/httpcore-4.0.1 (1).jar')
-    compile 'com.squareup.picasso:picasso:2.3.4'
-    compile 'com.squareup.okhttp:okhttp-urlconnection:2.0.0'
+    compile 'com.squareup.picasso:picasso:2.5.0'
+    compile 'com.squareup.okhttp:okhttp-urlconnection:2.5.0'
     compile 'com.github.ozodrukh:CircularReveal:1.1.0'
 }

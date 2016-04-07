@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.Image;
 import android.media.ThumbnailUtils;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.StrictMode;
@@ -48,6 +49,7 @@ public class UploadActivity extends AppCompatActivity implements View.OnClickLis
     private ImageView imgFile;
     private EditText edtCaption;
     String type;
+    String cameraUriPath;
     private Bundle bundle;
     private String ip,filePath,token,channel_id;
     private Button btnSend,btnCancel;
@@ -58,11 +60,13 @@ public class UploadActivity extends AppCompatActivity implements View.OnClickLis
         bundle=getIntent().getExtras();
         if(bundle!=null)
         {
+
             ip=bundle.getString("IP_VALUE");
             filePath=bundle.getString("FILE_PATH");
             token=bundle.getString("TOKEN");
             channel_id=bundle.getString("CHANNEL_ID");
             type=bundle.getString("TYPE");
+
         }
         initComponent();
 
@@ -239,6 +243,9 @@ public class UploadActivity extends AppCompatActivity implements View.OnClickLis
         if(imgFile1.exists()){
             if(type.contains("IMAGE"))
             {
+                Bitmap myBitmap = BitmapFactory.decodeFile(imgFile1.getAbsolutePath());
+                imgFile.setImageBitmap(myBitmap);
+            }else if(type.contains("CAMERA")){
                 Bitmap myBitmap = BitmapFactory.decodeFile(imgFile1.getAbsolutePath());
                 imgFile.setImageBitmap(myBitmap);
             }else {

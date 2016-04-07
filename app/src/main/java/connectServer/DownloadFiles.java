@@ -120,14 +120,14 @@ public class DownloadFiles extends AsyncTask<String,String,String>{
         if(responseCode==200) {
             mProgressDialog.dismiss();
             String destination_path = Environment.getExternalStorageDirectory()+"/HCircle";
-            openFolder();
+            openFolder(context);
         }else{
             mProgressDialog.setMessage(res);
             mProgressDialog.setCancelable(true);
         }
     }
 
-    public void openFolder()
+    public void openFolder(final Context context)
     {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         Uri uri = Uri.parse(Environment.getExternalStorageDirectory().getPath()
@@ -151,7 +151,7 @@ public class DownloadFiles extends AsyncTask<String,String,String>{
                 }
             }
         };
-        my_activity.startActivity(Intent.createChooser(intent, "Open folder"));
+        context.startActivity(Intent.createChooser(intent, "Open folder"));
     }
 
 }
