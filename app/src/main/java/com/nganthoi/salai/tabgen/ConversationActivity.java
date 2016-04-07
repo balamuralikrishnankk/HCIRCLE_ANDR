@@ -213,6 +213,8 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
 //        messagesContainerListview.setOnItemClickListener(this);
         pickImageFile = (ImageView) findViewById(R.id.pickImageFile);
         pickImageFile.setOnClickListener(this);
+
+        backButton.setOnClickListener(this);
         imgPhotos=(ImageView)findViewById(R.id.imgPhotos);
         imgPhotos.setOnClickListener(this);
         imgAudios=(ImageView)findViewById(R.id.imgAudios);
