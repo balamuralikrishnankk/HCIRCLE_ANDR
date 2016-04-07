@@ -16,15 +16,15 @@ public class ChatMessage {
     private String dateTime;
     private String sender_name;
     private String fileInfo;
-    private List<String> fileList;
+    private String fileList;
 
-    /*public String getFileList() {
+    public String getFileList() {
         return this.fileList;
-    }*/
+    }
 
-    /*public void setFileList(String fileList) {
+    public void setFileList(String fileList) {
         this.fileList = fileList;
-    }*/
+    }
 
 
     public ChatMessage(){
@@ -69,7 +69,7 @@ public class ChatMessage {
     public void setDate(String dateTime) {
         this.dateTime = dateTime;
     }
-    public void setFileList(JSONArray filenames){
+    /*public void setFileList(JSONArray filenames){
        try {
             for (int i = 0; i < filenames.length(); i++) {
                 fileList.add(filenames.getString(i));
@@ -81,5 +81,5 @@ public class ChatMessage {
    }
    public List<String> getFileList(){
         return this.fileList;
-   }
+   }*/
 }

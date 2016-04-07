@@ -170,7 +170,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
                             @Override
                             public void run(){
 
-                                if(last_timetamp!=null) {
+                                if(last_timetamp!=null||last_timetamp=="000000000") {
                                     System.out.println("Last timestamp: "+last_timetamp);
                                     new GetCurrentMessageTask().execute("http://"+ip+
                                             ":8065//api/v1/channels/"+channel_id+
@@ -618,7 +618,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
 
                         JSONArray files = json_obj.getJSONArray("filenames");
                         if(files.length()!=0){
-                            chatMessage.setFileList(files);
+                            chatMessage.setFileList(files.getString(0));
                         }
 
                         displayMessage(chatMessage);
@@ -766,7 +766,8 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
                         if (jsonObject.getString("filenames") != null) {
                             String file=jsonObject.getString("filenames");
                             JSONArray fileArray=new JSONArray(file);
-                            msg.setFileList(fileArray);
+                            if(fileArray.length()>0)
+                                msg.setFileList(fileArray.getString(0));
                             Log.e("ARRAY", "ARRAY:::" + fileArray.get(0));
                         }
                     }catch (Exception e){
@@ -1050,7 +1051,8 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
 
                                 /*If the post contains files*/
                                 JSONArray files = jObj3.getJSONArray("filenames");
-                                currentMsg.setFileList(files);
+                                if(files.length()>0)
+                                    currentMsg.setFileList(files.getString(0));
 //                                currentMsg.setFileList(files);
 
                                 if (user_id.equals("" + jObj3.getString("user_id"))) {
@@ -1148,7 +1150,8 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
 
                                 /*If the post contains files*/
                                 JSONArray files = jObj3.getJSONArray("filenames");
-                                currentMsg.setFileList(files);
+                                if(files.length()>0)
+                                    currentMsg.setFileList(files.getString(0));
 
                                 if (user_id.equals("" + jObj3.getString("user_id"))) {
                                     currentMsg.setMe(true);
