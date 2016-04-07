@@ -9,7 +9,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:showIn="@layout/activity_conversation"
+
     tools:context="com.nganthoi.salai.tabgen.ConversationActivity"
     android:background="#00000000">
     <!--tools:showIn="@layout/activity_conversation"
@@ -79,6 +79,9 @@
                 android:id="@+id/messageEditText"
                 android:hint="@string/messageHint"
                 android:background="@drawable/edittext_style" />
+            <TextView
+                android:layout_width="8dp"
+                android:layout_height="5dp" />
             <ImageView
                 android:layout_gravity="center"
                 android:layout_weight="0.5"
