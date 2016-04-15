@@ -25,7 +25,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.ActionMode;
@@ -98,7 +100,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
     RevealFrameLayout revealFrameLayout;
     LinearLayout reveal_items,llAudios,llVideos,llPhotos;
     private Toolbar toolbar;
-    private ImageView writeImageButton;
+    private ImageView writeImageButton,imgSentMessages;
     private TextView channel_label;
     private ImageView backButton,pickImageFile,imgPhotos,imgVideos,imgAudios,imgDocuments,imgCamera,cameraImageButton;//,imgCamera,conv_Icon;
     private RecyclerView messagesContainerRecyclerview;
@@ -206,7 +208,8 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
 //-----initializing the xml components
     public void initComponent(){
         /*** labels in the action abar of the activity_conversation ***/
-
+        imgSentMessages=(ImageView)findViewById(R.id.imgSentMessages);
+        imgSentMessages.setOnClickListener(this);
         reveal_items=(LinearLayout)findViewById(R.id.reveal_items);
         channel_label = (TextView) toolbar.findViewById(R.id.channel_name);
         channel_label.setText(channel_title);
@@ -218,7 +221,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
 //        layoutManager.setReverseLayout(true);
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         messagesContainerRecyclerview.setLayoutManager(layoutManager);
-        messagesContainerRecyclerview.addItemDecoration(new SimpleDividerItemDecoration(this));
+//        messagesContainerRecyclerview.addItemDecoration(new SimpleDividerItemDecoration(this));
         writeImageButton = (ImageView) findViewById(R.id.writeImageButton);
         writeImageButton.setOnClickListener(this);
         cameraImageButton=(ImageView)findViewById(R.id.cameraImageButton);
@@ -242,6 +245,29 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
         imgCamera=(ImageView)findViewById(R.id.imgCamera);
         imgCamera.setOnClickListener(this);
 
+        messageEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if(s.length()>0){
+                    imgSentMessages.setVisibility(View.VISIBLE);
+                    writeImageButton.setVisibility(View.GONE);
+                }else{
+                    writeImageButton.setVisibility(View.VISIBLE);
+                    imgSentMessages.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
     }
 
 
@@ -249,10 +275,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
     @Override
     public void onClick(View v) {
         switch (v.getId()){
-            case R.id.backButton:
-                onBackPressed();
-                break;
-            case R.id.writeImageButton:
+            case R.id.imgSentMessages:
                 Methods.toastShort("CLICKED",this);
                 String messageText = messageEditText.getText().toString();
                 if (TextUtils.isEmpty(messageText)||messageText.trim().length()==0) {
@@ -276,6 +299,12 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
                     Snackbar.make(v, "Oops! Message Sending failed", Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
                 }
+                break;
+            case R.id.backButton:
+                onBackPressed();
+                break;
+            case R.id.writeImageButton:
+
                 break;
             case R.id.cameraImageButton:
                 hidePopupWindow();

@@ -3,10 +3,14 @@ package chattingEngine;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.StrictMode;
+import android.provider.MediaStore;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.util.SparseBooleanArray;
@@ -28,6 +32,7 @@ import com.squareup.okhttp.Response;
 import com.squareup.picasso.LruCache;
 import com.squareup.picasso.OkHttpDownloader;
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
 import org.json.JSONObject;
 
@@ -116,6 +121,9 @@ public class ChatConversationAdapter extends RecyclerView.Adapter<ChatConversati
             return true;
         }else if(name.contains(".mp3")){
             return true;
+        }else if(name.contains(".mp4") || name.contains(".3gp"))
+        {
+            return true;
         }
         return false;
     }
@@ -124,37 +132,38 @@ public class ChatConversationAdapter extends RecyclerView.Adapter<ChatConversati
         holder.txtsender.setText(chatMessages.get(position).getSenderName());
         holder.txtMessage.setText(chatMessages.get(position).getMessage());
         holder.txtdateInfo.setText(chatMessages.get(position).getDate());
-
         if(chatMessages.get(position).getFileList()!=null){
+            String[] name=chatMessages.get(position).getFileList().split("/");
             if(validateFileExtn(chatMessages.get(position).getFileList())){
                 holder.rlDocumentFile.setVisibility(View.VISIBLE);
                 holder.rlFile.setVisibility(View.GONE);
-                String name[]=chatMessages.get(position).getFileList().split("/");
                 holder.txtDocName.setText(""+name[4]);
             }else{
                 holder.rlDocumentFile.setVisibility(View.GONE);
                 holder.rlFile.setVisibility(View.VISIBLE);
-                OkHttpClient picassoClient = new OkHttpClient();
-                picassoClient.networkInterceptors().add(new Interceptor() {
-                    @Override
-                    public Response intercept(Chain chain) throws IOException {
-                        Request newRequest = chain.request().newBuilder()
-                                .addHeader("Content-Type", "application/json")
-                                .addHeader("Accept", "application/json")
-                                .addHeader("Authorization", "Bearer " + token)
-                                .build();
-                        return chain.proceed(newRequest);
-                    }
-                });
+                    OkHttpClient picassoClient = new OkHttpClient();
+                    picassoClient.networkInterceptors().add(new Interceptor() {
+                        @Override
+                        public Response intercept(Chain chain) throws IOException {
+                            Request newRequest = chain.request().newBuilder()
+                                    .addHeader("Content-Type", "application/json")
+                                    .addHeader("Accept", "application/json")
+                                    .addHeader("Authorization", "Bearer " + token)
+                                    .build();
+                            return chain.proceed(newRequest);
+                        }
+                    });
 
-                Picasso.with(context).setIndicatorsEnabled(true);
-                new Picasso.Builder(context).loggingEnabled(BuildConfig.DEBUG)
-                        .indicatorsEnabled(BuildConfig.DEBUG)
-                        .downloader(new OkHttpDownloader(picassoClient)).build()
-                        .load("http://"+ip+":8065/api/v1/files/get"+chatMessages.get(position).getFileList())
-                        .resize(300,200)
-                        .error(R.drawable.place_holder)
-                        .into(holder.imgImages);
+                    Picasso.with(context).setIndicatorsEnabled(true);
+                    new Picasso.Builder(context).loggingEnabled(BuildConfig.DEBUG)
+                            .indicatorsEnabled(BuildConfig.DEBUG)
+                            .downloader(new OkHttpDownloader(picassoClient)).build()
+                            .load("http://"+ip+":8065/api/v1/files/get"+chatMessages.get(position).getFileList())
+                            .resize(300,200)
+                            .error(R.drawable.place_holder)
+                            .into(holder.imgImages);
+
+
             }
 
         }else{

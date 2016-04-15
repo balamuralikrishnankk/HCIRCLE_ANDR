@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/cardView"
-        android:layout_marginTop="10dp"
+        android:layout_margin="5dp"
         android:background="@drawable/cart_bg"
         >
         <LinearLayout
@@ -39,8 +39,8 @@
                     android:orientation="vertical">
 
                     <LinearLayout
-                        android:weightSum="2"
-                        android:layout_weight="1"
+                        android:weightSum="3"
+
                         android:gravity="left"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -58,8 +58,8 @@
                                         android:layout_gravity="left"
                                         android:gravity="center_vertical" />
 <LinearLayout
-    android:layout_marginRight="60dp"
-    android:layout_width="match_parent"
+    android:layout_weight="2"
+    android:layout_width="0dp"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:gravity="right"
@@ -67,29 +67,33 @@
     >
     <ImageView
         android:id="@+id/imgReply"
-        android:layout_width="40dp"
-        android:layout_height="30dp"
+        android:layout_width="30dp"
+        android:layout_margin="5dp"
+        android:layout_height="20dp"
         android:src="@drawable/icon_arrow_back"
          />
 
     <ImageView
+        android:layout_margin="5dp"
         android:id="@+id/imgMessages"
-        android:layout_width="40dp"
-        android:layout_height="30dp"
+        android:layout_width="30dp"
+        android:layout_height="20dp"
         android:src="@drawable/icon_reply_gray"
         />
 
     <ImageView
+        android:layout_margin="5dp"
         android:id="@+id/imgFavorite"
-        android:layout_width="40dp"
-        android:layout_height="30dp"
+        android:layout_width="30dp"
+        android:layout_height="20dp"
         android:src="@drawable/icon_love_gray"
         />
 
     <ImageView
+        android:layout_margin="5dp"
         android:id="@+id/imgBookmark"
-        android:layout_width="40dp"
-        android:layout_height="30dp"
+        android:layout_width="30dp"
+        android:layout_height="20dp"
         android:src="@drawable/icon_my_bookmark_gray"
  />
 
@@ -206,8 +210,9 @@
                             android:id="@+id/txtdateInfo"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:textSize="12sp"
+                            android:textSize="10sp"
                             android:text="dateInfo"
+                            android:textStyle="italic"
                             android:textColor="#8f8e8e"
                             android:layout_gravity="right"
                             android:layout_alignParentTop="true"
