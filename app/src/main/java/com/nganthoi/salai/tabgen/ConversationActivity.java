@@ -185,7 +185,9 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
                         runOnUiThread(new Runnable(){
                             @Override
                             public void run(){
-
+                                Log.v("CURRENT","TASK:::"+"http://"+ip+
+                                        ":8065//api/v1/channels/"+channel_id+
+                                        "/posts/"+last_timetamp);
                                 if(last_timetamp!=null||last_timetamp=="000000000") {
                                     System.out.println("Last timestamp: "+last_timetamp);
                                     new GetCurrentMessageTask().execute("http://"+ip+
@@ -307,7 +309,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
 
                 break;
             case R.id.cameraImageButton:
-                hidePopupWindow();
+//                hidePopupWindow();
                 Intent intent5 = new Intent("android.media.action.IMAGE_CAPTURE");
                 File file1 =FileUtils.getImageFile();
                 cameraUri=Uri.fromFile(file1);
@@ -477,113 +479,117 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
     }
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data){
+            Log.v("ONACTIVITYRESULT","ONACTIVITYRESULT");
+        try {
+            Uri fileUri;
+            switch (requestCode) {
+                case REQUEST_CODE: //file_path = readFile.getFilePath(fileUri,context);
 
-//        if(resultCode!=RESULT_OK || data==null) return;
-        Uri fileUri;
-        //ReadFile readFile = new ReadFile();
-        switch(requestCode){
+                    if (data.getData() != null) {
+                        fileUri = data.getData();
+                        file_path = ReadFile.getPath(fileUri, context);
+                        String mimetype = getMimeType(file_path);
 
-            case REQUEST_CODE: //file_path = readFile.getFilePath(fileUri,context);
-                if(data.getData()!=null) {
-                    fileUri = data.getData();
-                    file_path = ReadFile.getPath(fileUri, context);
-                    String mimetype = getMimeType(file_path);
-
-                    Methods.toastShort(mimetype, this);
-                    if (file_path != null) {
-                        //System.out.println("File has been selected: "+file_path);
+                        Methods.toastShort(mimetype, this);
+                        if (file_path != null) {
+                            //System.out.println("File has been selected: "+file_path);
 //                    Toast.makeText(context, "You have selected: "+file_path, Toast.LENGTH_SHORT).show();
-                        if (file_path.contains(".mp3")) {
-                            new Thread(new Runnable() {
-                                public void run() {
-                                    runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            UploadFile uploadFile = new UploadFile(file_path, "http://" + ip + ":8065/api/v1/files/upload");
-                                            uploadFile.execute();
+                            if (file_path.contains(".mp3")) {
+                                new Thread(new Runnable() {
+                                    public void run() {
+                                        runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                UploadFile uploadFile = new UploadFile(file_path, "http://" + ip + ":8065/api/v1/files/upload");
+                                                uploadFile.execute();
 
-                                        }
-                                    });
-                                }
-                            }).start();
+                                            }
+                                        });
+                                    }
+                                }).start();
 
-                        } else if (mimetype.contains("application/")) {
-                            new Thread(new Runnable() {
-                                public void run() {
-                                    runOnUiThread(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            UploadFile uploadFile = new UploadFile(file_path, "http://" + ip + ":8065/api/v1/files/upload");
-                                            uploadFile.execute();
+                            } else if (mimetype.contains("application/")) {
+                                new Thread(new Runnable() {
+                                    public void run() {
+                                        runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                UploadFile uploadFile = new UploadFile(file_path, "http://" + ip + ":8065/api/v1/files/upload");
+                                                uploadFile.execute();
 
-                                        }
-                                    });
-                                }
-                            }).start();
-                        } else if (mimetype.contains("image/")) {
+                                            }
+                                        });
+                                    }
+                                }).start();
+                            } else if (mimetype.contains("image/")) {
 
-                            Intent intent = new Intent(ConversationActivity.this, UploadActivity.class);
-                            Bundle bundle = new Bundle();
-                            bundle.putString("IP_VALUE", ip);
-                            bundle.putString("FILE_PATH", file_path);
-                            bundle.putString("TOKEN", token);
-                            bundle.putString("CHANNEL_ID", channel_id);
-                            bundle.putString("TYPE", "IMAGE");
-                            intent.putExtras(bundle);
-                            startActivityForResult(intent, UPLOAD_REQUEST_CODE);
-                        } else if (mimetype.contains("video/")) {
+                                Intent intent = new Intent(ConversationActivity.this, UploadActivity.class);
+                                Bundle bundle = new Bundle();
+                                bundle.putString("IP_VALUE", ip);
+                                bundle.putString("FILE_PATH", file_path);
+                                bundle.putString("TOKEN", token);
+                                bundle.putString("CHANNEL_ID", channel_id);
+                                bundle.putString("TYPE", "IMAGE");
+                                intent.putExtras(bundle);
+                                startActivityForResult(intent, UPLOAD_REQUEST_CODE);
+                            } else if (mimetype.contains("video/")) {
 //
-                            Intent intent = new Intent(ConversationActivity.this, UploadActivity.class);
-                            Bundle bundle = new Bundle();
-                            bundle.putString("IP_VALUE", ip);
-                            bundle.putString("FILE_PATH", file_path);
-                            bundle.putString("TOKEN", token);
-                            bundle.putString("CHANNEL_ID", channel_id);
-                            bundle.putString("TYPE", "VIDEO");
-                            intent.putExtras(bundle);
-                            startActivityForResult(intent, UPLOAD_REQUEST_CODE);
+                                Intent intent = new Intent(ConversationActivity.this, UploadActivity.class);
+                                Bundle bundle = new Bundle();
+                                bundle.putString("IP_VALUE", ip);
+                                bundle.putString("FILE_PATH", file_path);
+                                bundle.putString("TOKEN", token);
+                                bundle.putString("CHANNEL_ID", channel_id);
+                                bundle.putString("TYPE", "VIDEO");
+                                intent.putExtras(bundle);
+                                startActivityForResult(intent, UPLOAD_REQUEST_CODE);
+                            }
+                            Log.e("CONVERSATION", "ONACTIVITY_RESULT.");
                         }
-                        Log.e("CONVERSATION", "ONACTIVITY_RESULT.");
                     }
-                }
-                break;
-            case REQUEST_CODE_CAMERA:
-                if(cameraUri!=null) {
-                    Intent intent = new Intent(ConversationActivity.this, UploadActivity.class);
-                    Bundle bundle = new Bundle();
-                    bundle.putString("IP_VALUE", ip);
-                    bundle.putString("FILE_PATH", cameraUri.getPath());
-                    bundle.putString("TOKEN", token);
-                    bundle.putString("CHANNEL_ID", channel_id);
-                    bundle.putString("TYPE", "CAMERA");
-                    intent.putExtras(bundle);
-                    startActivityForResult(intent, UPLOAD_REQUEST_CODE);
-                }
-                break;
-            case UPLOAD_REQUEST_CODE:
-                try{
-                String result=data.getStringExtra("RESULT_STRING");
-                String caption=data.getStringExtra("CAPTION");
-                JSONObject fileObject = new JSONObject(result);
-                filenames=fileObject.getJSONArray("filenames");
+                    break;
+                case REQUEST_CODE_CAMERA:
+//                    hidePopupWindow();
+                    if (cameraUri != null) {
+                        Intent intent = new Intent(ConversationActivity.this, UploadActivity.class);
+                        Bundle bundle = new Bundle();
+                        bundle.putString("IP_VALUE", ip);
+                        bundle.putString("FILE_PATH", cameraUri.getPath());
+                        bundle.putString("TOKEN", token);
+                        bundle.putString("CHANNEL_ID", channel_id);
+                        bundle.putString("TYPE", "CAMERA");
+                        intent.putExtras(bundle);
+                        startActivityForResult(intent, UPLOAD_REQUEST_CODE);
+                    }
+                    break;
+                case UPLOAD_REQUEST_CODE:
+//                    hidePopupWindow();
+                    try {
+                        String result = data.getStringExtra("RESULT_STRING");
+                        String caption = data.getStringExtra("CAPTION");
+                        JSONObject fileObject = new JSONObject(result);
+                        filenames = fileObject.getJSONArray("filenames");
 //                String messageText = messageEditText.getText().toString();
-                    JSONObject jsonObject = new JSONObject();
+                        JSONObject jsonObject = new JSONObject();
 
-                    if(filenames!=null && filenames.length()>0){
-                        jsonObject.put("filenames",filenames);
+                        if (filenames != null && filenames.length() > 0) {
+                            jsonObject.put("filenames", filenames);
+                        }
+                        jsonObject.put("channel_id", channel_id);
+                        jsonObject.put("root_id", "");
+                        jsonObject.put("parent_id", "");
+                        jsonObject.put("Message", caption);
+                        sendMyMessage(jsonObject);
+                        filenames = null;
+                    } catch (Exception e) {
+                        System.out.print("Message Sending failed: " + e.toString());
                     }
-                    jsonObject.put("channel_id", channel_id);
-                    jsonObject.put("root_id", "");
-                    jsonObject.put("parent_id","");
-                    jsonObject.put("Message", caption);
-                    sendMyMessage(jsonObject);
-                    filenames=null;
-                } catch (Exception e) {
-                    System.out.print("Message Sending failed: " + e.toString());
-                }
-                break;
-            default:
-                Toast.makeText(context, "Invalid request code. You haven't selected any file", Toast.LENGTH_SHORT).show();
+                    break;
+                default:
+                    Toast.makeText(context, "Invalid request code. You haven't selected any file", Toast.LENGTH_SHORT).show();
+            }
+        }catch (Exception e){
+            Methods.toastShort("Oops! Something went wrong..",this);
         }
     }
 
@@ -1040,6 +1046,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
         }
         @Override
         protected void onPostExecute(String resp){
+            Log.v("GETCURRENT MESSAGE TASK","GETCURRENT MESSAGE TASK"+resp);
             if(resp!=null && responseCode==200) {
                 try {
 
@@ -1145,7 +1152,6 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
                     JSONArray jsonArray = jObj1.getJSONArray("order");
                     JSONObject jObj2;
                     if (jsonArray.length() > 0) {
-
                         jObj2 = jObj1.getJSONObject("posts");
                         int i = jsonArray.length()-1;
                         String messageDate;

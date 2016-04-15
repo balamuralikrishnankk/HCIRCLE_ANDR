@@ -36,6 +36,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
 import ListenerClasses.ListviewListeners;
+import Utils.ImageCompression;
 import Utils.InpuStreamConversion;
 import Utils.Methods;
 
@@ -70,7 +71,7 @@ public class UploadActivity extends AppCompatActivity implements View.OnClickLis
         }
         initComponent();
 
-        showImage(filePath,type);
+        showImage(filePath, type);
     }
     public void initComponent(){
         imgFile=(ImageView)findViewById(R.id.imgFile);
@@ -84,9 +85,21 @@ public class UploadActivity extends AppCompatActivity implements View.OnClickLis
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.btnSend:
+                try {
+//                        if(type.contains("CAMERA")){
+//                            Intent intent=new Intent();
+//                            intent.putExtra("RESULT_STRING",filePath);
+//                            intent.putExtra("CAPTION",edtCaption.getText().toString()+"");
+//                            setResult(ConversationActivity.UPLOAD_REQUEST_CODE,intent);
+//                        }else {
+                            UploadFile uploadFile = new UploadFile(filePath,"http://"+ip+":8065/api/v1/files/upload");
+                            uploadFile.execute();
 
-                UploadFile uploadFile = new UploadFile(filePath,"http://"+ip+":8065/api/v1/files/upload");
-                uploadFile.execute();
+//                        }
+
+                }catch(Exception e){
+                    Methods.toastShort("Something went wrong..",this);
+                }
 //                finish();
                 break;
             case R.id.btnCancel:
@@ -108,7 +121,9 @@ public class UploadActivity extends AppCompatActivity implements View.OnClickLis
 //                Bitmap myBitmap=ThumbnailUtils.createVideoThumbnail(imgFile1.getAbsolutePath(), MediaStore.Images.Thumbnails.MICRO_KIND);
                 imgFile.setImageBitmap(myBitmap);
             }else if(type.contains("CAMERA")){
-                Bitmap myBitmap = BitmapFactory.decodeFile(imgFile1.getAbsolutePath());
+                Bitmap myBitmap = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(imgFile1.getAbsolutePath()),
+                        100, 100);
+//                Bitmap myBitmap = BitmapFactory.decodeFile(imgFile1.getAbsolutePath());
                 imgFile.setImageBitmap(myBitmap);
             }else {
                 Bitmap bMap = ThumbnailUtils.createVideoThumbnail(path, MediaStore.Video.Thumbnails.MICRO_KIND);
@@ -143,6 +158,8 @@ public class UploadActivity extends AppCompatActivity implements View.OnClickLis
         @Override
         protected void onPreExecute(){
             Methods.showProgressDialog(UploadActivity.this,"Please wait..");
+            ImageCompression imageCompression=new ImageCompression(UploadActivity.this);
+            fileLocation=imageCompression.compressImage(fileLocation);
         }
         @Override
         protected String doInBackground(Void... v){
@@ -229,7 +246,7 @@ public class UploadActivity extends AppCompatActivity implements View.OnClickLis
         }
         @Override
         protected void onPostExecute(String result){
-            Methods.closeProgressDialog();
+//            Methods.closeProgressDialog();
             if(result!=null){
                 Log.e("RESULT","Result: "+result);//printing out the server results
 
@@ -250,6 +267,7 @@ public class UploadActivity extends AppCompatActivity implements View.OnClickLis
                     else{
 
                     }
+                    Methods.closeProgressDialog();
                 }catch(Exception e){
                     System.out.println("Unable to read file details: "+e.toString());
                 }
