@@ -38,8 +38,10 @@ public class ExpandableListDataPump {
         //channelList = OrganisationDetails.getListOfChannel(user_id);
 
         try {
-            ConnectServer channelIdList = new ConnectServer("http://"+sp.getServerIP_Preference(context)+"/TabGenAdmin/getChannelsID.php"+
+            ConnectServer channelIdList = new ConnectServer("http://"+sp.getServerIP_Preference(context)+"/TabGenAdmin/getChannels.php"+
                     "?user_id="+user_id);
+//            ConnectServer channelIdList = new ConnectServer("http://"+sp.getServerIP_Preference(context)+"/TabGenAdmin/getChannelsID.php"+
+//                    "?user_id="+user_id);
             String jsonStr = channelIdList.convertInputStreamToString(channelIdList.getData());
             //saving channel details in share preference
             sp.saveChannelPreference(context,jsonStr);
@@ -50,8 +52,8 @@ public class ExpandableListDataPump {
                     JSONArray jsonArray1 = jsonObj1.getJSONArray("team_list");
                     JSONArray jsonArray2 = jsonObj1.getJSONArray("channels");
                     for(int i=0;i<jsonArray1.length();i++){//for every item(team) in the team list
-                        JSONObject jsonObj2 = jsonArray1.getJSONObject(i);
-                        team_name = jsonObj2.getString("team_name");//getting the team name
+                        team_name= jsonArray1.getString(i);
+//                        team_name = jsonObj2.getString("team_name");//getting the team name
                         System.out.println("Team name--> " + team_name);
                         channelList = new ArrayList<String>();
 

@@ -57,7 +57,7 @@ public class MainActivity extends Activity {
 //        52.77.103.88
 //        128.199.111.18
 //        54.169.129.117
-        server_ip="128.199.111.18";
+        server_ip="52.77.103.88";
         //forgotPassword.setPaintFlags(forgotPassword.getPaintFlags()| Paint.UNDERLINE_TEXT_FLAG);
         //forgotPassword.setText(Html.fromHtml("<u><i>Forgot Password ?</i></u>"));
 
