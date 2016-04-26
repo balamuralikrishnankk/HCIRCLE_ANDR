@@ -1,12 +1,16 @@
 package com.nganthoi.salai.tabgen;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.text.Html;
 import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
@@ -37,6 +41,7 @@ public class MainActivity extends Activity {
     Context context=this;
     String msg,uname, passwd, team_name,server_ip;
     EditText username,password;
+    public static final int MY_PERMISSIONS_REQUEST_READ_CONTACTS=001;
     //CheckBox show_password;
     ProgressDialog progressDialog;
     //TextView forgotPassword;
@@ -53,11 +58,31 @@ public class MainActivity extends Activity {
         signin = (Button) findViewById(R.id.signIn);
         username = (EditText) findViewById(R.id.username);
         password = (EditText) findViewById(R.id.password);
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.READ_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            // Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.READ_EXTERNAL_STORAGE)) {
+            } else {
+
+                // No explanation needed, we can request the permission.
+
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                        MY_PERMISSIONS_REQUEST_READ_CONTACTS);
+
+                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+                // app-defined int constant. The callback method gets the
+                // result of the request.
+            }
+        }
         //show_password = (CheckBox) findViewById(R.id.show_password);
 //        52.77.103.88
 //        128.199.111.18
 //        54.169.129.117
-        server_ip="52.77.103.88";
+        server_ip="128.199.111.18";
         //forgotPassword.setPaintFlags(forgotPassword.getPaintFlags()| Paint.UNDERLINE_TEXT_FLAG);
         //forgotPassword.setText(Html.fromHtml("<u><i>Forgot Password ?</i></u>"));
 
@@ -117,6 +142,31 @@ public class MainActivity extends Activity {
     public void onBackPressed(){
         //super.onBackPressed();
         moveTaskToBack(true);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_READ_CONTACTS: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+
+                } else {
+
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                return;
+            }
+
+            // other 'case' lines to check for other
+            // permissions this app might request
+        }
     }
 
     public Boolean isValidate(){

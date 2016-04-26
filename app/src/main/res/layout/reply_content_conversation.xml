@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="com.nganthoi.salai.tabgen.ConversationActivity"
+    android:background="#00000000">
+
+    <android.support.v7.widget.RecyclerView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/replyRecyclerview"
+        android:divider="#d4d2d2"
+        android:dividerHeight="1dp"
+        android:paddingBottom="3dp"
+        android:transcriptMode="alwaysScroll"
+        android:layout_above="@+id/taskbar"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:focusableInTouchMode="true"
+        android:scrollIndicators="right"
+        android:overScrollFooter="#fff6f6"
+        android:overScrollHeader="#fff6f6"
+        android:outlineProvider="paddedBounds"
+        android:background="#00000000" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/rltaskbar"
+        android:layout_margin="5dp"
+        android:background="#FFFFFF"
+        android:layout_alignParentBottom="true"
+        android:focusable="true"
+        android:focusableInTouchMode="true">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+<LinearLayout
+    android:weightSum="3"
+    android:padding="30dp"
+    android:orientation="horizontal"
+    android:background="@drawable/edittext_style"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <EditText
+        android:layout_weight="2.5"
+
+        android:layout_gravity="left"
+        android:layout_width="match_parent"
+        android:textSize="16sp"
+        android:layout_height="wrap_content"
+        android:inputType="textMultiLine"
+        android:id="@+id/messageEditText"
+        android:hint="@string/commentHint"
+         />
+    <ImageView
+        android:id="@+id/imgAttachFile"
+        android:layout_weight=".5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/attach_file"
+        android:layout_gravity="center"
+        />
+</LinearLayout>
+
+                <Button
+                    android:id="@+id/btnAddComment"
+                    android:layout_margin="10dp"
+                    android:layout_gravity="right"
+                    android:gravity="right"
+                    android:text="Add Comment"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+        </LinearLayout>
+    </RelativeLayout>
+
+</RelativeLayout>
+

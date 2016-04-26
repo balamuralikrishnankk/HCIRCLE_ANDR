@@ -1,6 +1,6 @@
 package chattingEngine;
-
 import android.app.Activity;
+import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -8,6 +8,7 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.StrictMode;
 import android.provider.MediaStore;
@@ -24,7 +25,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.nganthoi.salai.tabgen.BuildConfig;
+import com.nganthoi.salai.tabgen.ImageviewerActivity;
 import com.nganthoi.salai.tabgen.R;
+import com.nganthoi.salai.tabgen.ReplyDialogActivity;
 import com.squareup.okhttp.Interceptor;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
@@ -77,8 +80,6 @@ public class ChatConversationAdapter extends RecyclerView.Adapter<ChatConversati
             ip = sp.getServerIP_Preference(context);
             token = sp.getTokenPreference(context);
     }
-
-
     public class ChatViewHolder extends RecyclerView.ViewHolder {
         public LinearLayout llContent,llcontentWithBackground;
         public ImageView imgProfile,imgReply,imgMessages,imgFavorite,imgBookmark,imgImages,imgDownloads,imgDocDownloads;
@@ -101,7 +102,6 @@ public class ChatConversationAdapter extends RecyclerView.Adapter<ChatConversati
             txtMessage=(TextView)view.findViewById(R.id.txtMessage);
             txtdateInfo=(TextView)view.findViewById(R.id.txtdateInfo);
             loadingPanel=(RelativeLayout)view.findViewById(R.id.loadingPanel);
-
             rlDocumentFile=(RelativeLayout)view.findViewById(R.id.rlDocumentFile);
             txtDocName=(TextView)view.findViewById(R.id.txtDocName);
             imgDocDownloads=(ImageView)view.findViewById(R.id.imgDocDownloads);
@@ -129,6 +129,33 @@ public class ChatConversationAdapter extends RecyclerView.Adapter<ChatConversati
     }
     @Override
     public void onBindViewHolder(final ChatViewHolder holder, final int position) {
+
+            if(chatMessages.get(position).getUserId()!=null){
+                OkHttpClient picassoClient1 = new OkHttpClient();
+                picassoClient1.networkInterceptors().add(new Interceptor() {
+                    @Override
+                    public Response intercept(Chain chain) throws IOException {
+                        Request newRequest = chain.request().newBuilder()
+                                .addHeader("Content-Type", "application/json")
+                                .addHeader("Accept", "application/json")
+                                .addHeader("Authorization", "Bearer " + token)
+                                .build();
+                        return chain.proceed(newRequest);
+                    }
+                });
+
+                Picasso.with(context).setIndicatorsEnabled(true);
+                new Picasso.Builder(context).loggingEnabled(BuildConfig.DEBUG)
+                        .indicatorsEnabled(BuildConfig.DEBUG)
+                        .downloader(new OkHttpDownloader(picassoClient1)).build()
+                        .load("http://"+ip+":8065/api/v1/users/"+chatMessages.get(position).getUserId()+"/image")
+                        .error(R.drawable.username)
+                        .into(holder.imgProfile);
+            }
+
+
+
+//        holder.imgProfile.se
         holder.txtsender.setText(chatMessages.get(position).getSenderName());
         holder.txtMessage.setText(chatMessages.get(position).getMessage());
         holder.txtdateInfo.setText(chatMessages.get(position).getDate());
@@ -162,8 +189,6 @@ public class ChatConversationAdapter extends RecyclerView.Adapter<ChatConversati
                             .resize(300,200)
                             .error(R.drawable.place_holder)
                             .into(holder.imgImages);
-
-
             }
 
         }else{
@@ -174,6 +199,17 @@ public class ChatConversationAdapter extends RecyclerView.Adapter<ChatConversati
             holder.loadingPanel.setVisibility(View.GONE);
             holder.llDocloadingPanel.setVisibility(View.GONE);
         }
+        holder.imgReply.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(context,ReplyDialogActivity.class);
+                intent.putExtra("POST_ID",chatMessages.get(position).getId());
+                intent.putExtra("TOKEN",""+token);
+                intent.putExtra("IP",ip+"");
+                context.startActivity(intent);
+                context.finish();
+            }
+        });
         holder.imgDocDownloads.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -202,11 +238,51 @@ public class ChatConversationAdapter extends RecyclerView.Adapter<ChatConversati
                             }
 
                         }catch (Exception e){
+                            AlertHelper.Alert("Something went wrong.."+e.toString(),context);
+                            holder.loadingPanel.setVisibility(View.GONE);
+                        }
+                    }
+                }
+
+            }
+        });
+        holder.imgImages.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(NetworkHelper.isOnline(context)){
+                    String response=getFileInfo("http://" + ip + ":8065/api/v1/files/get_info/" + chatMessages.get(position).getFileList(), token);
+                    if(response!=null){
+                        try {
+
+                            JSONObject jsonfileInfo = new JSONObject(response);
+                            String file_name = jsonfileInfo.getString("filename");
+                            int lastOccurance = file_name.lastIndexOf('/');
+                            only_filename = file_name.substring(lastOccurance + 1);
+                            String fileData[]=chatMessages.get(position).getFileList().split("/");
+                            File SDCardRoot = new File(Environment.getExternalStorageDirectory()+"/HCircle");
+                            if(SDCardRoot.exists()){
+                                File file = new File(SDCardRoot,fileData[4]);
+                                if(file.exists()){
+                                    Intent intent=new Intent(context, ImageviewerActivity.class);
+                                    intent.putExtra("FILENAME",""+Environment.getExternalStorageDirectory().getPath()
+                                            + "/HCircle/"+fileData[4]);
+                                    context.startActivity(intent);
+//                                    openFolder(context,fileData[4]);
+                                }else{
+                                    holder.loadingPanel.setVisibility(View.VISIBLE);
+                                    fileInfo = only_filename + " \n" + InpuStreamConversion.humanReadableByteCount(Long.parseLong(jsonfileInfo.getString("size")), true);
+                                    String filePath = "http://"+ip+":8065/api/v1/files/get/"+chatMessages.get(position).getFileList()+"?session_token_index=0";
+                                    downloadFiles(filePath,context,token);
+                                }
+                            }
+
+                        }catch (Exception e){
                             AlertHelper.Alert("Something went wrong..",context);
                             holder.loadingPanel.setVisibility(View.GONE);
                         }
                     }
                 }
+
 
             }
         });
@@ -227,7 +303,11 @@ public class ChatConversationAdapter extends RecyclerView.Adapter<ChatConversati
                             if(SDCardRoot.exists()){
                                 File file = new File(SDCardRoot,fileData[4]);
                                 if(file.exists()){
-                                    openFolder(context,fileData[4]);
+                                    Intent intent=new Intent(context, ImageviewerActivity.class);
+                                    intent.putExtra("FILENAME",""+Environment.getExternalStorageDirectory().getPath()
+                                            + "/HCircle/"+fileData[4]);
+                                    context.startActivity(intent);
+//                                    openFolder(context,fileData[4]);
                                 }else{
                                     holder.loadingPanel.setVisibility(View.VISIBLE);
                                     fileInfo = only_filename + " \n" + InpuStreamConversion.humanReadableByteCount(Long.parseLong(jsonfileInfo.getString("size")), true);
@@ -250,6 +330,7 @@ public class ChatConversationAdapter extends RecyclerView.Adapter<ChatConversati
 
     public void openFolder(final Context context,String filename)
     {
+
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         Log.v("PATH","PATH::"+Environment.getExternalStorageDirectory().getPath()
                 + "/HCircle/");

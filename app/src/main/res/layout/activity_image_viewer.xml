@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="@android:color/white"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:context=".ImageviewerActivity">
+
+    <android.support.design.widget.AppBarLayout
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:theme="@style/AppTheme.AppBarOverlay">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbarConversation"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            app:popupTheme="@style/AppTheme.PopupOverlay">
+            <!--android:background="?attr/colorPrimary"
+            android:layout_height="?attr/actionBarSize"-->
+
+        </android.support.v7.widget.Toolbar>
+    </android.support.design.widget.AppBarLayout>
+<LinearLayout
+    android:layout_marginTop="10dp"
+    android:padding="10dp"
+    android:background="@drawable/bg_scr"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
+        android:id="@+id/wvImageViewer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"></com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView>
+</LinearLayout>
+</android.support.design.widget.CoordinatorLayout>

@@ -38,7 +38,7 @@ public class ConnectAPIs {
         StrictMode.setThreadPolicy(policy);
         try{
             conn = (HttpURLConnection) api_url.openConnection();
-            //conn.setRequestProperty("Content-Type", "application/json");
+            conn.setRequestProperty("Content-Type", "application/json");
             conn.setRequestProperty("Accept", "application/json");
             conn.setRequestProperty("Authorization", "Bearer " + TokenId);
             conn.setRequestMethod("POST");
@@ -121,4 +121,32 @@ public class ConnectAPIs {
         }
         return result;
     }
+    public InputStream getReply(){
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
+        try{
+            conn = (HttpURLConnection) api_url.openConnection();
+            conn.setRequestProperty("Accept", "application/json");
+            conn.setRequestProperty("Authorization", "Bearer " + TokenId);
+            conn.setRequestMethod("GET");
+//            conn.setDoInput(true);
+//            conn.setDoOutput(true);
+            conn.connect();
+            responseCode = conn.getResponseCode();
+            responseMessage = conn.getResponseMessage();
+            System.out.println("Response Code: " + responseCode + "\nResponse message: " + responseMessage);
+            if(responseCode == 200/*HttpURLConnection.HTTP_OK*/){
+                isr = new BufferedInputStream(conn.getInputStream());
+            }
+            else {
+                isr = new BufferedInputStream(conn.getErrorStream());
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+            errorMessage = e.toString();
+            responseCode=-1;
+            System.out.println("Exception occurs here: " + e.toString());
+        }
+        return isr;
+    }//end of getDa
 }//end of ConnApi class

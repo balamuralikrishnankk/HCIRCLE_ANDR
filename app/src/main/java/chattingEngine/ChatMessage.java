@@ -12,7 +12,7 @@ public class ChatMessage {
     private String id;
     private boolean isMe;
     private String message;
-    private Long userId;
+    private String userId;
     private String dateTime;
     private String sender_name;
     private String fileInfo;
@@ -54,11 +54,11 @@ public class ChatMessage {
     public String getSenderName(){return this.sender_name;}
     public void setFileInfo(String info){this.fileInfo=info;}
     public String getFileInfo(){return this.fileInfo;}
-    public long getUserId() {
+    public String getUserId() {
         return userId;
     }
 
-    public void setUserId(long userId) {
+    public void setUserId(String userId) {
         this.userId = userId;
     }
 

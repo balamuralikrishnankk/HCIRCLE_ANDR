@@ -11,6 +11,8 @@ import android.os.StrictMode;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.nganthoi.salai.tabgen.ImageviewerActivity;
+
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -141,38 +143,43 @@ public class DownloadFiles extends AsyncTask<String,String,String> implements Do
         if(responseCode==200) {
             mProgressDialog.dismiss();
             String destination_path = Environment.getExternalStorageDirectory()+"/HCircle";
-            openFolder(context);
+            openFolder(context,destination_path);
         }else{
             mProgressDialog.setMessage(res);
             mProgressDialog.setCancelable(true);
         }
     }
 
-    public void openFolder(final Context context)
+    public void openFolder(final Context context,String path)
     {
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        Uri uri = Uri.parse(Environment.getExternalStorageDirectory().getPath()
-                + "/HCircle/");
-        intent.setDataAndType(uri, "*/*");
-        Activity my_activity = new Activity(){
-            @Override
-            public void onActivityResult(int requestCode, int resultCode, Intent data){
-                if(data==null) return;
-                Uri fileUri = data.getData();
-                //ReadFile readFile = new ReadFile();
-                switch(requestCode){
-                    case 1: //file_path = readFile.getFilePath(fileUri,context);
-                        String file_path = ReadFile.getPath(fileUri, context);
-                        if(file_path!=null){
-
-                        }
-                        break;
-                    default:
-                        Toast.makeText(context, "Invalid request code. You haven't selected any file", Toast.LENGTH_SHORT).show();
-                }
-            }
-        };
-        context.startActivity(Intent.createChooser(intent, "Open folder"));
+//        String file_path = ReadFile.getPath(fileUri, context);
+        Intent intent=new Intent(context, ImageviewerActivity.class);
+        intent.putExtra("FILENAME",""+Environment.getExternalStorageDirectory().getPath()
+                + "/HCircle/"+file_name);
+        context.startActivity(intent);
+//        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+//        Uri uri = Uri.parse(Environment.getExternalStorageDirectory().getPath()
+//                + "/HCircle/");
+//        intent.setDataAndType(uri, "*/*");
+//        Activity my_activity = new Activity(){
+//            @Override
+//            public void onActivityResult(int requestCode, int resultCode, Intent data){
+//                if(data==null) return;
+//                Uri fileUri = data.getData();
+//                //ReadFile readFile = new ReadFile();
+//                switch(requestCode){
+//                    case 1: //file_path = readFile.getFilePath(fileUri,context);
+//                        String file_path = ReadFile.getPath(fileUri, context);
+//                        if(file_path!=null){
+//
+//                        }
+//                        break;
+//                    default:
+//                        Toast.makeText(context, "Invalid request code. You haven't selected any file", Toast.LENGTH_SHORT).show();
+//                }
+//            }
+//        };
+//        context.startActivity(Intent.createChooser(intent, "Open folder"));
     }
 
     @Override

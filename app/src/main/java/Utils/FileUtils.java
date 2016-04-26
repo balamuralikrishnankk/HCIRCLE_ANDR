@@ -12,7 +12,7 @@ import java.util.Date;
 public class FileUtils {
 
     public static File getStorageDir() {
-        File file = new File(Environment.getExternalStorageDirectory(),"AoaUser");
+        File file = new File(Environment.getExternalStorageDirectory(),"/HCircle");
         if(!file.isDirectory()) {
             file.mkdir();
         }

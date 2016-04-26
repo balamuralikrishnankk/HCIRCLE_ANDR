@@ -1,7 +1,12 @@
 package com.nganthoi.salai.tabgen;
 
+import android.Manifest;
 import android.app.ProgressDialog;
+import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.Image;
@@ -11,6 +16,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.provider.MediaStore;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -61,13 +68,11 @@ public class UploadActivity extends AppCompatActivity implements View.OnClickLis
         bundle=getIntent().getExtras();
         if(bundle!=null)
         {
-
             ip=bundle.getString("IP_VALUE");
             filePath=bundle.getString("FILE_PATH");
             token=bundle.getString("TOKEN");
             channel_id=bundle.getString("CHANNEL_ID");
             type=bundle.getString("TYPE");
-
         }
         initComponent();
 
@@ -77,7 +82,7 @@ public class UploadActivity extends AppCompatActivity implements View.OnClickLis
         imgFile=(ImageView)findViewById(R.id.imgFile);
         btnSend=(Button)findViewById(R.id.btnSend);
         btnCancel=(Button)findViewById(R.id.btnCancel);
-        edtCaption=(EditText)findViewById(R.id.edtCaption);
+            edtCaption=(EditText)findViewById(R.id.edtCaption);
         btnSend.setOnClickListener(this);
         btnCancel.setOnClickListener(this);
     }
@@ -86,13 +91,9 @@ public class UploadActivity extends AppCompatActivity implements View.OnClickLis
         switch (v.getId()){
             case R.id.btnSend:
                 try {
-//                        if(type.contains("CAMERA")){
-//                            Intent intent=new Intent();
-//                            intent.putExtra("RESULT_STRING",filePath);
-//                            intent.putExtra("CAPTION",edtCaption.getText().toString()+"");
-//                            setResult(ConversationActivity.UPLOAD_REQUEST_CODE,intent);
-//                        }else {
-                            UploadFile uploadFile = new UploadFile(filePath,"http://"+ip+":8065/api/v1/files/upload");
+
+                    File file=new File(filePath);
+                            UploadFile uploadFile = new UploadFile(file.getAbsolutePath(),"http://"+ip+":8065/api/v1/files/upload");
                             uploadFile.execute();
 
 //                        }
@@ -109,20 +110,81 @@ public class UploadActivity extends AppCompatActivity implements View.OnClickLis
     }
 
 
+    public boolean hasPermissionInManifest(Context context, String permissionName) {
+        final String packageName = context.getPackageName();
+        try {
+            final PackageInfo packageInfo = context.getPackageManager()
+                    .getPackageInfo(packageName, PackageManager.GET_PERMISSIONS);
+            final String[] declaredPermisisons = packageInfo.requestedPermissions;
+            if (declaredPermisisons != null && declaredPermisisons.length > 0) {
+                for (String p : declaredPermisisons) {
+                    if (p.equals(permissionName)) {
+                        return true;
+                    }
+                }
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+
+        }
+        return false;
+    }
+
+    public static Bitmap decodeSampledBitmapFromFile(String path, int reqWidth, int reqHeight)
+    { // BEST QUALITY MATCH
+
+        //First decode with inJustDecodeBounds=true to check dimensions
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(path, options);
+
+        // Calculate inSampleSize, Raw height and width of image
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        options.inPreferredConfig = Bitmap.Config.RGB_565;
+        int inSampleSize = 1;
+
+        if (height > reqHeight)
+        {
+            inSampleSize = Math.round((float)height / (float)reqHeight);
+        }
+        int expectedWidth = width / inSampleSize;
+
+        if (expectedWidth > reqWidth)
+        {
+            //if(Math.round((float)width / (float)reqWidth) > inSampleSize) // If bigger SampSize..
+            inSampleSize = Math.round((float)width / (float)reqWidth);
+        }
+
+        options.inSampleSize = inSampleSize;
+
+        // Decode bitmap with inSampleSize set
+        options.inJustDecodeBounds = false;
+
+        return BitmapFactory.decodeFile(path, options);
+    }
     public void showImage(String path,String type){
         File imgFile1 = new  File(path);
 
         if(imgFile1.exists()){
             if(type.contains("IMAGE"))
             {
-                Bitmap myBitmap = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(imgFile1.getAbsolutePath()),
-                        100, 100);
+                try {
+
+                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), Uri.fromFile(imgFile1));
+                    imgFile.setImageBitmap(bitmap);
+                }catch (Exception e){
+
+                }
+//                Bitmap myBitmap=decodeSampledBitmapFromFile(path,100,1000);
+//                File file=new File(path);
+//                Bitmap myBitmap=BitmapFactory.decodeFile(file.getAbsolutePath());
 //                Bitmap myBitmap = BitmapFactory.decodeFile(imgFile1.getAbsolutePath());
 //                Bitmap myBitmap=ThumbnailUtils.createVideoThumbnail(imgFile1.getAbsolutePath(), MediaStore.Images.Thumbnails.MICRO_KIND);
-                imgFile.setImageBitmap(myBitmap);
+
             }else if(type.contains("CAMERA")){
-                Bitmap myBitmap = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(imgFile1.getAbsolutePath()),
-                        100, 100);
+                Bitmap myBitmap = BitmapFactory.decodeFile(imgFile1.getAbsolutePath());
+//                Bitmap myBitmap = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(path),
+//                        100, 100);
 //                Bitmap myBitmap = BitmapFactory.decodeFile(imgFile1.getAbsolutePath());
                 imgFile.setImageBitmap(myBitmap);
             }else {

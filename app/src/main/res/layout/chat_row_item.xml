@@ -67,7 +67,7 @@
     >
     <ImageView
         android:id="@+id/imgReply"
-        android:layout_width="30dp"
+        android:layout_width="20dp"
         android:layout_margin="5dp"
         android:layout_height="20dp"
         android:src="@drawable/icon_arrow_back"
@@ -76,7 +76,7 @@
     <ImageView
         android:layout_margin="5dp"
         android:id="@+id/imgMessages"
-        android:layout_width="30dp"
+        android:layout_width="20dp"
         android:layout_height="20dp"
         android:src="@drawable/icon_reply_gray"
         />
@@ -84,7 +84,7 @@
     <ImageView
         android:layout_margin="5dp"
         android:id="@+id/imgFavorite"
-        android:layout_width="30dp"
+        android:layout_width="20dp"
         android:layout_height="20dp"
         android:src="@drawable/icon_love_gray"
         />
@@ -92,7 +92,7 @@
     <ImageView
         android:layout_margin="5dp"
         android:id="@+id/imgBookmark"
-        android:layout_width="30dp"
+        android:layout_width="20dp"
         android:layout_height="20dp"
         android:src="@drawable/icon_my_bookmark_gray"
  />
@@ -202,6 +202,7 @@
                     </LinearLayout>
                     <RelativeLayout
                         android:layout_margin="5dp"
+                        android:visibility="invisible"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:paddingTop="10dp">
@@ -212,6 +213,8 @@
                             android:layout_height="wrap_content"
                             android:textSize="10sp"
                             android:text="dateInfo"
+                            android:singleLine="true"
+                            android:ellipsize="end"
                             android:textStyle="italic"
                             android:textColor="#8f8e8e"
                             android:layout_gravity="right"
