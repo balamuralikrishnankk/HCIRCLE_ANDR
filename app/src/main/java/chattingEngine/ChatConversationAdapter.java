@@ -207,7 +207,7 @@ public class ChatConversationAdapter extends RecyclerView.Adapter<ChatConversati
                 intent.putExtra("TOKEN",""+token);
                 intent.putExtra("IP",ip+"");
                 context.startActivity(intent);
-                context.finish();
+//                context.finish();
             }
         });
         holder.imgDocDownloads.setOnClickListener(new View.OnClickListener() {

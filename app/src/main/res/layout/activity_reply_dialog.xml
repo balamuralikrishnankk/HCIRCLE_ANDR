@@ -39,15 +39,17 @@
                 <!--/>-->
         </android.support.v7.widget.Toolbar>
     </android.support.design.widget.AppBarLayout>
+    <include layout="@layout/reply_content_conversation" />
     <RelativeLayout android:layout_width="match_parent"
         android:layout_height="match_parent">
+
         <include
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="?android:actionBarSize"
             android:layout_alignParentBottom="true"
-            layout="@layout/attachement_layout"/>
+            layout="@layout/reply_attatchment_layout"/>
     </RelativeLayout>
-    <include layout="@layout/reply_content_conversation" />
+
 
 </android.support.design.widget.CoordinatorLayout>

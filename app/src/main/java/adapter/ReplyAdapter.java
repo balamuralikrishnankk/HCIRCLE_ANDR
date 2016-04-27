@@ -134,8 +134,13 @@ public class ReplyAdapter extends RecyclerView.Adapter<ReplyAdapter.ChatViewHold
         return false;
     }
     private String getUsernameById(String user_id){
+       String users= preferenceHelper.getString("all_users");
+
         String username=null;
-        if(members!=null){
+        try{
+            JSONObject all_users=new JSONObject(users);
+            Log.v("USERS","USERS OBJECT:::"+all_users);
+        /*if(members!=null){
             try{
                 for(int i=0;i<members.length();i++){
                     JSONObject users = members.getJSONObject(i);
@@ -148,20 +153,60 @@ public class ReplyAdapter extends RecyclerView.Adapter<ReplyAdapter.ChatViewHold
                 System.out.println("Unable to get Username in getUsernameById: "+e.toString());
                 username=null;
             }
+        }*/
+            if(all_users!=null){
+                try{
+                    JSONObject jobj = all_users.getJSONObject(user_id);
+
+                    if(jobj.getString("first_name").length()!=0 && jobj.getString("first_name")!=null){
+                        username = jobj.getString("first_name");
+                    }
+                    else{
+                        username = jobj.getString("username");
+                    }
+                }
+                catch(Exception e){
+                    username = null;
+                }
+            }
+            else username="Unknown";
+        }catch (Exception e){
+
         }
+
         return username;
+
     }
     @Override
     public void onBindViewHolder(final ChatViewHolder holder, final int position) {
-        if(replyMessages.get(position).getParentId()!=null){
+        if(replyMessages.get(position).getUserId()!=null){
+            OkHttpClient picassoClient1 = new OkHttpClient();
+            picassoClient1.networkInterceptors().add(new Interceptor() {
+                @Override
+                public Response intercept(Chain chain) throws IOException {
+                    Request newRequest = chain.request().newBuilder()
+                            .addHeader("Content-Type", "application/json")
+                            .addHeader("Accept", "application/json")
+                            .addHeader("Authorization", "Bearer " + token)
+                            .build();
+                    return chain.proceed(newRequest);
+                }
+            });
 
+            Picasso.with(context).setIndicatorsEnabled(true);
+            new Picasso.Builder(context).loggingEnabled(BuildConfig.DEBUG)
+                    .indicatorsEnabled(BuildConfig.DEBUG)
+                    .downloader(new OkHttpDownloader(picassoClient1)).build()
+                    .load("http://"+ip+":8065/api/v1/users/"+replyMessages.get(position).getUserId()+"/image")
+                    .error(R.drawable.username)
+                    .into(holder.imgProfile);
         }
-        Long timestamp = Long.parseLong(replyMessages.get(position).getCreateAt());
-        Date date = new Date(timestamp);
+//        Long timestamp = Long.parseLong(replyMessages.get(position).getCreateAt());
+//        Date date = new Date(timestamp);
 //        chatMessage.setDate(simpleDateFormat.format(date));
         holder.txtsender.setText(getUsernameById(replyMessages.get(position).getUserId())+"");
         holder.txtMessage.setText(replyMessages.get(position).getMessage()+"");
-        holder.txtdateInfo.setText(simpleDateFormat.format(date)+"");
+//        holder.txtdateInfo.setText(simpleDateFormat.format(date)+"");
         if(replyMessages.get(position).getFilenames()!=null && replyMessages.get(position).getFilenames().size()>0){
             String[] name=replyMessages.get(position).getFilenames().get(0).split("/");
             if(validateFileExtn(replyMessages.get(position).getFilenames().get(0))){

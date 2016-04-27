@@ -100,6 +100,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
     public static final int RESULT_CODE=113;
     public static final int REQUEST_CODE_CAMERA=114;
     SupportAnimator animator_reverse;
+    String users_info;
     RevealFrameLayout revealFrameLayout;
     LinearLayout reveal_items,llAudios,llVideos,llPhotos;
     private Toolbar toolbar;
@@ -117,6 +118,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
     private String ip;
     private HttpURLConnection conn=null;
     Uri cameraUri;
+    JSONObject all_users;
     private Thread currentMessageTaskThread;
     public Boolean interrupt=false;
     private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy' at 'h:mm a");
@@ -156,6 +158,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
         try{
             JSONObject jObj = new JSONObject(user_details);
             user_id=jObj.getString("id");
+            preferenceHelper.addString("USER_ID",user_id);
         }catch(Exception e){
             System.out.println("Unable to read user ID: "+e.toString());
         }
@@ -167,23 +170,34 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        Log.v("HISTORY","http://"+ip+
-                                ":8065//api/v1/channels/"+channel_id+
-                                "/posts/0/60");
+                        /*Joining the Channel for the first time*/
+                        ConnectAPIs joinChannel = new ConnectAPIs("http://"+ip+":8065/api/v1/channels/"+channel_id+"/join",token);
+                        String joinChannelInfo = convertInputStreamToString(joinChannel.getData());
+                        System.out.println("Join Channel Result: "+joinChannelInfo);
+                        /*******************************************************************/
                         /*** Getting extra information about the current channel ***/
-                        ConnectAPIs connApis = new ConnectAPIs("http://"+ip+":8065//api/v1/channels/"+channel_id+"/extra_info",token);
+                        /*ConnectAPIs connApis = new ConnectAPIs("http://"+ip+":8065//api/v1/channels/"+channel_id+"/extra_info",token);
                         extra_info = convertInputStreamToString(connApis.getData());
-                        System.out.println("Extra Information: " + extra_info);
+                        System.out.println("Extra Information: "+extra_info);
                         try{
                             extraInfoObj = new JSONObject(extra_info);
                             members=extraInfoObj.getJSONArray("members");
-                            preferenceHelper.addString("members",members.toString());
                         }catch(Exception e){
                             System.out.println("unable to get user extra information");
+                        }*/
+                        /****New Code for Getting all user information from server********/
+                        ConnectAPIs getUsers = new ConnectAPIs("http://"+ip+":8065//api/v1/users/profiles",token);
+                        users_info = convertInputStreamToString(getUsers.getData());
+                        preferenceHelper.addString("all_users",users_info);
+                        System.out.println("Users: "+users_info);
+                        try{
+                            all_users = new JSONObject(users_info);
+
                         }
-                        Log.v("MYURL","http://"+ip+
-                                ":8065//api/v1/channels/"+channel_id+
-                                "/posts/0/60");
+                        catch(Exception e){
+                            System.out.println("unable to get user information");
+                        }
+                        /********************************************************************/
                         new GetMessageHistoryTask().execute("http://"+ip+
                                 ":8065//api/v1/channels/"+channel_id+
                                 "/posts/0/60");
@@ -201,9 +215,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
                         runOnUiThread(new Runnable(){
                             @Override
                             public void run(){
-                                Log.v("CURRENT","TASK:::"+"http://"+ip+
-                                        ":8065//api/v1/channels/"+channel_id+
-                                        "/posts/"+last_timetamp);
+
                                 if(last_timetamp!=null||last_timetamp=="000000000") {
                                     System.out.println("Last timestamp: "+last_timetamp);
                                     new GetCurrentMessageTask().execute("http://"+ip+
@@ -308,8 +320,6 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.imgSentMessages:
-
-//                Methods.toastShort("CLICKED",this);
                 String messageText = messageEditText.getText().toString();
                 if (TextUtils.isEmpty(messageText)||messageText.trim().length()==0) {
                     return;
@@ -655,7 +665,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
 
     private String getUsernameById(String user_id){
         String username=null;
-        if(members!=null){
+        /*if(members!=null){
             try{
                 for(int i=0;i<members.length();i++){
                     JSONObject users = members.getJSONObject(i);
@@ -668,8 +678,24 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
                 System.out.println("Unable to get Username in getUsernameById: "+e.toString());
                 username=null;
             }
+        }*/
+        if(all_users!=null){
+            try{
+                JSONObject jobj = all_users.getJSONObject(user_id);
+                if(jobj.getString("first_name").length()!=0 && jobj.getString("first_name")!=null){
+                    username = jobj.getString("first_name");
+                }
+                else{
+                    username = jobj.getString("username");
+                }
+            }
+            catch(Exception e){
+                username = null;
+            }
         }
+        else username="Unknown";
         return username;
+
     }
     private void sendMyMessage(JSONObject jsonMsg) {
 
@@ -1080,6 +1106,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
         String resp=null;
         @Override
         protected String doInBackground(String... messageUrl){
+            Log.v("CURRENTMSG","CALLED");
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
             StrictMode.setThreadPolicy(policy);
             try{
