@@ -3,6 +3,7 @@ package adapter;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.StrictMode;
@@ -21,6 +22,7 @@ import android.widget.Toast;
 import com.nganthoi.salai.tabgen.BuildConfig;
 import com.nganthoi.salai.tabgen.ImageviewerActivity;
 import com.nganthoi.salai.tabgen.R;
+import com.nganthoi.salai.tabgen.ReplyDialogActivity;
 import com.squareup.okhttp.Interceptor;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
@@ -43,26 +45,31 @@ import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import AsyncClasses.WebServiceHelper;
 import ListenerClasses.DownloadListeners;
 import Utils.AlertHelper;
 import Utils.InpuStreamConversion;
+import Utils.LikeAndDislikeListener;
 import Utils.NetworkHelper;
 import Utils.PreferenceHelper;
+import chattingEngine.ChatMessage;
 import connectServer.DownloadFiles;
+import de.hdodenhof.circleimageview.CircleImageView;
 import readData.ReadFile;
 import reply_pojo.ReplyInnerObject;
 import sharePreference.SharedPreference;
-
 /**
  * Created by atul on 22/4/16.
  */
-public class ReplyAdapter extends RecyclerView.Adapter<ReplyAdapter.ChatViewHolder> implements DownloadListeners {
+public class ReplyAdapter extends RecyclerView.Adapter<ReplyAdapter.ChatViewHolder> implements DownloadListeners , LikeAndDislikeListener{
     private List<ReplyInnerObject> replyMessages;
     PreferenceHelper preferenceHelper;
     private Activity context;
     private String fileInfo;
     String memberresponse;
     JSONArray members;
+    String temp="";
     private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy' at 'h:mm a");
     boolean flagValue=false,flagDownload=false;
     DownloadListeners downloadListeners;
@@ -80,10 +87,40 @@ public class ReplyAdapter extends RecyclerView.Adapter<ReplyAdapter.ChatViewHold
         ip = sp.getServerIP_Preference(context);
         token = sp.getTokenPreference(context);
     }
+
+    @Override
+    public void addAndRemoveBookMark(boolean flag, String post_id) {
+
+    }
+
+    @Override
+    public void addAndRemoveLike(boolean flag, String post_id, String no_of_likes) {
+        if(flag){
+            for(ReplyInnerObject replyInnerObject : replyMessages){
+                if(replyInnerObject.getId().equalsIgnoreCase(post_id)){
+                    replyInnerObject.setIsLikedByYou(flag);
+                    replyInnerObject.setNo_of_likes(Integer.parseInt(no_of_likes));
+                    notifyDataSetChanged();
+                    break;
+                }
+            }
+        }else{
+            for(ReplyInnerObject replyInnerObject : replyMessages){
+                if(replyInnerObject.getId().equalsIgnoreCase(post_id)){
+                    replyInnerObject.setIsLikedByYou(flag);
+                    replyInnerObject.setNo_of_likes(Integer.parseInt(no_of_likes));
+                    notifyDataSetChanged();
+                    break;
+                }
+            }
+        }
+    }
+
     public class ChatViewHolder extends RecyclerView.ViewHolder {
         public LinearLayout llContent,llcontentWithBackground;
-        public ImageView imgProfile,imgReply,imgMessages,imgFavorite,imgBookmark,imgImages,imgDownloads,imgDocDownloads;
-        public TextView txtsender,txtMessage,txtdateInfo,txtDocName;
+        public CircleImageView imgProfile;
+        public ImageView imgReply,imgMessages,imgFavorite,imgBookmark,imgImages,imgDownloads,imgDocDownloads;
+        public TextView txtsender,txtMessage,txtdateInfo,txtDocName,txtLikeCount;
         public RelativeLayout rlFile,loadingPanel,rlDocumentFile,llDocloadingPanel;
 
         public ChatViewHolder(View view) {
@@ -97,7 +134,7 @@ public class ReplyAdapter extends RecyclerView.Adapter<ReplyAdapter.ChatViewHold
             rlFile=(RelativeLayout)view.findViewById(R.id.rlFile);
             llContent=(LinearLayout)view.findViewById(R.id.llContent);
             llcontentWithBackground=(LinearLayout)view.findViewById(R.id.llcontentWithBackground);
-            imgProfile=(ImageView)view.findViewById(R.id.imgProfile);
+            imgProfile=(CircleImageView)view.findViewById(R.id.imgProfile);
             imgReply=(ImageView)view.findViewById(R.id.imgReply);
             imgMessages=(ImageView)view.findViewById(R.id.imgMessages);
             imgFavorite=(ImageView)view.findViewById(R.id.imgFavorite);
@@ -112,12 +149,13 @@ public class ReplyAdapter extends RecyclerView.Adapter<ReplyAdapter.ChatViewHold
             txtDocName=(TextView)view.findViewById(R.id.txtDocName);
             imgDocDownloads=(ImageView)view.findViewById(R.id.imgDocDownloads);
             llDocloadingPanel=(RelativeLayout)view.findViewById(R.id.llDocloadingPanel);
+            txtLikeCount=(TextView)view.findViewById(R.id.txtLikeCount);
         }
     }
     @Override
     public ChatViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View itemView = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.chat_row_item, parent, false);
+                .inflate(R.layout.reply_row_item, parent, false);
         return new ChatViewHolder(itemView);
     }
     public static boolean validateFileExtn(String name){
@@ -139,21 +177,6 @@ public class ReplyAdapter extends RecyclerView.Adapter<ReplyAdapter.ChatViewHold
         String username=null;
         try{
             JSONObject all_users=new JSONObject(users);
-            Log.v("USERS","USERS OBJECT:::"+all_users);
-        /*if(members!=null){
-            try{
-                for(int i=0;i<members.length();i++){
-                    JSONObject users = members.getJSONObject(i);
-                    if(user_id.equals(users.getString("id"))){
-                        username = users.getString("username");
-                        break;
-                    }
-                }
-            }catch(JSONException e){
-                System.out.println("Unable to get Username in getUsernameById: "+e.toString());
-                username=null;
-            }
-        }*/
             if(all_users!=null){
                 try{
                     JSONObject jobj = all_users.getJSONObject(user_id);
@@ -179,7 +202,8 @@ public class ReplyAdapter extends RecyclerView.Adapter<ReplyAdapter.ChatViewHold
     }
     @Override
     public void onBindViewHolder(final ChatViewHolder holder, final int position) {
-        if(replyMessages.get(position).getUserId()!=null){
+
+        if(replyMessages.get(position+1).getUserId()!=null){
             OkHttpClient picassoClient1 = new OkHttpClient();
             picassoClient1.networkInterceptors().add(new Interceptor() {
                 @Override
@@ -193,23 +217,58 @@ public class ReplyAdapter extends RecyclerView.Adapter<ReplyAdapter.ChatViewHold
                 }
             });
 
-            Picasso.with(context).setIndicatorsEnabled(true);
             new Picasso.Builder(context).loggingEnabled(BuildConfig.DEBUG)
-                    .indicatorsEnabled(BuildConfig.DEBUG)
                     .downloader(new OkHttpDownloader(picassoClient1)).build()
-                    .load("http://"+ip+":8065/api/v1/users/"+replyMessages.get(position).getUserId()+"/image")
+                    .load("http://"+ip+":8065/api/v1/users/"+replyMessages.get(position+1).getUserId()+"/image")
                     .error(R.drawable.username)
                     .into(holder.imgProfile);
         }
-//        Long timestamp = Long.parseLong(replyMessages.get(position).getCreateAt());
-//        Date date = new Date(timestamp);
-//        chatMessage.setDate(simpleDateFormat.format(date));
-        holder.txtsender.setText(getUsernameById(replyMessages.get(position).getUserId())+"");
-        holder.txtMessage.setText(replyMessages.get(position).getMessage()+"");
-//        holder.txtdateInfo.setText(simpleDateFormat.format(date)+"");
-        if(replyMessages.get(position).getFilenames()!=null && replyMessages.get(position).getFilenames().size()>0){
-            String[] name=replyMessages.get(position).getFilenames().get(0).split("/");
-            if(validateFileExtn(replyMessages.get(position).getFilenames().get(0))){
+        if(String.valueOf(replyMessages.get(position).getNo_of_likes())!=null){
+            if(replyMessages.get(position).getNo_of_likes()>0){
+                holder.txtLikeCount.setVisibility(View.VISIBLE);
+                holder.txtLikeCount.setTextColor(Color.parseColor("#1a89c6"));
+                holder.txtLikeCount.setText(""+replyMessages.get(position).getNo_of_likes());
+            }else{
+                holder.txtLikeCount.setTextColor(Color.BLACK);
+                holder.txtLikeCount.setVisibility(View.GONE);
+            }
+        }
+
+        if(replyMessages.get(position).isLikedByYou()){
+            holder.imgFavorite.setImageResource(R.drawable.icon_love);
+        }else{
+            holder.imgFavorite.setImageResource(R.drawable.icon_love_gray);
+        }
+        holder.imgFavorite.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (NetworkHelper.isOnline(context)) {
+                    WebServiceHelper webServiceHelper = new WebServiceHelper();
+                    webServiceHelper.updateLike(context, ip, preferenceHelper.getString("USER_ID"), replyMessages.get(position).getId(), ReplyAdapter.this);
+                }
+            }
+        });
+        if(replyMessages.get(position + 1).getUserId()!=null){
+            if (temp.equalsIgnoreCase(getUsernameById(replyMessages.get(position + 1).getUserId()))) {
+                holder.txtsender.setText("");
+            } else {
+                holder.txtsender.setText(getUsernameById(replyMessages.get(position + 1).getUserId()));
+                temp = getUsernameById(replyMessages.get(position + 1).getUserId());
+            }
+        }else{
+
+        }
+
+//        if(replyMessages.get(position+1).getUserId()!=null){
+//            holder.txtsender.setText(getUsernameById(replyMessages.get(position+1).getUserId())+"");
+//        }else{
+//            holder.txtsender.setText("");
+//        }
+
+        holder.txtMessage.setText(replyMessages.get(position+1).getMessage()+"");
+        if(replyMessages.get(position+1).getFilenames()!=null && replyMessages.get(position+1).getFilenames().size()>0){
+            String[] name=replyMessages.get(position+1).getFilenames().get(0).split("/");
+            if(validateFileExtn(replyMessages.get(position+1).getFilenames().get(0))){
                 holder.rlDocumentFile.setVisibility(View.VISIBLE);
                 holder.rlFile.setVisibility(View.GONE);
                 holder.txtDocName.setText(""+name[4]);
@@ -229,12 +288,11 @@ public class ReplyAdapter extends RecyclerView.Adapter<ReplyAdapter.ChatViewHold
                     }
                 });
 
-                Picasso.with(context).setIndicatorsEnabled(true);
+                Picasso.with(context).setIndicatorsEnabled(false);
                 new Picasso.Builder(context).loggingEnabled(BuildConfig.DEBUG)
-                        .indicatorsEnabled(BuildConfig.DEBUG)
                         .downloader(new OkHttpDownloader(picassoClient)).build()
-                        .load("http://"+ip+":8065/api/v1/files/get"+replyMessages.get(position).getFilenames().get(0))
-                        .resize(300,200)
+                        .load("http://"+ip+":8065/api/v1/files/get"+replyMessages.get(position+1).getFilenames().get(0))
+                        .resize(300, 200)
                         .error(R.drawable.place_holder)
                         .into(holder.imgImages);
             }
@@ -247,30 +305,19 @@ public class ReplyAdapter extends RecyclerView.Adapter<ReplyAdapter.ChatViewHold
             holder.loadingPanel.setVisibility(View.GONE);
             holder.llDocloadingPanel.setVisibility(View.GONE);
         }
-//        holder.imgReply.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Intent intent=new Intent(context,ReplyDialogActivity.class);
-//                intent.putExtra("POST_ID",chatMessages.get(position).getId());
-//                intent.putExtra("TOKEN",""+token);
-//                intent.putExtra("IP",ip+"");
-//                context.startActivity(intent);
-//            }
-//        });
         holder.imgDocDownloads.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
                 if(NetworkHelper.isOnline(context)){
-                    String response=getFileInfo("http://" + ip + ":8065/api/v1/files/get_info/" + replyMessages.get(position).getFilenames().get(0), token);
+                    String response=getFileInfo("http://" + ip + ":8065/api/v1/files/get_info/" + replyMessages.get(position+1).getFilenames().get(0), token);
                     if(response!=null){
                         try {
-
                             JSONObject jsonfileInfo = new JSONObject(response);
                             String file_name = jsonfileInfo.getString("filename");
                             int lastOccurance = file_name.lastIndexOf('/');
                             only_filename = file_name.substring(lastOccurance + 1);
-                            String fileData[]=replyMessages.get(position).getFilenames().get(0).split("/");
+                            String fileData[]=replyMessages.get(position+1).getFilenames().get(0).split("/");
                             File SDCardRoot = new File(Environment.getExternalStorageDirectory()+"/HCircle");
                             if(SDCardRoot.exists()){
                                 File file = new File(SDCardRoot,fileData[4]);
@@ -279,73 +326,65 @@ public class ReplyAdapter extends RecyclerView.Adapter<ReplyAdapter.ChatViewHold
                                 }else{
                                     holder.llDocloadingPanel.setVisibility(View.VISIBLE);
                                     fileInfo = only_filename + " \n" + InpuStreamConversion.humanReadableByteCount(Long.parseLong(jsonfileInfo.getString("size")), true);
-                                    String filePath = "http://"+ip+":8065/api/v1/files/get/"+replyMessages.get(position).getFilenames().get(0)+"?session_token_index=0";
+                                    String filePath = "http://"+ip+":8065/api/v1/files/get/"+replyMessages.get(position+1).getFilenames().get(0)+"?session_token_index=0";
                                     downloadFiles(filePath,context,token);
                                 }
                             }
-
                         }catch (Exception e){
                             AlertHelper.Alert("Something went wrong.." + e.toString(), context);
                             holder.loadingPanel.setVisibility(View.GONE);
                         }
                     }
                 }
-
             }
         });
         holder.imgImages.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(NetworkHelper.isOnline(context)){
-                    String response=getFileInfo("http://" + ip + ":8065/api/v1/files/get_info/" + replyMessages.get(position).getFilenames().get(0), token);
+                    String response=getFileInfo("http://" + ip + ":8065/api/v1/files/get_info/" + replyMessages.get(position+1).getFilenames().get(0), token);
                     if(response!=null){
                         try {
-
-                            JSONObject jsonfileInfo = new JSONObject(response);
-                            String file_name = jsonfileInfo.getString("filename");
-                            int lastOccurance = file_name.lastIndexOf('/');
-                            only_filename = file_name.substring(lastOccurance + 1);
-                            String fileData[]=replyMessages.get(position).getFilenames().get(0).split("/");
-                            File SDCardRoot = new File(Environment.getExternalStorageDirectory()+"/HCircle");
-                            if(SDCardRoot.exists()){
-                                File file = new File(SDCardRoot,fileData[4]);
-                                if(file.exists()){
-                                    Intent intent=new Intent(context, ImageviewerActivity.class);
-                                    intent.putExtra("FILENAME",""+Environment.getExternalStorageDirectory().getPath()
-                                            + "/HCircle/"+fileData[4]);
-                                    context.startActivity(intent);
-//                                    openFolder(context,fileData[4]);
-                                }else{
-                                    holder.loadingPanel.setVisibility(View.VISIBLE);
-                                    fileInfo = only_filename + " \n" + InpuStreamConversion.humanReadableByteCount(Long.parseLong(jsonfileInfo.getString("size")), true);
-                                    String filePath = "http://"+ip+":8065/api/v1/files/get/"+replyMessages.get(position).getFilenames().get(0)+"?session_token_index=0";
-                                    downloadFiles(filePath,context,token);
+                                JSONObject jsonfileInfo = new JSONObject(response);
+                                String file_name = jsonfileInfo.getString("filename");
+                                int lastOccurance = file_name.lastIndexOf('/');
+                                only_filename = file_name.substring(lastOccurance + 1);
+                                String fileData[]=replyMessages.get(position+1).getFilenames().get(0).split("/");
+                                File SDCardRoot = new File(Environment.getExternalStorageDirectory()+"/HCircle");
+                                if(SDCardRoot.exists()){
+                                    File file = new File(SDCardRoot,fileData[4]);
+                                        if(file.exists()){
+                                            Intent intent=new Intent(context, ImageviewerActivity.class);
+                                            intent.putExtra("FILENAME",""+Environment.getExternalStorageDirectory().getPath()
+                                                    + "/HCircle/"+fileData[4]);
+                                            context.startActivity(intent);
+                                        }else{
+                                            holder.loadingPanel.setVisibility(View.VISIBLE);
+                                            fileInfo = only_filename + " \n" + InpuStreamConversion.humanReadableByteCount(Long.parseLong(jsonfileInfo.getString("size")), true);
+                                            String filePath = "http://"+ip+":8065/api/v1/files/get/"+replyMessages.get(position+1).getFilenames().get(0)+"?session_token_index=0";
+                                            downloadFiles(filePath,context,token);
+                                        }
                                 }
-                            }
-
                         }catch (Exception e){
                             AlertHelper.Alert("Something went wrong..",context);
                             holder.loadingPanel.setVisibility(View.GONE);
                         }
                     }
                 }
-
-
             }
         });
         holder.imgDownloads.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(NetworkHelper.isOnline(context)){
-                    String response=getFileInfo("http://" + ip + ":8065/api/v1/files/get_info/" + replyMessages.get(position).getFilenames().get(0), token);
+                    String response=getFileInfo("http://" + ip + ":8065/api/v1/files/get_info/" + replyMessages.get(position+1).getFilenames().get(0), token);
                     if(response!=null){
                         try {
-
                             JSONObject jsonfileInfo = new JSONObject(response);
                             String file_name = jsonfileInfo.getString("filename");
                             int lastOccurance = file_name.lastIndexOf('/');
                             only_filename = file_name.substring(lastOccurance + 1);
-                            String fileData[]=replyMessages.get(position).getFilenames().get(0).split("/");
+                            String fileData[]=replyMessages.get(position+1).getFilenames().get(0).split("/");
                             File SDCardRoot = new File(Environment.getExternalStorageDirectory()+"/HCircle");
                             if(SDCardRoot.exists()){
                                 File file = new File(SDCardRoot,fileData[4]);
@@ -354,11 +393,10 @@ public class ReplyAdapter extends RecyclerView.Adapter<ReplyAdapter.ChatViewHold
                                     intent.putExtra("FILENAME",""+Environment.getExternalStorageDirectory().getPath()
                                             + "/HCircle/"+fileData[4]);
                                     context.startActivity(intent);
-//                                    openFolder(context,fileData[4]);
                                 }else{
                                     holder.loadingPanel.setVisibility(View.VISIBLE);
                                     fileInfo = only_filename + " \n" + InpuStreamConversion.humanReadableByteCount(Long.parseLong(jsonfileInfo.getString("size")), true);
-                                    String filePath = "http://"+ip+":8065/api/v1/files/get/"+replyMessages.get(position).getFilenames().get(0)+"?session_token_index=0";
+                                    String filePath = "http://"+ip+":8065/api/v1/files/get/"+replyMessages.get(position+1).getFilenames().get(0)+"?session_token_index=0";
                                     downloadFiles(filePath,context,token);
                                 }
                             }
@@ -374,7 +412,10 @@ public class ReplyAdapter extends RecyclerView.Adapter<ReplyAdapter.ChatViewHold
         });
 
     }
+    @Override
+    public void getResponse(String response, boolean flg) {
 
+    }
     public void openFolder(final Context context,String filename)
     {
 
@@ -411,13 +452,11 @@ public class ReplyAdapter extends RecyclerView.Adapter<ReplyAdapter.ChatViewHold
     public void onDataUpdate(boolean flag) {
         if(flag){
             flagValue=true;
-//                loadingPanel.setVisibility(View.GONE);
         }else{
             flagValue=false;
         }
         notifyDataSetChanged();
     }
-
     @Override
     public void donotNeedtoDownload(String path) {
         if(path!=null){
@@ -430,7 +469,7 @@ public class ReplyAdapter extends RecyclerView.Adapter<ReplyAdapter.ChatViewHold
     @Override
     public int getItemCount() {
         if (replyMessages != null) {
-            return replyMessages.size();
+            return replyMessages.size()-1;
         } else {
             return 0;
         }

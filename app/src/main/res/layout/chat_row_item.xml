@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+
     android:orientation="vertical"
 
     >
@@ -24,14 +25,23 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_marginTop="5dp"
+                android:layout_marginTop="2dp"
                 >
-                <ImageView
+                <de.hdodenhof.circleimageview.CircleImageView
+                    xmlns:app="http://schemas.android.com/apk/res-auto"
                     android:id="@+id/imgProfile"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
                     android:src="@drawable/username"
-                    android:layout_gravity="top"/>
+                    app:civ_border_width="2dp"
+                    android:layout_gravity="top"
+                    app:civ_border_color="#FFFFFF"/>
+                <!--<ImageView-->
+                    <!--android:id="@+id/imgProfile"-->
+                    <!--android:layout_width="50dp"-->
+                    <!--android:layout_height="50dp"-->
+                    <!--android:src="@drawable/username"-->
+                    <!--android:layout_gravity="top"/>-->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -53,7 +63,7 @@
                                         android:id="@+id/txtsender"
                                         android:textColor="#232324"
                                         android:textStyle="bold"
-                                        android:textSize="18sp"
+                                        android:textSize="15sp"
                                         android:text="sender"
                                         android:layout_gravity="left"
                                         android:gravity="center_vertical" />
@@ -65,37 +75,94 @@
     android:gravity="right"
 
     >
+
+
+    <RelativeLayout
+
+        android:id="@+id/relative_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
     <ImageView
+
         android:id="@+id/imgReply"
         android:layout_width="20dp"
-        android:layout_margin="5dp"
-        android:layout_height="20dp"
+        android:layout_height="25dp"
         android:src="@drawable/icon_arrow_back"
          />
+        </LinearLayout>
+</RelativeLayout>
 
+    <RelativeLayout
+        android:layout_marginLeft="20dp"
+        android:id="@+id/relative_layoutre"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <TextView
+            android:text="11"
+            android:textSize="10sp"
+            android:id="@+id/txtReplyCount"
+            android:layout_gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
     <ImageView
-        android:layout_margin="5dp"
         android:id="@+id/imgMessages"
         android:layout_width="20dp"
-        android:layout_height="20dp"
+        android:layout_height="25dp"
         android:src="@drawable/icon_reply_gray"
         />
+        </LinearLayout>
+    </RelativeLayout>
 
+    <RelativeLayout
+        android:layout_marginLeft="20dp"
+        android:id="@+id/relative_layoutif"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <TextView
+            android:text="11"
+            android:textSize="10sp"
+            android:id="@+id/txtLikeCount"
+            android:layout_gravity="center_vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
     <ImageView
-        android:layout_margin="5dp"
         android:id="@+id/imgFavorite"
         android:layout_width="20dp"
-        android:layout_height="20dp"
+        android:layout_height="25dp"
         android:src="@drawable/icon_love_gray"
         />
+</LinearLayout>
+    </RelativeLayout>
 
+    <RelativeLayout
+        android:layout_marginLeft="20dp"
+        android:id="@+id/relative_layoutiB"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
     <ImageView
-        android:layout_margin="5dp"
         android:id="@+id/imgBookmark"
         android:layout_width="20dp"
-        android:layout_height="20dp"
+        android:layout_height="25dp"
         android:src="@drawable/icon_my_bookmark_gray"
  />
+        </LinearLayout>
+    </RelativeLayout>
 
 </LinearLayout>
                     </LinearLayout>
@@ -110,7 +177,7 @@
                             android:text="test"
                             android:typeface="sans"
                             android:textStyle="normal"
-                            android:textSize="16sp"
+                            android:textSize="12sp"
                             android:gravity="center_vertical"
                             android:layout_alignParentTop="true" />
                     </LinearLayout>
@@ -171,9 +238,9 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="center">
                             <ImageView
+                                android:padding="10dp"
                                 android:id="@+id/imgImages"
                                 android:visibility="visible"
-                                android:src="@drawable/place_holder"
                                 android:layout_width="300dp"
                                 android:layout_height="200dp"/>
                             <ImageView
@@ -226,7 +293,34 @@
                     </RelativeLayout>
                 </LinearLayout>
             </LinearLayout>
+
+            <android.support.v7.widget.RecyclerView
+
+                android:layout_marginLeft="50dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/innerRecyclerview"
+                android:divider="#d4d2d2"
+                android:dividerHeight="1dp"
+                android:paddingBottom="3dp"
+                android:transcriptMode="alwaysScroll"
+
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:focusableInTouchMode="true"
+                android:scrollIndicators="left"
+                android:overScrollFooter="#fff6f6"
+                android:overScrollHeader="#fff6f6"
+                android:outlineProvider="paddedBounds"
+                android:background="#00000000"
+
+                />
+
         </LinearLayout>
+
+
     </android.support.v7.widget.CardView>
+
+
 
 </LinearLayout>

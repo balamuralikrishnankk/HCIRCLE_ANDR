@@ -10,6 +10,7 @@ import java.util.List;
 import com.google.gson.annotations.SerializedName;
 
 public class ReplyInnerObject implements Serializable {
+
     @SerializedName("id")
     private String id;
     @SerializedName("create_at")
@@ -40,7 +41,46 @@ public class ReplyInnerObject implements Serializable {
     private List<String> filenames = new ArrayList<String>();
     @SerializedName("pending_post_id")
     private String pendingPostId;
+    @SerializedName("no_of_reply")
+    private int no_of_reply;
+    @SerializedName("no_of_likes")
+    private int no_of_likes;
+    @SerializedName("isLikedByYou")
+    private boolean isLikedByYou;
 
+    public boolean isProfile() {
+        return profile;
+    }
+
+    public void setProfile(boolean profile) {
+        this.profile = profile;
+    }
+
+    private boolean profile;
+
+    public int getNo_of_reply() {
+        return no_of_reply;
+    }
+
+    public void setNo_of_reply(int no_of_reply) {
+        this.no_of_reply = no_of_reply;
+    }
+
+    public int getNo_of_likes() {
+        return no_of_likes;
+    }
+
+    public void setNo_of_likes(int no_of_likes) {
+        this.no_of_likes = no_of_likes;
+    }
+
+    public boolean isLikedByYou() {
+        return isLikedByYou;
+    }
+
+    public void setIsLikedByYou(boolean isLikedByYou) {
+        this.isLikedByYou = isLikedByYou;
+    }
     public String getId() {
         return id;
     }

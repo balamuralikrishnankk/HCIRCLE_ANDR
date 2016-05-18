@@ -28,7 +28,7 @@
 <LinearLayout
     android:layout_marginTop="10dp"
     android:padding="10dp"
-    android:background="@drawable/bg_scr"
+    android:background="@drawable/upload_bg"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
     <com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView

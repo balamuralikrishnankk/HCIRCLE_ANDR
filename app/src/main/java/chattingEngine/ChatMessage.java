@@ -17,6 +17,66 @@ public class ChatMessage {
     private String sender_name;
     private String fileInfo;
     private String fileList;
+    private String no_of_likes;
+    private boolean isLikedByYou;
+    private boolean isBookmarkedByYou;
+
+
+    public boolean isBookmarkedByYou() {
+        return isBookmarkedByYou;
+    }
+
+    public void setIsBookmarkedByYou(boolean isBookmarkedByYou) {
+        this.isBookmarkedByYou = isBookmarkedByYou;
+    }
+
+    public boolean isProfile() {
+        return profile;
+    }
+
+    public void setProfile(boolean profile) {
+        this.profile = profile;
+    }
+
+    private boolean profile;
+
+    public boolean isLikedByYou() {
+        return isLikedByYou;
+    }
+
+    public void setIsLikedByYou(boolean isLikedByYou) {
+        this.isLikedByYou = isLikedByYou;
+    }
+
+    public String getNo_of_likes() {
+        return no_of_likes;
+    }
+
+    public void setNo_of_likes(String no_of_likes) {
+        this.no_of_likes = no_of_likes;
+    }
+
+
+    private String no_of_reply;
+
+    public String getNo_of_reply() {
+        return no_of_reply;
+    }
+
+    public void setNo_of_reply(String no_of_reply) {
+        this.no_of_reply = no_of_reply;
+    }
+
+
+    public String getParent_id() {
+        return parent_id;
+    }
+
+    public void setParent_id(String parent_id) {
+        this.parent_id = parent_id;
+    }
+
+    private String parent_id;
 
     public String getFileList() {
         return this.fileList;
@@ -69,17 +129,4 @@ public class ChatMessage {
     public void setDate(String dateTime) {
         this.dateTime = dateTime;
     }
-    /*public void setFileList(JSONArray filenames){
-       try {
-            for (int i = 0; i < filenames.length(); i++) {
-                fileList.add(filenames.getString(i));
-            }
-        }catch(Exception e){
-            System.out.println("Unable to store file lists: "+e.toString());
-            fileList=null;
-        }
-   }
-   public List<String> getFileList(){
-        return this.fileList;
-   }*/
 }

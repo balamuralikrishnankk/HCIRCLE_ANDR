@@ -8,7 +8,7 @@
     tools:context="com.nganthoi.salai.tabgen.ConversationActivity">
 
     <LinearLayout
-
+        android:layout_marginTop="10dp"
         android:padding="10dp"
         android:visibility="gone"
         android:id="@+id/reveal_items"
@@ -16,107 +16,86 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         >
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"  >
         <LinearLayout
-            android:id="@+id/llPhotos"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical">
-            <ImageButton
-                android:id="@+id/imgPhotos"
-                android:layout_width="70dp"
-                android:layout_height="70dp"
-                android:background="@drawable/ic_menu_gallery" />
-            <TextView
-                android:layout_width="wrap_content"
+            android:orientation="horizontal"  >
+            <LinearLayout
+                android:id="@+id/llPhotos"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="Photos" />
-        </LinearLayout>
-        <LinearLayout
-            android:id="@+id/llVideos"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical">
-            <ImageButton
-                android:id="@+id/imgVideos"
-                android:layout_width="70dp"
-                android:layout_height="70dp"
-                android:background="@drawable/ic_menu_camera" />
-            <TextView
-                android:layout_width="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+                <ImageButton
+                    android:id="@+id/imgPhotos"
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
+                    android:background="@drawable/pics" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="Gallery" />
+            </LinearLayout>
+            <LinearLayout
+                android:id="@+id/llDocuments"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="Video" />
-        </LinearLayout>
-        <LinearLayout
-            android:id="@+id/llAudios"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical">
-            <ImageButton
-                android:id="@+id/imgAudios"
-                android:layout_width="70dp"
-                android:layout_height="70dp"
-                android:background="@drawable/ic_menu_gallery" />
-            <TextView
-                android:layout_width="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+                <ImageButton
+                    android:id="@+id/imgDocuments"
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
+                    android:background="@drawable/docs" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="Documents" />
+            </LinearLayout>
+            <LinearLayout
+                android:id="@+id/llCamera"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="AUDIOS" />
-        </LinearLayout>
-    </LinearLayout>
-    <LinearLayout
-        android:padding="10dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"  >
-        <LinearLayout
-            android:id="@+id/llDocuments"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical">
-            <ImageButton
-                android:id="@+id/imgDocuments"
-                android:layout_width="70dp"
-                android:layout_height="70dp"
-                android:background="@drawable/ic_menu_gallery" />
-            <TextView
-                android:layout_width="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+                <ImageButton
+                    android:id="@+id/imgCamera"
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
+                    android:background="@drawable/camera" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="Camera" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/llContact"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="Documents" />
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
+                <ImageButton
+                    android:id="@+id/imgContact"
+                    android:layout_width="70dp"
+                    android:layout_height="70dp"
+                    android:background="@drawable/contact" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="Contacts" />
+            </LinearLayout>
+
         </LinearLayout>
-        <LinearLayout
-            android:id="@+id/llCamera"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical">
-            <ImageButton
-                android:id="@+id/imgCamera"
-                android:layout_width="70dp"
-                android:layout_height="70dp"
-                android:background="@drawable/ic_menu_camera" />
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="Camera" />
-        </LinearLayout>
-    </LinearLayout>
+
     </LinearLayout>
 
 </io.codetail.widget.RevealFrameLayout>

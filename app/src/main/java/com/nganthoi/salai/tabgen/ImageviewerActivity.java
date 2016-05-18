@@ -30,8 +30,8 @@ public class ImageviewerActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        filePath=getIntent().getStringExtra("FILENAME");
         setContentView(R.layout.activity_image_viewer);
+        filePath=getIntent().getStringExtra("FILENAME");
         toolbar = (Toolbar) findViewById(R.id.toolbarConversation);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);

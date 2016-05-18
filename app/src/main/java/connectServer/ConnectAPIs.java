@@ -198,6 +198,7 @@ public class ConnectAPIs {
                 }
                 osw.close();
             }catch(Exception e){
+                Log.v("ERROR","ERROR::"+e.toString());
                 e.printStackTrace();
                 errorMessage = e.toString();
                 responseCode=-1;
@@ -255,7 +256,7 @@ public class ConnectAPIs {
         try{
             conn = (HttpURLConnection) api_url.openConnection();
             conn.setRequestProperty("Accept", "application/json");
-            conn.setRequestProperty("Authorization", "Bearer " + TokenId);
+//            conn.setRequestProperty("Authorization", "Bearer " + TokenId);
             conn.setRequestMethod("GET");
 //            conn.setDoInput(true);
 //            conn.setDoOutput(true);
@@ -265,6 +266,7 @@ public class ConnectAPIs {
             System.out.println("Response Code: " + responseCode + "\nResponse message: " + responseMessage);
             if(responseCode == 200/*HttpURLConnection.HTTP_OK*/){
                 isr = new BufferedInputStream(conn.getInputStream());
+                Log.v("POSTO","INPUTSTREAM:::"+isr);
             }
             else {
                 isr = new BufferedInputStream(conn.getErrorStream());

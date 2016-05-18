@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -24,6 +25,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.nispok.snackbar.Snackbar;
+import com.nispok.snackbar.SnackbarManager;
+import com.nispok.snackbar.enums.SnackbarType;
 
 
 public class Methods {
@@ -87,7 +91,15 @@ public class Methods {
 	public static void toastLong(String msg, Context ctx) {
 		Toast.makeText(ctx, msg, Toast.LENGTH_LONG).show();
 	}
-
+    public static void showSnackbar(String msg,Activity activity){
+		SnackbarManager.show(
+				Snackbar.with(activity.getApplicationContext()) // context
+						.type(SnackbarType.MULTI_LINE) // Set is as a multi-line snackbar
+						.text(""+msg) // text to be displayed
+						.duration(Snackbar.SnackbarDuration.LENGTH_SHORT) // make it shorter
+						.animation(false) // don't animate it
+				, activity); // where it is displayed
+	}
 	/**This method is used to show progress dialog**/
 	public static void showProgressDialog(final Context ctx) {
 		context = ctx;

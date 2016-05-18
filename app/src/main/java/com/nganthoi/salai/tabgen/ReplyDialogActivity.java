@@ -1,10 +1,15 @@
 package com.nganthoi.salai.tabgen;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.StrictMode;
+import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
@@ -18,6 +23,7 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.EditText;
@@ -26,7 +32,6 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.google.gson.Gson;
 import com.squareup.okhttp.Interceptor;
 import com.squareup.okhttp.OkHttpClient;
@@ -52,28 +57,35 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 
+import AsyncClasses.WebServiceHelper;
 import ListenerClasses.AsyncCallback;
 import Utils.FileUtils;
 import Utils.InpuStreamConversion;
+import Utils.LikeAndDislikeListener;
 import Utils.Methods;
 import Utils.NetworkHelper;
 import Utils.PreferenceHelper;
 import adapter.ReplyAdapter;
+import chattingEngine.ChatMessage;
 import connectServer.ConnectAPIs;
+import de.hdodenhof.circleimageview.CircleImageView;
 import readData.ReadFile;
 import reply_pojo.ReplyInnerObject;
 
 /**
  * Created by atul on 19/4/16.
  */
-public class ReplyDialogActivity extends AppCompatActivity implements View.OnClickListener, AsyncCallback{
+public class ReplyDialogActivity extends AppCompatActivity implements View.OnClickListener, AsyncCallback, LikeAndDislikeListener{
     private static final int REQUEST_CODE=111;
     public static final int UPLOAD_REQUEST_CODE=112;
     public static final int RESULT_CODE=113;
+    static final int PICK_CONTACT=1;
+
     public static final int REQUEST_CODE_CAMERA=114;
     private static final int REPLY_REQUEST_CODE=111;
     private ArrayList<ReplyInnerObject> innerObjectsList=new ArrayList<>();
     LinearLayout reveal_items;
+    public Boolean interrupt=false;
     String last_timetamp="000000000";
     private JSONArray filenames=null;
     boolean flag;
@@ -89,20 +101,21 @@ public class ReplyDialogActivity extends AppCompatActivity implements View.OnCli
     private RecyclerView replyRecyclerview;
     private TextView txtchannelname;
     private Button btnAddComment;
-    ImageView imgPhotos,imgAudios,imgVideos,imgDocuments,imgCamera;
+    ImageView imgPhotos,imgAudios,imgVideos,imgDocuments,imgCamera,imgContact;
     boolean hidden=true;
-
     EditText messageEditText;
+    Thread currentMessageTaskThread;
+    CircleImageView imgParentMsg;
     ImageView writeImageButton,imgSentMessages,cameraImageButton,pickImageFile;
-
-    ImageView imgParentMsg,imParentAttachment;
+    ImageView imParentAttachment;
     TextView txtParentsender,txtParentMessage;
-
+    InputMethodManager inputManager;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reply_dialog);
         preferenceHelper=new PreferenceHelper(this);
+        inputManager = (InputMethodManager) this.getSystemService(Context.INPUT_METHOD_SERVICE);
         toolbar = (Toolbar) findViewById(R.id.toolbarConversation);
         setSupportActionBar(toolbar);
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.back);
@@ -110,36 +123,49 @@ public class ReplyDialogActivity extends AppCompatActivity implements View.OnCli
         channel_name=preferenceHelper.getString("CHANNEL_NAME");
         channel_id=preferenceHelper.getString("CHANNEL_ID");
         post_id=getIntent().getStringExtra("POST_ID");
+        Toast.makeText(getBaseContext(),post_id,Toast.LENGTH_SHORT).show();
+        System.out.println("Post Id: "+post_id);
         ip=getIntent().getStringExtra("IP");
         token=getIntent().getStringExtra("TOKEN");
         if(NetworkHelper.isOnline(this)){
-          Thread thread=new Thread(){
-              @Override
-              public void run() {
-                  runOnUiThread(new Runnable() {
-                      @Override
-                      public void run() {
-                          ConnectAPIs connectAPIs = new ConnectAPIs("http://" + ip + ":8065/api/v1/channels/" + channel_id + "/post/" + post_id, token);
-                          InputStream inputStream = connectAPIs.getReply();
-                          String resp = connectAPIs.convertInputStreamToString(inputStream);
-                          parseJson(resp);
-                      }
-                  });
-              }
-          };
-            thread.start();
+            String url="http://" + ip + "/TabGenAdmin/get_a_post.php?channel_id=" + channel_id + "&token=" + token+"&user_id="+preferenceHelper.getString("USER_ID")+"&post_id="+post_id;
+            Log.v("POSTO","POSTO::::"+url);
+            WebServiceHelper webServiceHelper=new WebServiceHelper();
+            webServiceHelper.getReplyDetails(this,url,ReplyDialogActivity.this);
         }else{
-            Methods.toastShort("Please check your internet connection..", this);
+            Methods.showSnackbar("Please check your internet connection..", this);
         }
+        currentMessageTaskThread = new Thread(){
+            @Override
+            public void run(){
+                try{
+                    while(!isInterrupted() || !interrupt){
+                        Thread.sleep(6000);
+                        runOnUiThread(new Runnable(){
+                            @Override
+                            public void run(){
+                                String current_url="http://"+ip+"/TabGenAdmin/getCurrentPost.php?channel_id="+channel_id+"&token="+token+"&timestamp="+last_timetamp+"&user_id="+preferenceHelper.getString("USER_ID");
+                                if(last_timetamp!=null||last_timetamp=="000000000") {
+                                    Log.v("TIMESTAMP","Last timestamp: "+last_timetamp);
+                                    new GetCurrentMessageTask().execute(current_url+"");
+                                }else
+                                    System.out.println("latest timestamp is null, no chat history for this channel");
+                            }
+                        });
+                    }
+                }catch(InterruptedException e){
+                    System.out.println("Interrupted Exception: "+e.toString());
+                }
+            }
+        };
+        currentMessageTaskThread.start();
         initComponents();
     }
     private void initComponents() {
-        imgParentMsg=(ImageView)findViewById(R.id.imgParentMsg);
+        imgParentMsg=(CircleImageView)findViewById(R.id.imgParentMsg);
         imParentAttachment=(ImageView)findViewById(R.id.imParentAttachment);
         txtParentsender=(TextView)findViewById(R.id.txtParentsender);
         txtParentMessage=(TextView)findViewById(R.id.txtParentMessage);
-
-
         writeImageButton=(ImageView)findViewById(R.id.writeImageButton);
         writeImageButton.setOnClickListener(this);
         imgSentMessages=(ImageView)findViewById(R.id.imgSentMessages);
@@ -160,20 +186,14 @@ public class ReplyDialogActivity extends AppCompatActivity implements View.OnCli
         replyAdapter = new ReplyAdapter(this,innerObjectsList);
         replyRecyclerview.setAdapter(replyAdapter);
         getSupportActionBar().setTitle(""+channel_name);
-//        btnAddComment=(Button)findViewById(R.id.btnAddComment);
-//        btnAddComment.setOnClickListener(this);
         imgPhotos=(ImageView)findViewById(R.id.imgPhotos);
         imgPhotos.setOnClickListener(this);
-        imgAudios=(ImageView)findViewById(R.id.imgAudios);
-        imgAudios.setOnClickListener(this);
-        imgVideos=(ImageView)findViewById(R.id.imgVideos);
-        imgVideos.setOnClickListener(this);
+        imgContact=(ImageView)findViewById(R.id.imgContact);
+        imgContact.setOnClickListener(this);
         imgDocuments=(ImageView)findViewById(R.id.imgDocuments);
         imgDocuments.setOnClickListener(this);
         imgCamera=(ImageView)findViewById(R.id.imgCamera);
         imgCamera.setOnClickListener(this);
-
-
         messageEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -258,30 +278,23 @@ public class ReplyDialogActivity extends AppCompatActivity implements View.OnCli
                     Snackbar.make(v, "Oops! Message Sending failed", Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
                 }
-//                messageText
-//                imgSentMessages.setVisibility(View.GONE);
-
+                hidekeyboard();
                 break;
-            case R.id.imgAudios:
+            case R.id.imgContact:
                 hidePopupWindow();
-                Intent intent1 = new Intent(Intent.ACTION_PICK);
-                intent1.setType("audio/*");
-                intent1.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-                intent1.setAction(Intent.ACTION_GET_CONTENT);
-                startActivityForResult(Intent.createChooser(intent1, "Select a file from music player"), REQUEST_CODE);
-                break;
-            case R.id.imgVideos:
-                hidePopupWindow();
-                Intent intent3 = new Intent(Intent.ACTION_PICK,
-                        MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
-                intent3.setType("video/*");
-                startActivityForResult(Intent.createChooser(intent3, "Select a file from vidoes"), REQUEST_CODE);
+                hasPermissionInManifest(this, "android.permission.READ_CONTACTS");
+                hasPermissionInManifest(this, "android.permission.WRITE_CONTACTS");
+                final Uri uriContact = ContactsContract.Contacts.CONTENT_URI;
+                Intent intentPickContact = new Intent(Intent.ACTION_PICK, uriContact);
+                startActivityForResult(intentPickContact, PICK_CONTACT);;
                 break;
             case R.id.imgPhotos:
                 hidePopupWindow();
+                hasPermissionInManifest(this, "android.permission.READ_EXTERNAL_STORAGE");
+                hasPermissionInManifest(this, "android.permission.WRITE_EXTERNAL_STORAGE");
                 Intent intent2 = new Intent(Intent.ACTION_PICK,
                         android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                intent2.setType("image/*");
+                intent2.setType("*/*");
                 startActivityForResult(Intent.createChooser(intent2, "Select a file photos"), REQUEST_CODE);
                 break;
             case R.id.imgDocuments:
@@ -294,7 +307,6 @@ public class ReplyDialogActivity extends AppCompatActivity implements View.OnCli
                 break;
             case R.id.imgCamera:
                 hidePopupWindow();
-//                ((ConversationActivity)getApplicationContext()).hasPermissionInManifest(this, "android.permission.CAMERA");
                 Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 File file = FileUtils.getImageFile();
                 cameraUri=Uri.fromFile(file);
@@ -303,6 +315,26 @@ public class ReplyDialogActivity extends AppCompatActivity implements View.OnCli
                 break;
         }
     }
+
+    public boolean hasPermissionInManifest(Context context, String permissionName) {
+        final String packageName = context.getPackageName();
+        try {
+            final PackageInfo packageInfo = context.getPackageManager()
+                    .getPackageInfo(packageName, PackageManager.GET_PERMISSIONS);
+            final String[] declaredPermisisons = packageInfo.requestedPermissions;
+            if (declaredPermisisons != null && declaredPermisisons.length > 0) {
+                for (String p : declaredPermisisons) {
+                    if (p.equals(permissionName)) {
+                        return true;
+                    }
+                }
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+
+        }
+        return false;
+    }
+
     public void hidePopupWindow(){
         if(!hidden) {
             reveal_items.setVisibility(View.GONE);
@@ -320,7 +352,6 @@ public class ReplyDialogActivity extends AppCompatActivity implements View.OnCli
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data){
-        Log.v("ONACTIVITYRESULT","ONACTIVITYRESULT");
         try {
             Uri fileUri;
             switch (requestCode) {
@@ -333,8 +364,7 @@ public class ReplyDialogActivity extends AppCompatActivity implements View.OnCli
 
                         Methods.toastShort(mimetype, this);
                         if (file_path != null) {
-                            //System.out.println("File has been selected: "+file_path);
-//                    Toast.makeText(context, "You have selected: "+file_path, Toast.LENGTH_SHORT).show();
+
                             if (file_path.contains(".mp3")) {
                                 new Thread(new Runnable() {
                                     public void run() {
@@ -385,13 +415,39 @@ public class ReplyDialogActivity extends AppCompatActivity implements View.OnCli
                                 intent.putExtras(bundle);
                                 startActivityForResult(intent, UPLOAD_REQUEST_CODE);
                             }
-                            Log.e("CONVERSATION", "ONACTIVITY_RESULT.");
+                        }
+                    }
+                    break;
+                case PICK_CONTACT:
+                    String phone=null,name=null;
+                    fileUri=data.getData();
+                    Cursor cursor = getContentResolver().query(fileUri, null, null, null, null);
+                    if (cursor.moveToNext()) {
+                        int columnIndex_ID = cursor.getColumnIndex(ContactsContract.Contacts._ID);
+                        String contactID = cursor.getString(columnIndex_ID);
+                        int columnIndex_HASPHONENUMBER = cursor.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER);
+                        String stringHasPhoneNumber = cursor.getString(columnIndex_HASPHONENUMBER);
+
+                        if (stringHasPhoneNumber.equalsIgnoreCase("1")) {
+                            Cursor cursorNum = getContentResolver().query(
+                                    ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                                    null,
+                                    ContactsContract.CommonDataKinds.Phone.CONTACT_ID + "=" + contactID,
+                                    null,
+                                    null);
+
+                            //Get the first phone number
+                            if (cursorNum.moveToNext()) {
+                                int columnIndex_number = cursorNum.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
+                                int columnIndex_name = cursorNum.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
+                                phone = cursorNum.getString(columnIndex_number);
+                                name = cursorNum.getString(columnIndex_name);
+
+                            }
                         }
                     }
                     break;
                 case REQUEST_CODE_CAMERA:
-//                    hidePopupWindow();
-                    Log.v("PATH","IMAGE:::"+cameraUri.getPath());
                     if (cameraUri != null) {
                         Intent intent = new Intent(this, UploadActivity.class);
                         Bundle bundle = new Bundle();
@@ -411,9 +467,7 @@ public class ReplyDialogActivity extends AppCompatActivity implements View.OnCli
                         String caption = data.getStringExtra("CAPTION");
                         JSONObject fileObject = new JSONObject(result);
                         filenames = fileObject.getJSONArray("filenames");
-//                String messageText = messageEditText.getText().toString();
                         JSONObject jsonObject = new JSONObject();
-
                         if (filenames != null && filenames.length() > 0) {
                             jsonObject.put("filenames", filenames);
                         }
@@ -435,23 +489,17 @@ public class ReplyDialogActivity extends AppCompatActivity implements View.OnCli
             Methods.toastShort("Oops! Something went wrong..",this);
         }
     }
-
-
     private void parseJson(String resp) {
-        Log.v("RESPONSE","RESPONSE:::"+resp);
+        String temp="";
         try {
             JSONObject jsonObject = new JSONObject(resp);
             JSONObject jsonObject1=jsonObject.getJSONObject("posts");
-            Log.v("OBJECT","OBJECT::"+jsonObject1);
             Iterator<String> keys = jsonObject1.keys();
             while( keys.hasNext() )
             {
                 String key = keys.next();
-                Log.v("category key", key);
                 JSONObject innerJObject = jsonObject1.getJSONObject(key);
-                Log.v("inner","inner::"+innerJObject.toString());
                 ReplyInnerObject replyInnerObject=new Gson().fromJson(innerJObject.toString(), ReplyInnerObject.class);
-
                 innerObjectsList.add(replyInnerObject);
             }
             for(int i=0;i<innerObjectsList.size();i++){
@@ -482,7 +530,7 @@ public class ReplyDialogActivity extends AppCompatActivity implements View.OnCli
                         .into(imgParentMsg);
             }
             txtParentsender.setText(""+getUsernameById(innerObjectsList.get(0).getUserId()));
-            txtParentMessage.setText(""+innerObjectsList.get(0).getMessage()+"");
+            txtParentMessage.setText("" + innerObjectsList.get(0).getMessage() + "");
             OkHttpClient picassoClient = new OkHttpClient();
             picassoClient.networkInterceptors().add(new Interceptor() {
                 @Override
@@ -495,7 +543,6 @@ public class ReplyDialogActivity extends AppCompatActivity implements View.OnCli
                     return chain.proceed(newRequest);
                 }
             });
-
             Picasso.with(this).setIndicatorsEnabled(true);
             new Picasso.Builder(this).loggingEnabled(BuildConfig.DEBUG)
                     .indicatorsEnabled(BuildConfig.DEBUG)
@@ -504,37 +551,19 @@ public class ReplyDialogActivity extends AppCompatActivity implements View.OnCli
                     .resize(300,300)
                     .error(R.drawable.place_holder)
                     .into(imParentAttachment);
-            innerObjectsList.remove(0);
             replyAdapter.notifyDataSetChanged();
         }catch (Exception e){
-                Log.v("ERROR", "ERROR::" + e.toString());
+            Log.v("ERROR", "ERROR::" + e.toString());
         }
     }
     private String getUsernameById(String user_id){
         String users= preferenceHelper.getString("all_users");
-
         String username=null;
         try{
             JSONObject all_users=new JSONObject(users);
-            Log.v("USERS","USERS OBJECT:::"+all_users);
-        /*if(members!=null){
-            try{
-                for(int i=0;i<members.length();i++){
-                    JSONObject users = members.getJSONObject(i);
-                    if(user_id.equals(users.getString("id"))){
-                        username = users.getString("username");
-                        break;
-                    }
-                }
-            }catch(JSONException e){
-                System.out.println("Unable to get Username in getUsernameById: "+e.toString());
-                username=null;
-            }
-        }*/
             if(all_users!=null){
                 try{
                     JSONObject jobj = all_users.getJSONObject(user_id);
-
                     if(jobj.getString("first_name").length()!=0 && jobj.getString("first_name")!=null){
                         username = jobj.getString("first_name");
                     }
@@ -550,15 +579,36 @@ public class ReplyDialogActivity extends AppCompatActivity implements View.OnCli
         }catch (Exception e){
 
         }
-
         return username;
-
     }
+    public void hidekeyboard(){
+        if(inputManager.isActive()){
+            inputManager.hideSoftInputFromWindow(
+                    this.getCurrentFocus().getWindowToken(),
+                    InputMethodManager.HIDE_NOT_ALWAYS);
+        }
+    }
+
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        Intent intent = new Intent(this, ConversationActivity.class);
+        intent.putExtra(ChatFragment.TEAM_NAME,preferenceHelper.getString("TEAM_NAME"));
+        intent.putExtra(ChatFragment.CHANNEL_NAME, preferenceHelper.getString("CHANNEL_NAME"));
+        startActivity(intent);
+        finish();
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case android.R.id.home:
-                onBackPressed();
+                Intent intent = new Intent(this, ConversationActivity.class);
+                intent.putExtra(ChatFragment.TEAM_NAME,preferenceHelper.getString("TEAM_NAME"));
+                intent.putExtra(ChatFragment.CHANNEL_NAME, preferenceHelper.getString("CHANNEL_NAME"));
+                startActivity(intent);
+                finish();
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -569,27 +619,56 @@ public class ReplyDialogActivity extends AppCompatActivity implements View.OnCli
         if(flag){
             if(result!=null ){
                 if(responsecode==200){
-                    ReplyInnerObject replyInnerObject=new ReplyInnerObject();
-                    try{
-                        JSONObject json_obj= new JSONObject(result);
-                        replyInnerObject.setId(json_obj.getString("id"));
-                        replyInnerObject.setMessage(json_obj.getString("message"));
-                        last_timetamp = json_obj.getString("create_at");
-                        replyInnerObject.setUserId(json_obj.getString("user_id"));
-                        Long timestamp = Long.parseLong(last_timetamp);
-                        Date date = new Date(timestamp);
-//                        replyInnerObject.setDate(simpleDateFormat.format(date));
+                    try {
+                        JSONObject jObj1 = new JSONObject(result);
+                        JSONArray jsonArray = jObj1.getJSONArray("order");
+                        JSONObject jObj2;
+                        String temp="";
+                        if (jsonArray.length() > 0) {
+                            jObj2 = jObj1.getJSONObject("posts");
+                            int i = 0;
+                            String messageDate=null;
+                            while (i < jsonArray.length()) {
+                                JSONObject jObj3 = jObj2.getJSONObject(jsonArray.getString(i));
+                                if(jObj3.getString("root_id").equals(post_id) || jObj3.getString("parent_id").equals(post_id)) {
+                                    messageDate = "" + jObj3.getString("create_at");
+                                    System.out.println("Message Date: " + messageDate);
+                                    if (Long.parseLong(messageDate) > Long.parseLong(last_timetamp) && jObj3.getLong("delete_at") == 0) {//it means if the message is new, which is indicated by the last timestamp
+                                        ReplyInnerObject replyInnerObject = new ReplyInnerObject();
+                                        replyInnerObject.setId(jObj3.getString("id"));
+                                        replyInnerObject.setMessage("" + jObj3.getString("message"));
+                                        Long timeStamp = Long.parseLong(messageDate);
+                                        Date date = new Date(timeStamp);
+//                                    /*If the post contains files*/
+                                        JSONArray files = jObj3.getJSONArray("filenames");
+                                        ArrayList<String> filelist = new ArrayList<>();
+                                        if (files.length() > 0) {
+                                            for (int j = 0; j < files.length(); j++) {
+                                                filelist.add(files.get(j).toString());
+                                            }
+                                        }replyInnerObject.setParentId("" + jObj3.getString("parent_id"));
+                                        replyInnerObject.setRootId("" + jObj3.getString("root_id"));
+//                                        replyInnerObject.setUserId("" + json_obj.getString("user_id"));
+                                        if (filelist.size() > 0)
+                                            replyInnerObject.setFilenames(filelist);
+                                        if (temp.equalsIgnoreCase(jObj3.getString("user_id"))) {
+                                            replyInnerObject.setUserId("");
+                                        } else {
+                                            replyInnerObject.setUserId(jObj3.getString("user_id"));
+                                            temp = getUsernameById(jObj3.getString("user_id"));
+                                        }
 
-                        JSONArray files = json_obj.getJSONArray("filenames");
-                        if(files.length()!=0){
-//                            replyInnerObject.sefiles.getString(0));
+                                        displayMessage(replyInnerObject);
+                                    }//otherwise dont create the message
+                                }
+                                if (Long.parseLong(last_timetamp) < Long.parseLong(messageDate))
+                                    last_timetamp = messageDate;
+                                i++;
+                            }//end while loop
                         }
-
-                        displayMessage(replyInnerObject);
-                    }catch(Exception e){
-                        System.out.print("Chat Exception: "+e.toString());
+                    } catch (Exception e) {
+                        System.out.println("Error in parsing JSON: " + e.toString());
                     }
-                    file_path=null;
                 }
                 else{
                     try{
@@ -607,6 +686,23 @@ public class ReplyDialogActivity extends AppCompatActivity implements View.OnCli
             flag=false;
             resultComment=null;
         }
+    }
+
+    @Override
+    public void addAndRemoveBookMark(boolean flag, String post_id) {
+
+    }
+
+    @Override
+    public void addAndRemoveLike(boolean flag, String post_id, String no_of_likes) {
+
+    }
+
+    @Override
+    public void getResponse(String response, boolean flg) {
+        Log.v("POSTO", "LISTENER:::" + response);
+        parseJson(response);
+
     }
 
     public class UploadFile extends AsyncTask<Void, String, String> {
@@ -746,13 +842,115 @@ public class ReplyDialogActivity extends AppCompatActivity implements View.OnCli
     }
 
     private void displayMessage(ReplyInnerObject replyInnerObject) {
+//        for(int i=0;i<innerObjectsList.size();i++){
+//
+//            if(innerObjectsList.get(i).getId().equals(replyInnerObject.getId())){
+//                Log.v("INNER","INNER:::"+innerObjectsList.get(i).getId());
+//                Log.v("INNER","Reply:::"+replyInnerObject.getId());
+//            }else{
+//                Log.v("Going in","Reply:::"+replyInnerObject.getId());
+//                Log.v("Going in", "INNER:::" + innerObjectsList.get(i).getId());
+//
+//            }
+//        }
         innerObjectsList.add(replyInnerObject);
         replyAdapter.notifyDataSetChanged();
         scroll();
     }
+    class GetCurrentMessageTask extends AsyncTask<String,Void,String>{
+        InputStream isr=null;
+        HttpURLConnection conn;
+        URL api_url;
+        int responseCode=-1;
+        String respMsg;
+        String resp=null;
+        @Override
+        protected String doInBackground(String... messageUrl){
+            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+            StrictMode.setThreadPolicy(policy);
+            try{
+                api_url = new URL(messageUrl[0]);
+                conn = (HttpURLConnection) api_url.openConnection();
+                conn.setRequestProperty("Authorization", "Bearer " + token);
+                conn.setRequestMethod("POST");
+                conn.setDoInput(true);
+                conn.setDoOutput(true);
+                conn.connect();
+                responseCode = conn.getResponseCode();
+                respMsg = conn.getResponseMessage();
+                System.out.println("Response Code: " + responseCode + "\nResponse message: " + respMsg);
+                if(responseCode == 200)/*HttpURLConnection.HTTP_OK*/{
+                    isr = new BufferedInputStream(conn.getInputStream());
+                }
+                else {
+                    isr = new BufferedInputStream(conn.getErrorStream());
+                }
+                resp = InpuStreamConversion.convertInputStreamToString(isr);
+            }catch(Exception e){
+                e.printStackTrace();
+                System.out.println("Exception in getMessage(): " + e.toString());
+                return null;
+            }
+            System.out.println(resp);
+            return resp;
+        }
+        @Override
+        protected void onPostExecute(String resp){
+            if(resp!=null && responseCode==200) {
+                try {
+                    JSONObject jObj1 = new JSONObject(resp);
+                    JSONArray jsonArray = jObj1.getJSONArray("order");
+                    JSONObject jObj2;
+                    String temp="";
+                    if (jsonArray.length() > 0) {
+                        jObj2 = jObj1.getJSONObject("posts");
+                        int i = 0;
+                        String messageDate=null;
+                        while (i < jsonArray.length()) {
+                            JSONObject jObj3 = jObj2.getJSONObject(jsonArray.getString(i));
+                            if(jObj3.getString("root_id").equals(post_id) || jObj3.getString("parent_id").equals(post_id)) {
+                                messageDate = "" + jObj3.getString("create_at");
+                                System.out.println("Message Date: " + messageDate);
+                                if (Long.parseLong(messageDate) > Long.parseLong(last_timetamp) && jObj3.getLong("delete_at") == 0) {//it means if the message is new, which is indicated by the last timestamp
+                                    ReplyInnerObject replyInnerObject = new ReplyInnerObject();
+                                    replyInnerObject.setId(jObj3.getString("id"));
+                                    replyInnerObject.setMessage("" + jObj3.getString("message"));
+                                    Long timeStamp = Long.parseLong(messageDate);
+                                    Date date = new Date(timeStamp);
+//                                    /*If the post contains files*/
+                                    JSONArray files = jObj3.getJSONArray("filenames");
+                                    ArrayList<String> filelist = new ArrayList<>();
+                                    if (files.length() > 0) {
+                                        for (int j = 0; j < files.length(); j++) {
+                                            filelist.add(files.get(j).toString());
+                                        }
+                                    }
+                                    if (filelist.size() > 0)
+                                        replyInnerObject.setFilenames(filelist);
+                                    if (temp.equalsIgnoreCase(jObj3.getString("user_id"))) {
+                                        replyInnerObject.setUserId("");
+                                    } else {
+                                        replyInnerObject.setUserId(jObj3.getString("user_id"));
+                                        temp = getUsernameById(jObj3.getString("user_id"));
+                                    }
 
+                                    displayMessage(replyInnerObject);
+                                }//otherwise dont create the message
+                            }
+                            if (Long.parseLong(last_timetamp) < Long.parseLong(messageDate))
+                                last_timetamp = messageDate;
+                            i++;
+                        }//end while loop
+                    }
+                } catch (Exception e) {
+                    System.out.println("Error in parsing JSON: " + e.toString());
+                }
+            }//end if
+        }//end on post execution
+    }
     private void scroll() {
-        replyRecyclerview.scrollToPosition(innerObjectsList.size()-1);
+        //replyRecyclerview.scrollToPosition(innerObjectsList.size()-1);
+        replyRecyclerview.smoothScrollToPosition(replyAdapter.getItemCount() - 1);
     }
 
 

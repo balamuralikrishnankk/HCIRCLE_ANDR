@@ -52,7 +52,12 @@ public class ImageCompression {
 //      width and height values are set maintaining the aspect ratio of the image
 
         if (actualHeight > maxHeight || actualWidth > maxWidth) {
-            if (imgRatio < maxRatio) {               imgRatio = maxHeight / actualHeight;                actualWidth = (int) (imgRatio * actualWidth);               actualHeight = (int) maxHeight;             } else if (imgRatio > maxRatio) {
+            if (imgRatio < maxRatio)
+            {
+                imgRatio = maxHeight / actualHeight;
+                actualWidth = (int) (imgRatio * actualWidth);
+                actualHeight = (int) maxHeight;
+            } else if (imgRatio > maxRatio) {
                 imgRatio = maxWidth / actualWidth;
                 actualHeight = (int) (imgRatio * actualHeight);
                 actualWidth = (int) maxWidth;
@@ -83,6 +88,12 @@ public class ImageCompression {
 
         }
         try {
+            if(actualHeight<=0){
+                actualHeight=(int)maxHeight;
+            }
+            if(actualWidth<=0){
+                actualWidth=(int)maxWidth;
+            }
             scaledBitmap = Bitmap.createBitmap(actualWidth, actualHeight,Bitmap.Config.ARGB_8888);
         } catch (OutOfMemoryError exception) {
             exception.printStackTrace();
@@ -149,10 +160,12 @@ public class ImageCompression {
         if (height > reqHeight || width > reqWidth) {
             final int heightRatio = Math.round((float) height/ (float) reqHeight);
             final int widthRatio = Math.round((float) width / (float) reqWidth);
-            inSampleSize = heightRatio < widthRatio ? heightRatio : widthRatio;      }       final float totalPixels = width * height;       final float totalReqPixelsCap = reqWidth * reqHeight * 2;       while (totalPixels / (inSampleSize * inSampleSize) > totalReqPixelsCap) {
+            inSampleSize = heightRatio < widthRatio ? heightRatio : widthRatio;      }
+            final float totalPixels = width * height;
+            final float totalReqPixelsCap = reqWidth * reqHeight * 2;
+            while (totalPixels / (inSampleSize * inSampleSize) > totalReqPixelsCap) {
             inSampleSize++;
         }
-
         return inSampleSize;
     }
     public String getFilename() {

@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.Image;
@@ -91,17 +92,17 @@ public class UploadActivity extends AppCompatActivity implements View.OnClickLis
         switch (v.getId()){
             case R.id.btnSend:
                 try {
-
-                    File file=new File(filePath);
-                            UploadFile uploadFile = new UploadFile(file.getAbsolutePath(),"http://"+ip+":8065/api/v1/files/upload");
+                    File imgFile1 = new  File(filePath);
+                        if(filePath!=null) {
+                            UploadFile uploadFile = new UploadFile(imgFile1.getAbsolutePath(), "http://" + ip + ":8065/api/v1/files/upload");
                             uploadFile.execute();
-
-//                        }
-
+                        }else{
+                            Log.v("WRONG","WRONG:::NULL");
+                        }
                 }catch(Exception e){
-                    Methods.toastShort("Something went wrong..",this);
+
+                    Methods.toastShort("Something went wrong.."+e.toString(),this);
                 }
-//                finish();
                 break;
             case R.id.btnCancel:
                 finish();
@@ -164,37 +165,25 @@ public class UploadActivity extends AppCompatActivity implements View.OnClickLis
     }
     public void showImage(String path,String type){
         File imgFile1 = new  File(path);
-
         if(imgFile1.exists()){
             if(type.contains("IMAGE"))
             {
                 try {
-
                     Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), Uri.fromFile(imgFile1));
                     imgFile.setImageBitmap(bitmap);
                 }catch (Exception e){
 
                 }
-//                Bitmap myBitmap=decodeSampledBitmapFromFile(path,100,1000);
-//                File file=new File(path);
-//                Bitmap myBitmap=BitmapFactory.decodeFile(file.getAbsolutePath());
-//                Bitmap myBitmap = BitmapFactory.decodeFile(imgFile1.getAbsolutePath());
-//                Bitmap myBitmap=ThumbnailUtils.createVideoThumbnail(imgFile1.getAbsolutePath(), MediaStore.Images.Thumbnails.MICRO_KIND);
-
             }else if(type.contains("CAMERA")){
                 Bitmap myBitmap = BitmapFactory.decodeFile(imgFile1.getAbsolutePath());
-//                Bitmap myBitmap = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(path),
-//                        100, 100);
-//                Bitmap myBitmap = BitmapFactory.decodeFile(imgFile1.getAbsolutePath());
                 imgFile.setImageBitmap(myBitmap);
             }else {
-                Bitmap bMap = ThumbnailUtils.createVideoThumbnail(path, MediaStore.Video.Thumbnails.MICRO_KIND);
+                Bitmap bMap = ThumbnailUtils.createVideoThumbnail(imgFile1.getAbsolutePath(), MediaStore.Video.Thumbnails.MICRO_KIND);
                 imgFile.setImageBitmap(bMap);
             }
-
-
         }
     }
+
     public class UploadFile extends AsyncTask<Void, String, String>{
         URL connectURL;
         String serverRespMsg,file_upload_uri=null;
@@ -220,8 +209,11 @@ public class UploadActivity extends AppCompatActivity implements View.OnClickLis
         @Override
         protected void onPreExecute(){
             Methods.showProgressDialog(UploadActivity.this,"Please wait..");
-            ImageCompression imageCompression=new ImageCompression(UploadActivity.this);
-            fileLocation=imageCompression.compressImage(fileLocation);
+
+                ImageCompression imageCompression=new ImageCompression(UploadActivity.this);
+                fileLocation=imageCompression.compressImage(fileLocation);
+
+
         }
         @Override
         protected String doInBackground(Void... v){

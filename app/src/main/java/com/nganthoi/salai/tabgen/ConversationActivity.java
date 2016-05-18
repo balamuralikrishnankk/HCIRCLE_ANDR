@@ -4,11 +4,13 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -20,9 +22,11 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.ResultReceiver;
 import android.os.StrictMode;
+import android.provider.Contacts;
+import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.support.design.widget.Snackbar;
-import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -30,30 +34,21 @@ import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.AttributeSet;
 import android.util.Log;
 import android.view.ActionMode;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.inputmethod.InputMethodManager;
 import android.webkit.MimeTypeMap;
-import android.widget.AbsListView;
-import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.squareup.picasso.Picasso;
-
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -63,7 +58,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-//import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -72,19 +66,15 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
 import Channel.Channel;
 import Channel.GetChannelDetails;
 import ListenerClasses.ListviewListeners;
+import Utils.EndlessRecyclerOnScrollListener;
 import Utils.FileUtils;
 import Utils.Methods;
 import Utils.PreferenceHelper;
-import Utils.SimpleDividerItemDecoration;
-import chattingEngine.ChatAdapter;
 import chattingEngine.ChatConversationAdapter;
 import chattingEngine.ChatMessage;
-import connectServer.DownloadResultReceiver;
-import connectServer.FileInfoService;
 import customDialogManager.CustomDialogManager;
 import io.codetail.animation.SupportAnimator;
 import io.codetail.animation.ViewAnimationUtils;
@@ -92,7 +82,6 @@ import io.codetail.widget.RevealFrameLayout;
 import readData.ReadFile;
 import sharePreference.SharedPreference;
 import connectServer.ConnectAPIs;
-
 
 public class ConversationActivity extends AppCompatActivity implements View.OnClickListener,View.OnLongClickListener,ListviewListeners{
     private static final int REQUEST_CODE=111;
@@ -106,14 +95,16 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
     private Toolbar toolbar;
     private ImageView writeImageButton,imgSentMessages;
     private TextView channel_label;
-    private ImageView backButton,pickImageFile,imgPhotos,imgVideos,imgAudios,imgDocuments,imgCamera,cameraImageButton;//,imgCamera,conv_Icon;
+    private ImageView backButton,pickImageFile,imgPhotos,imgVideos,imgAudios,
+            imgDocuments,imgCamera,cameraImageButton,imgContact;//,imgCamera,conv_Icon;
     private RecyclerView messagesContainerRecyclerview;
     private EditText messageEditText;
-//    private ChatAdapter adapter;
+    static final int PICK_CONTACT=1;
     private ArrayList<ChatMessage> chatHistory;
     private SharedPreference sharedPreference;
     private Context context=this;
     private String channel_id="",user_id,token,last_timetamp="000000000",extra_info,copied_msg=null,channel_title;
+    private String first_post_id=null;
     private String file_path=null;
     private String ip;
     private HttpURLConnection conn=null;
@@ -133,11 +124,14 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
     int visibleItemCount,totalItemCount,pastVisiblesItems;
     int firstVisibleInListview;
     PreferenceHelper preferenceHelper;
+    InputMethodManager inputManager;
+    SwipeRefreshLayout swipeRefreshLayout;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_conversation);
         preferenceHelper=new PreferenceHelper(this);
+        inputManager = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
         toolbar = (Toolbar) findViewById(R.id.toolbarConversation);
         setSupportActionBar(toolbar);
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.back);
@@ -146,6 +140,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
         channel_title = intent.getStringExtra(ChatFragment.CHANNEL_NAME);
         preferenceHelper.addString("CHANNEL_NAME",channel_title+"");
         String team_name = intent.getStringExtra(ChatFragment.TEAM_NAME);
+        preferenceHelper.addString("TEAM_NAME",team_name);
         initComponent();
         sharedPreference = new SharedPreference();
         token=sharedPreference.getTokenPreference(context);
@@ -153,14 +148,12 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
         Channel channel = channelDetails.getChannel(team_name,channel_title,context);
         channel_id=channel.getChannel_id();
         preferenceHelper.addString("CHANNEL_ID",channel_id);
-        System.out.println("Team Name: "+team_name+" Channel Title: "+channel_title+" ---> Channel Id: "+channel_id+"\nToken Id: "+token);
         String user_details=sharedPreference.getPreference(context);
         try{
             JSONObject jObj = new JSONObject(user_details);
             user_id=jObj.getString("id");
             preferenceHelper.addString("USER_ID",user_id);
         }catch(Exception e){
-            System.out.println("Unable to read user ID: "+e.toString());
         }
         ip = sharedPreference.getServerIP_Preference(context);//getting ip
         //last_timetamp="1456185600000";
@@ -174,18 +167,6 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
                         ConnectAPIs joinChannel = new ConnectAPIs("http://"+ip+":8065/api/v1/channels/"+channel_id+"/join",token);
                         String joinChannelInfo = convertInputStreamToString(joinChannel.getData());
                         System.out.println("Join Channel Result: "+joinChannelInfo);
-                        /*******************************************************************/
-                        /*** Getting extra information about the current channel ***/
-                        /*ConnectAPIs connApis = new ConnectAPIs("http://"+ip+":8065//api/v1/channels/"+channel_id+"/extra_info",token);
-                        extra_info = convertInputStreamToString(connApis.getData());
-                        System.out.println("Extra Information: "+extra_info);
-                        try{
-                            extraInfoObj = new JSONObject(extra_info);
-                            members=extraInfoObj.getJSONArray("members");
-                        }catch(Exception e){
-                            System.out.println("unable to get user extra information");
-                        }*/
-                        /****New Code for Getting all user information from server********/
                         ConnectAPIs getUsers = new ConnectAPIs("http://"+ip+":8065//api/v1/users/profiles",token);
                         users_info = convertInputStreamToString(getUsers.getData());
                         preferenceHelper.addString("all_users",users_info);
@@ -197,10 +178,9 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
                         catch(Exception e){
                             System.out.println("unable to get user information");
                         }
+                        String url= "http://"+ip+"/TabGenAdmin/getPost.php?channel_id="+channel_id+"&token="+token+"&user_id="+user_id;
                         /********************************************************************/
-                        new GetMessageHistoryTask().execute("http://"+ip+
-                                ":8065//api/v1/channels/"+channel_id+
-                                "/posts/0/60");
+                        new GetMessageHistoryTask(true).execute(url+"");
                     }
                 });
             }
@@ -234,42 +214,51 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
         currentMessageTaskThread.start();
         loadHistory.start();
     }
-
-//-----initializing the xml components
+    //-----initializing the xml components
     public void initComponent(){
-        /*** labels in the action abar of the activity_conversation ***/
+        swipeRefreshLayout=(SwipeRefreshLayout)findViewById(R.id.swipeRefreshLayout);
         imgSentMessages=(ImageView)findViewById(R.id.imgSentMessages);
         imgSentMessages.setOnClickListener(this);
         reveal_items=(LinearLayout)findViewById(R.id.reveal_items);
-        getSupportActionBar().setTitle(""+channel_title);
-//        channel_label = (TextView) toolbar.findViewById(R.id.channel_name);
-//        channel_label.setText(channel_title);
+        getSupportActionBar().setTitle("" + channel_title);
         messageEditText = (EditText) findViewById(R.id.messageEditText);
         progressDialog = new ProgressDialog(context);
-//        backButton = (ImageView) toolbar.findViewById(R.id.backButton);
         messagesContainerRecyclerview = (RecyclerView) findViewById(R.id.messagesContainerRecyclerview);
         final LinearLayoutManager layoutManager = new LinearLayoutManager(context);
-//        layoutManager.setReverseLayout(true);
         layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         messagesContainerRecyclerview.setLayoutManager(layoutManager);
-//        messagesContainerRecyclerview.addItemDecoration(new SimpleDividerItemDecoration(this));
         writeImageButton = (ImageView) findViewById(R.id.writeImageButton);
         writeImageButton.setOnClickListener(this);
         cameraImageButton=(ImageView)findViewById(R.id.cameraImageButton);
         cameraImageButton.setOnClickListener(this);
         //setting Chat adapter
-        adapter = new ChatConversationAdapter(ConversationActivity.this, new ArrayList<ChatMessage>());
+        adapter = new ChatConversationAdapter(ConversationActivity.this, chatHistory);
         messagesContainerRecyclerview.setAdapter(adapter);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                // Refresh items
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        String url = "http://" + ip + "/TabGenAdmin/getPreviousPost.php?channel_id=" + channel_id +
+                                "&token=" + token + "&user_id=" + user_id + "&post_id=" + first_post_id;//  preferenceHelper.getString("LAST_POST_ID");
+                        Log.v("URL", "URL::::" + url);
+//                                /********************************************************************/
+                        new GetMessageHistoryTask(false).execute(url + "");
+                        swipeRefreshLayout.setRefreshing(false);
+                    }
+                });
+
+            }
+        });
         messageEditText.setOnLongClickListener(this);
         pickImageFile = (ImageView) findViewById(R.id.pickImageFile);
         pickImageFile.setOnClickListener(this);
-//        backButton.setOnClickListener(this);
         imgPhotos=(ImageView)findViewById(R.id.imgPhotos);
         imgPhotos.setOnClickListener(this);
-        imgAudios=(ImageView)findViewById(R.id.imgAudios);
-        imgAudios.setOnClickListener(this);
-        imgVideos=(ImageView)findViewById(R.id.imgVideos);
-        imgVideos.setOnClickListener(this);
+        imgContact=(ImageView)findViewById(R.id.imgContact);
+        imgContact.setOnClickListener(this);
         imgDocuments=(ImageView)findViewById(R.id.imgDocuments);
         imgDocuments.setOnClickListener(this);
         imgCamera=(ImageView)findViewById(R.id.imgCamera);
@@ -285,9 +274,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
                     writeImageButton.setVisibility(View.VISIBLE);
                     imgSentMessages.setVisibility(View.GONE);
                 }
-
             }
-
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if(s.length()>0){
@@ -298,7 +285,6 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
                     imgSentMessages.setVisibility(View.GONE);
                 }
             }
-
             @Override
             public void afterTextChanged(Editable s) {
                 if(s.length()>0){
@@ -311,11 +297,8 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
 
             }
         });
-
     }
-
-
-//----OnClick Listeners
+    //----OnClick Listeners
     @Override
     public void onClick(View v) {
         switch (v.getId()){
@@ -344,19 +327,13 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
                     Snackbar.make(v, "Oops! Message Sending failed", Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
                 }
-//                messageText
-//                imgSentMessages.setVisibility(View.GONE);
-//                writeImageButton.setVisibility(View.VISIBLE);
+                hidekeyboard();
                 break;
-//            case R.id.backButton:
-//                onBackPressed();
-//                break;
             case R.id.writeImageButton:
 
                 break;
             case R.id.cameraImageButton:
-//                hidePopupWindow();
-
+                hasPermissionInManifest(this, "android.permission.CAMERA");
                 Intent intent5 = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 File file1 =FileUtils.getImageFile();
                 cameraUri=Uri.fromFile(file1);
@@ -371,28 +348,22 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
                     reveal_items.setVisibility(View.GONE);
                     hidden=true;
                 }
-//                opentheAttachmentMenu();
                 break;
-            case R.id.imgAudios:
+            case R.id.imgContact:
                 hidePopupWindow();
-                Intent intent1 = new Intent(Intent.ACTION_PICK);
-                intent1.setType("audio/*");
-                intent1.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-                intent1.setAction(Intent.ACTION_GET_CONTENT);
-                startActivityForResult(Intent.createChooser(intent1, "Select a file from music player"), REQUEST_CODE);
-                break;
-            case R.id.imgVideos:
-                hidePopupWindow();
-                Intent intent3 = new Intent(Intent.ACTION_PICK,
-                        MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
-                intent3.setType("video/*");
-                startActivityForResult(Intent.createChooser(intent3, "Select a file from vidoes"), REQUEST_CODE);
+                hasPermissionInManifest(this, "android.permission.READ_CONTACTS");
+                hasPermissionInManifest(this, "android.permission.WRITE_CONTACTS");
+                final Uri uriContact = ContactsContract.Contacts.CONTENT_URI;
+                Intent intentPickContact = new Intent(Intent.ACTION_PICK, uriContact);
+                startActivityForResult(intentPickContact, PICK_CONTACT);;
                 break;
             case R.id.imgPhotos:
                 hidePopupWindow();
+                hasPermissionInManifest(this, "android.permission.READ_EXTERNAL_STORAGE");
+                hasPermissionInManifest(this, "android.permission.WRITE_EXTERNAL_STORAGE");
                 Intent intent2 = new Intent(Intent.ACTION_PICK,
                         android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                intent2.setType("image/*");
+                intent2.setType("*/*");
                 startActivityForResult(Intent.createChooser(intent2, "Select a file photos"), REQUEST_CODE);
                 break;
             case R.id.imgDocuments:
@@ -414,6 +385,16 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
                 break;
         }
     }
+
+    public void hidekeyboard(){
+
+        if(inputManager.isActive()){
+            inputManager.hideSoftInputFromWindow(
+                    this.getCurrentFocus().getWindowToken(),
+                    InputMethodManager.HIDE_NOT_ALWAYS);
+        }
+
+    }
     public boolean hasPermissionInManifest(Context context, String permissionName) {
         final String packageName = context.getPackageName();
         try {
@@ -432,7 +413,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
         }
         return false;
     }
-//-----OnLongClick Listener for EditText
+    //-----OnLongClick Listener for EditText
     @Override
     public boolean onLongClick(View v) {
 
@@ -471,6 +452,9 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
             case R.id.aeroplane:
 
 //                int cy = (reveal_items.getTop() + reveal_items.getBottom())/2;
+                break;
+            case R.id.bookmark:
+
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -511,7 +495,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
 
                 @Override
                 public void onAnimationRepeat() {
-                    Methods.toastShort("ANIMATION REPEAT",ConversationActivity.this);
+                    Methods.toastShort("ANIMATION REPEAT", ConversationActivity.this);
                 }
             });
             animator_reverse.start();
@@ -520,7 +504,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
     }
     public void hidePopupWindow(){
         if(!hidden) {
-                    reveal_items.setVisibility(View.GONE);
+            reveal_items.setVisibility(View.GONE);
             hidden=false;
         }else{
             reveal_items.setVisibility(View.VISIBLE);
@@ -547,12 +531,10 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
     }
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data){
-            Log.v("ONACTIVITYRESULT","ONACTIVITYRESULT");
         try {
             Uri fileUri;
             switch (requestCode) {
                 case REQUEST_CODE: //file_path = readFile.getFilePath(fileUri,context);
-
                     if (data.getData() != null) {
                         fileUri = data.getData();
                         file_path = ReadFile.getPath(fileUri, context);
@@ -560,8 +542,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
 
                         Methods.toastShort(mimetype, this);
                         if (file_path != null) {
-                            //System.out.println("File has been selected: "+file_path);
-//                    Toast.makeText(context, "You have selected: "+file_path, Toast.LENGTH_SHORT).show();
+
                             if (file_path.contains(".mp3")) {
                                 new Thread(new Runnable() {
                                     public void run() {
@@ -601,24 +582,53 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
                                 intent.putExtras(bundle);
                                 startActivityForResult(intent, UPLOAD_REQUEST_CODE);
                             } else if (mimetype.contains("video/")) {
-//
-                                Intent intent = new Intent(ConversationActivity.this, UploadActivity.class);
-                                Bundle bundle = new Bundle();
-                                bundle.putString("IP_VALUE", ip);
-                                bundle.putString("FILE_PATH", file_path);
-                                bundle.putString("TOKEN", token);
-                                bundle.putString("CHANNEL_ID", channel_id);
-                                bundle.putString("TYPE", "VIDEO");
-                                intent.putExtras(bundle);
-                                startActivityForResult(intent, UPLOAD_REQUEST_CODE);
+                                new Thread(new Runnable() {
+                                    public void run() {
+                                        runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                UploadFile uploadFile = new UploadFile(file_path, "http://" + ip + ":8065/api/v1/files/upload");
+                                                uploadFile.execute();
+
+                                            }
+                                        });
+                                    }
+                                }).start();
                             }
-                            Log.e("CONVERSATION", "ONACTIVITY_RESULT.");
                         }
                     }
                     break;
+                case PICK_CONTACT:
+                    String phone=null,name=null;
+                    fileUri=data.getData();
+                    Cursor cursor = getContentResolver().query(fileUri, null, null, null, null);
+                    if (cursor.moveToNext()) {
+                        int columnIndex_ID = cursor.getColumnIndex(ContactsContract.Contacts._ID);
+                        String contactID = cursor.getString(columnIndex_ID);
+                        int columnIndex_HASPHONENUMBER = cursor.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER);
+                        String stringHasPhoneNumber = cursor.getString(columnIndex_HASPHONENUMBER);
+
+                        if (stringHasPhoneNumber.equalsIgnoreCase("1")) {
+                            Cursor cursorNum = getContentResolver().query(
+                                    ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                                    null,
+                                    ContactsContract.CommonDataKinds.Phone.CONTACT_ID + "=" + contactID,
+                                    null,
+                                    null);
+
+                            //Get the first phone number
+                            if (cursorNum.moveToNext()) {
+                                int columnIndex_number = cursorNum.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
+                                int columnIndex_name = cursorNum.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
+                                phone = cursorNum.getString(columnIndex_number);
+                                name = cursorNum.getString(columnIndex_name);
+
+                            }
+                        }
+                        Methods.toastShort("CONTACT:::"+phone+" NAME::"+name,this);
+                    }
+                    break;
                 case REQUEST_CODE_CAMERA:
-//                    hidePopupWindow();
-                    Log.v("PATH","IMAGE:::"+cameraUri.getPath());
                     if (cameraUri != null) {
                         Intent intent = new Intent(ConversationActivity.this, UploadActivity.class);
                         Bundle bundle = new Bundle();
@@ -632,15 +642,12 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
                     }
                     break;
                 case UPLOAD_REQUEST_CODE:
-//                    hidePopupWindow();
                     try {
                         String result = data.getStringExtra("RESULT_STRING");
                         String caption = data.getStringExtra("CAPTION");
                         JSONObject fileObject = new JSONObject(result);
                         filenames = fileObject.getJSONArray("filenames");
-//                String messageText = messageEditText.getText().toString();
                         JSONObject jsonObject = new JSONObject();
-
                         if (filenames != null && filenames.length() > 0) {
                             jsonObject.put("filenames", filenames);
                         }
@@ -665,20 +672,6 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
 
     private String getUsernameById(String user_id){
         String username=null;
-        /*if(members!=null){
-            try{
-                for(int i=0;i<members.length();i++){
-                    JSONObject users = members.getJSONObject(i);
-                    if(user_id.equals(users.getString("id"))){
-                        username = users.getString("username");
-                        break;
-                    }
-                }
-            }catch(JSONException e){
-                System.out.println("Unable to get Username in getUsernameById: "+e.toString());
-                username=null;
-            }
-        }*/
         if(all_users!=null){
             try{
                 JSONObject jobj = all_users.getJSONObject(user_id);
@@ -708,11 +701,8 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
             if(response!=null ){
                 if(messageAPI.responseCode==200){
                     ChatMessage chatMessage = new ChatMessage();
-                    //chatMessage.setDate(DateFormat.getDateTimeInstance().format(new Date()));
                     chatMessage.setMe(true);
-                    chatMessage.setSenderName("Me");
-//                    chatMessage.setUserId();
-                    //messageEditText.setText("");
+//                    chatMessage.setSenderName("Me");
                     System.out.println("Sending result: " + response);
                     Log.v("MESSAGE","RESPONSE::"+response);
                     try{
@@ -720,6 +710,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
                         chatMessage.setId(json_obj.getString("id"));
                         chatMessage.setUserId(json_obj.getString("user_id"));
                         chatMessage.setMessage(json_obj.getString("message"));
+//                        chatMessage.setNo_of_reply("0");
                         last_timetamp = json_obj.getString("create_at");
                         Long timestamp = Long.parseLong(last_timetamp);
                         Date date = new Date(timestamp);
@@ -729,7 +720,6 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
                         if(files.length()!=0){
                             chatMessage.setFileList(files.getString(0));
                         }
-
                         displayMessage(chatMessage);
                     }catch(Exception e){
                         System.out.print("Chat Exception: "+e.toString());
@@ -758,10 +748,19 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
         adapter.notifyDataSetChanged();
         scroll();
     }
+    public void displayMessage(List<ChatMessage> msgList){
+        adapter.add(msgList);
+        adapter.notifyDataSetChanged();
+        scroll();
+    }
+
+    public void displayMessageHistory(List<ChatMessage> msgList){
+        adapter.addAbove(msgList);
+        adapter.notifyDataSetChanged();
+    }
 
     private void scroll() {
         messagesContainerRecyclerview.scrollToPosition(adapter.getItemCount()-1);
-
     }
 
     @Override
@@ -770,19 +769,10 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
             Methods.toastShort("CALLBACK",this);
             try{
                 JSONObject fileObject = new JSONObject(filename);
-//                if(serverRespCode==200) {
-                    //assign the list of filenames in the global JSON array filename
-                    filenames=fileObject.getJSONArray("filenames");
-                    for (int i = 0; i < filenames.length(); i++) {
-                        Log.e("FILE::::", "file name: " + filenames.getString(i));
-
-//                    }
+                filenames=fileObject.getJSONArray("filenames");
+                for (int i = 0; i < filenames.length(); i++) {
                 }
                 sendMyMessage(fileObject);
-                //end if statement
-//                else{
-////
-//                }
             }catch(Exception e){
 //
             }
@@ -858,21 +848,23 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
 
     private void readChatHistory(String res){
         if(res!=null) {
+            String temp="";
             chatHistory = new ArrayList<ChatMessage>();
             try {
                 JSONArray jsonArray = new JSONArray(res);
                 JSONObject jsonObject;
                 int i=jsonArray.length()-1;
+
                 for (; i >= 0; i--) {
                     jsonObject = jsonArray.getJSONObject(i);
                     ChatMessage msg = new ChatMessage();
                     msg.setId(jsonObject.getString("postId"));
-                    if (user_id.equals(jsonObject.getString("UserId"))) {
-                        msg.setMe(true);
-                        msg.setSenderName("Me");
-                    } else {
-                        msg.setMe(false);
-                        msg.setSenderName(jsonObject.getString("messaged_by"));
+
+                    if(temp.equalsIgnoreCase(getUsernameById(jsonObject.getString("UserId")))){
+                        msg.setSenderName("");
+                    }else{
+                        msg.setSenderName(getUsernameById(jsonObject.getString("UserId")));
+                        temp = getUsernameById(jsonObject.getString("user_id"));
                     }
                     try {
                         if (jsonObject.getString("filenames") != null) {
@@ -885,12 +877,11 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
                     }catch (Exception e){
                         Log.e("ERROR","ERROR:::"+e.getMessage());
                     }
-
+                    msg.setParent_id(""+jsonObject.getString("parent_id"));
                     msg.setMessage(jsonObject.getString("Message"));
                     Long chatTime = Long.parseLong(jsonObject.getString("CreateAt"));
                     Date date = new Date(chatTime);
                     msg.setDate(simpleDateFormat.format(date));
-                    //msg.setDate(DateFormat.getDateTimeInstance().format(new Date()));
                     last_timetamp = jsonObject.getString("LastPostAt");
                     chatHistory.add(msg);
                 }
@@ -943,7 +934,6 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
         InputStream isr=null;
 
         public UploadFile(String sourceFileUri,String serverUploadPath){
-        Log.e("CONVERSATION","UPLOAD FILE");
             fileLocation = sourceFileUri;
             file_upload_uri = serverUploadPath;
         }
@@ -984,21 +974,9 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
                     dos.writeBytes(twoHyphens+boundary+lineEnd);
                     dos.writeBytes("Content-Disposition: form-data; name=\"channel_id\""+lineEnd+lineEnd);
                     dos.writeBytes(channel_id+lineEnd);
-
                     dos.writeBytes(twoHyphens+boundary+lineEnd);
                     dos.writeBytes("Content-Disposition: form-data; name=\"files\";filename=\""+fileLocation + "\"" + lineEnd);
                     dos.writeBytes(lineEnd);
-
-                    /*
-                    // Send parameter #1
-                    dos.writeBytes(twoHyphens + boundary + lineEnd);
-                    dos.writeBytes("Content-Disposition: form-data; name=\"param1\"" + lineEnd + lineEnd);
-                    dos.writeBytes("foo1" + lineEnd);
-                    // Send parameter #2
-                    dos.writeBytes(twoHyphens + boundary + lineEnd);
-                    dos.writeBytes("Content-Disposition: form-data; name=\"param2\"" + lineEnd + lineEnd);
-                    dos.writeBytes("foo2" + lineEnd);*/
-
                     //create a buffer of maximum size
                     bytesAvailable = fis.available();
                     bufferSize = Math.min(bytesAvailable,maxBufferSize);
@@ -1068,6 +1046,26 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
                                 jsonObject.put("root_id", "");
                                 jsonObject.put("parent_id","");
                                 jsonObject.put("Message", " ");
+
+                                sendMyMessage(jsonObject);
+                                filenames=null;
+                            } catch (Exception e) {
+                                Log.v("MESSAGE","Message Sending failed");
+                                System.out.print("Message Sending failed: " + e.toString());
+                            }
+                        }else if(file_path.contains(".mp4")){
+                            try{
+                                filenames=fileObject.getJSONArray("filenames");
+                                JSONObject jsonObject = new JSONObject();
+
+                                if(filenames!=null && filenames.length()>0){
+                                    jsonObject.put("filenames",filenames);
+                                }
+                                jsonObject.put("channel_id", channel_id);
+                                jsonObject.put("root_id", "");
+                                jsonObject.put("parent_id","");
+                                jsonObject.put("Message", " ");
+
                                 sendMyMessage(jsonObject);
                                 filenames=null;
                             } catch (Exception e) {
@@ -1106,7 +1104,6 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
         String resp=null;
         @Override
         protected String doInBackground(String... messageUrl){
-            Log.v("CURRENTMSG","CALLED");
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
             StrictMode.setThreadPolicy(policy);
             try{
@@ -1137,49 +1134,46 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
         }
         @Override
         protected void onPostExecute(String resp){
-            Log.v("GETCURRENT MESSAGE TASK","GETCURRENT MESSAGE TASK"+resp);
             if(resp!=null && responseCode==200) {
                 try {
-
                     JSONObject jObj1 = new JSONObject(resp);
                     JSONArray jsonArray = jObj1.getJSONArray("order");
                     JSONObject jObj2;
+                    String temp="";
                     if (jsonArray.length() > 0) {
                         jObj2 = jObj1.getJSONObject("posts");
                         int i = 0;
                         String messageDate;
                         while (i < jsonArray.length()) {
-                            //System.out.println(jsonArray.getString(i));
                             JSONObject jObj3 = jObj2.getJSONObject(jsonArray.getString(i));
                             System.out.println("Id: " + jObj3.getString("id") + " Message: " + jObj3.getString("message"));
                             messageDate = "" + jObj3.getString("create_at");
                             System.out.println("Message Date: " + messageDate);
-                            //!messageDate.equals(last_timetamp)
                             if(Long.parseLong(messageDate)>Long.parseLong(last_timetamp) && jObj3.getLong("delete_at")==0) {//it means if the message is new, which is indicated by the last timestamp
-                                ChatMessage currentMsg = new ChatMessage();
-                                currentMsg.setId(jObj3.getString("id"));
-                                currentMsg.setMessage("" + jObj3.getString("message"));
-                                Long timeStamp = Long.parseLong(messageDate);
-                                Date date = new Date(timeStamp);
-                                currentMsg.setDate(simpleDateFormat.format(date));
+                                if(jObj3.getString("root_id").equals("")) {
+                                    ChatMessage currentMsg = new ChatMessage();
+                                    currentMsg.setId(jObj3.getString("id"));
+                                    currentMsg.setMessage("" + jObj3.getString("message"));
+                                    Long timeStamp = Long.parseLong(messageDate);
+                                    Date date = new Date(timeStamp);
+                                    currentMsg.setDate(simpleDateFormat.format(date));
+                                    /*If the post contains files*/
+                                    currentMsg.setUserId(jObj3.getString("user_id"));
+                                    JSONArray files = jObj3.getJSONArray("filenames");
+                                    if (files.length() > 0)
+                                        currentMsg.setFileList(files.getString(0));
+                                    if (temp.equalsIgnoreCase(getUsernameById(jObj3.getString("user_id")))) {
+                                        currentMsg.setSenderName("");
+                                        currentMsg.setProfile(false);
+                                    } else {
+                                        currentMsg.setSenderName(getUsernameById(jObj3.getString("user_id")));
+                                        temp = getUsernameById(jObj3.getString("user_id"));
+                                        currentMsg.setProfile(true);
+                                    }
+                                    displayMessage(currentMsg);
+                                }else{
 
-                                /*If the post contains files*/
-                                currentMsg.setUserId(jObj3.getString("user_id"));
-                                JSONArray files = jObj3.getJSONArray("filenames");
-                                                                                               if(files.length()>0)
-                                    currentMsg.setFileList(files.getString(0));
-//                                currentMsg.setFileList(files);
-
-                                if (user_id.equals("" + jObj3.getString("user_id"))) {
-                                    currentMsg.setMe(true);
-                                    currentMsg.setSenderName("Me");
-                                } else {
-                                    currentMsg.setMe(false);
-
-                                    getUsernameById(jObj3.getString("user_id"));
-                                    currentMsg.setSenderName(getUsernameById(jObj3.getString("user_id")));
                                 }
-                                displayMessage(currentMsg);
                             }//otherwise dont create the message
                             if(Long.parseLong(last_timetamp)< Long.parseLong(messageDate))
                                 last_timetamp = messageDate;
@@ -1191,8 +1185,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
                 }
             }//end if
         }//end on post execution
-    }//end of GetCurrentMessageTask class
-    //class for getting instant message
+    }
     class GetMessageHistoryTask extends AsyncTask<String,Void,String>{
         InputStream isr=null;
         HttpURLConnection conn;
@@ -1200,6 +1193,12 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
         int responseCode=-1;
         String respMsg;
         String resp=null;
+        Boolean flag=true;//if flag is true then it is first time loading
+        //else it is loading more history
+
+        public GetMessageHistoryTask(Boolean loadType){
+            flag=loadType;
+        }
 
         @Override
         protected void onPreExecute(){
@@ -1237,18 +1236,20 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
             return resp;
         }
         @Override
-        protected void onPostExecute(String resp){
-            Log.v("RESPONSE", "RESPONSE CONVERSATION:::" + resp);
+        protected void onPostExecute(String resp) {
+            List<ChatMessage> msgList = new ArrayList<ChatMessage>();
             if(resp!=null && responseCode==200) {
                 try {
                     JSONObject jObj1 = new JSONObject(resp);
                     JSONArray jsonArray = jObj1.getJSONArray("order");
                     JSONObject jObj2;
+                    String temp="";
                     if (jsonArray.length() > 0) {
                         jObj2 = jObj1.getJSONObject("posts");
                         int i = jsonArray.length()-1;
                         String messageDate;
-                        System.out.print("length : "+i);
+                        first_post_id=jObj2.getJSONObject(jsonArray.getString(i)).getString("id");
+                        System.out.print("length : " + i);
                         while (i>=0) {
                             //System.out.println(jsonArray.getString(i));
                             JSONObject jObj3 = jObj2.getJSONObject(jsonArray.getString(i));
@@ -1257,35 +1258,56 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
                             System.out.println("Message Date: " + messageDate);
                             //!messageDate.equals(last_timetamp)
                             if(jObj3.getLong("delete_at")==0) {//it means if the message is new, which is indicated by the last timestamp
-                                ChatMessage currentMsg = new ChatMessage();
-                                currentMsg.setId(jObj3.getString("id"));
-                                currentMsg.setMessage("" + jObj3.getString("message"));
-                                Long timeStamp = Long.parseLong(messageDate);
-                                Date date = new Date(timeStamp);
-                                currentMsg.setDate(simpleDateFormat.format(date));
-                                currentMsg.setUserId(jObj3.getString("user_id"));
-                                /*If the post contains files*/
-                                JSONArray files = jObj3.getJSONArray("filenames");
-                                if(files.length()>0) {
-                                    Log.v("FILE","FILE::"+files.getString(0));
-                                    currentMsg.setFileList(files.getString(0));
-                                }
+                                JSONObject jsoData= jObj2.getJSONObject(jsonArray.getString(0));
+                                preferenceHelper.addString("LAST_POST_ID",jsoData.getString("id"));
+                                if(jObj3.getString("root_id").equals("")) {
+                                    ChatMessage currentMsg = new ChatMessage();
+                                    currentMsg.setId(jObj3.getString("id"));
 
-                                if (user_id.equals("" + jObj3.getString("user_id"))) {
-                                    currentMsg.setMe(true);
-                                    currentMsg.setSenderName("Me");
-                                } else {
-                                    currentMsg.setMe(false);
-                                    getUsernameById(jObj3.getString("user_id"));
-                                    currentMsg.setSenderName(getUsernameById(jObj3.getString("user_id")));
+                                    currentMsg.setMessage("" + jObj3.getString("message"));
+                                    Long timeStamp = Long.parseLong(messageDate);
+                                    Date date = new Date(timeStamp);
+                                    currentMsg.setDate(simpleDateFormat.format(date));
+                                    currentMsg.setUserId(jObj3.getString("user_id"));
+                                    currentMsg.setNo_of_likes(jObj3.getString("no_of_likes"));
+                                    currentMsg.setIsBookmarkedByYou(jObj3.getBoolean("isBookmarkedByYou"));
+                                    currentMsg.setIsLikedByYou(jObj3.getBoolean("isLikedByYou"));
+                                    currentMsg.setNo_of_reply("" + jObj3.getInt("no_of_reply"));
+                                /*If the post contains files*/
+                                    JSONArray files = jObj3.getJSONArray("filenames");
+                                    if (files.length() > 0) {
+                                        Log.v("FILE", "FILE::" + files.getString(0));
+                                        currentMsg.setFileList(files.getString(0));
+                                    }
+                                    if (temp.equalsIgnoreCase(getUsernameById(jObj3.getString("user_id")))) {
+                                        currentMsg.setSenderName("");
+                                        currentMsg.setProfile(false);
+                                    } else {
+                                        currentMsg.setSenderName(getUsernameById(jObj3.getString("user_id")));
+                                        temp = getUsernameById(jObj3.getString("user_id"));
+                                        currentMsg.setProfile(true);
+                                    }
+                                    msgList.add(currentMsg);
+                                    //displayMessage(currentMsg);
+                                }else{
+
                                 }
-                                displayMessage(currentMsg);
                                 scroll();
                             }//otherwise dont create the message
                             if(Long.parseLong(last_timetamp)< Long.parseLong(messageDate))
                                 last_timetamp = messageDate;
+//                            }
                             i--;
                         }//end while loop
+                        try {
+                            if(flag==true)
+                                displayMessage(msgList);
+                            else
+                                displayMessageHistory(msgList);
+                        }
+                        catch(Exception e){
+                            System.out.println("Error in displaying message history: "+e.toString());
+                        }
                     }
                 } catch (Exception e) {
                     System.out.println("Something is wrong error in parsing JSON: " + e.toString());
@@ -1377,15 +1399,10 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
             }else{
                 picasso.pauseTag(context);
             }
-//            if (newState == SCROLL_STATE_IDLE || newState == SCROLL_STATE_TOUCH_SCROLL) {
-//                picasso.resumeTag(context);
-//            } else {
-//                picasso.pauseTag(context);
-//            }
+
         }
 
     }
 
 
 }
-
