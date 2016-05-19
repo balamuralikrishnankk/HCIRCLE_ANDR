@@ -123,7 +123,7 @@ public class ReplyDialogActivity extends AppCompatActivity implements View.OnCli
         channel_name=preferenceHelper.getString("CHANNEL_NAME");
         channel_id=preferenceHelper.getString("CHANNEL_ID");
         post_id=getIntent().getStringExtra("POST_ID");
-        Toast.makeText(getBaseContext(),post_id,Toast.LENGTH_SHORT).show();
+//        Toast.makeText(getBaseContext(),post_id,Toast.LENGTH_SHORT).show();
         System.out.println("Post Id: "+post_id);
         ip=getIntent().getStringExtra("IP");
         token=getIntent().getStringExtra("TOKEN");

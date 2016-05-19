@@ -156,6 +156,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
         }catch(Exception e){
         }
         ip = sharedPreference.getServerIP_Preference(context);//getting ip
+        preferenceHelper.addString("APPLICATION_IP",ip);
         //last_timetamp="1456185600000";
         Thread loadHistory = new Thread(){
             @Override
@@ -449,12 +450,16 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
             case android.R.id.home:
                 onBackPressed();
                 break;
+            case R.id.home:
+                startActivity(new Intent(this,UserLandingActivity.class));
+                finish();
+                break;
             case R.id.aeroplane:
 
 //                int cy = (reveal_items.getTop() + reveal_items.getBottom())/2;
                 break;
             case R.id.bookmark:
-
+                startActivity(new Intent(this,BoomkarkActivity.class));
                 break;
         }
         return super.onOptionsItemSelected(item);

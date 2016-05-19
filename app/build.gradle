@@ -33,15 +33,6 @@ dependencies {
     compile 'com.android.support:design:23.0.1'
     compile files('libs/volley.jar')
     compile files('libs/gson-2.3.1.jar')
-    compile files('src/main/java/universal-image-loader-1.9.5.jar')
-    compile files('src/main/java/android-support-v4.jar')
-    compile files('src/main/java/apache-mime4j-0.6.jar')
-    compile files('src/main/java/httpmime-4.0.1.jar')
-    compile files('src/main/java/junit3.7.jar')
-    compile files('src/main/java/httpcore-4.0.1.jar')
-    compile files('src/main/java/httpclient-osgi-4.2.1.jar')
-    compile files('src/main/java/httpclient-4.2.3.jar')
-    compile files('src/main/java/httpcore-4.0.1 (1).jar')
     compile 'com.squareup.picasso:picasso:2.5.0'
     compile 'com.squareup.okhttp:okhttp-urlconnection:2.5.0'
     compile 'com.github.ozodrukh:CircularReveal:1.1.0'

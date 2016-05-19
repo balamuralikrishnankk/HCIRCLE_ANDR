@@ -8,12 +8,14 @@
         android:orderInCategory="100" app:showAsAction="always"
         android:icon="@drawable/icone_home_small"/>
     <item android:id="@+id/alarm" android:title=""
+        android:visible="false"
         android:orderInCategory="100" app:showAsAction="always"
         android:icon="@drawable/icon_alarm_small"/>
     <item android:id="@+id/bookmark" android:title=""
         android:orderInCategory="100" app:showAsAction="always"
         android:icon="@drawable/icon_bookmark_small"/>
     <item android:id="@+id/aeroplane" android:title=""
+        android:visible="false"
         android:orderInCategory="100" app:showAsAction="always"
         android:icon="@drawable/icon_aeroplane_small"/>
 

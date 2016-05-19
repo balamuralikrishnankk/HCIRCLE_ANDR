@@ -175,8 +175,13 @@ public class UploadActivity extends AppCompatActivity implements View.OnClickLis
 
                 }
             }else if(type.contains("CAMERA")){
-                Bitmap myBitmap = BitmapFactory.decodeFile(imgFile1.getAbsolutePath());
-                imgFile.setImageBitmap(myBitmap);
+                try {
+                    Bitmap myBitmap = ThumbnailUtils.createVideoThumbnail(imgFile1.getAbsolutePath(), MediaStore.Images.Thumbnails.MICRO_KIND);
+//                    Bitmap myBitmap = BitmapFactory.decodeFile(imgFile1.getAbsolutePath());
+                    imgFile.setImageBitmap(myBitmap);
+                }catch (Exception e){
+
+                }
             }else {
                 Bitmap bMap = ThumbnailUtils.createVideoThumbnail(imgFile1.getAbsolutePath(), MediaStore.Video.Thumbnails.MICRO_KIND);
                 imgFile.setImageBitmap(bMap);
