@@ -16,10 +16,13 @@ import com.nganthoi.salai.tabgen.ImageviewerActivity;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import ListenerClasses.DownloadListeners;
 import readData.ReadFile;
@@ -54,8 +57,6 @@ public class DownloadFiles extends AsyncTask<String,String,String> implements Do
             System.out.println("Unable to set URL in DownloadFiles constructor: "+e.toString());
         }
     }
-
-
     public DownloadFiles(String url_path,Context _context,String token_id){
         try{
             api_url = new URL(url_path);
@@ -143,6 +144,7 @@ public class DownloadFiles extends AsyncTask<String,String,String> implements Do
         if(responseCode==200) {
             mProgressDialog.dismiss();
             String destination_path = Environment.getExternalStorageDirectory()+"/HCircle";
+
             openFolder(context,destination_path);
         }else{
             mProgressDialog.setMessage(res);
@@ -152,34 +154,74 @@ public class DownloadFiles extends AsyncTask<String,String,String> implements Do
 
     public void openFolder(final Context context,String path)
     {
-//        String file_path = ReadFile.getPath(fileUri, context);
-        Intent intent=new Intent(context, ImageviewerActivity.class);
-        intent.putExtra("FILENAME",""+Environment.getExternalStorageDirectory().getPath()
-                + "/HCircle/"+file_name);
+        Log.v("IF","PATH:::"+file_name+" PATTERN:::");
+        Pattern fileExtnPtrn = Pattern.compile("([^\\s]+(\\.(?i)(txt|doc|csv|pdf|docx|ppt|pptx|xls|xlsx|rtf|wav|rar|zip|txt|mp3|mp4|3gp))$)");
+        Matcher mtch = fileExtnPtrn.matcher(file_name);
+        if(mtch.matches()){
+            Intent intent=new Intent(context, ImageviewerActivity.class);
+            intent.putExtra("FILENAME",""+Environment.getExternalStorageDirectory().getPath()
+                    + "/HCircle/"+file_name);
+            context.startActivity(intent);
+
+        }else{
+            openFile(context,Uri.fromFile(new File(path)),path);
+
+        }
+
+    }
+    public static void openFile(Context context, Uri uri,String path) {
+        // Create URI
+//        File file=url;
+//        Uri uri = Uri.fromFile(file);
+
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        // Check what kind of file you are trying to open, by comparing the url with extensions.
+        // When the if condition is matched, plugin sets the correct intent (mime) type,
+        // so Android knew what application to use to open the file
+        if (path.toString().contains(".doc") || path.toString().contains(".docx")) {
+            // Word document
+            intent.setDataAndType(uri, "application/msword");
+        } else if(path.toString().contains(".pdf")) {
+            // PDF file
+            intent.setDataAndType(uri, "application/pdf");
+        } else if(path.toString().contains(".ppt") || path.toString().contains(".pptx")) {
+            // Powerpoint file
+            intent.setDataAndType(uri, "application/vnd.ms-powerpoint");
+        } else if(path.toString().contains(".xls") || path.toString().contains(".xlsx")) {
+            // Excel file
+            intent.setDataAndType(uri, "application/vnd.ms-excel");
+        } else if(path.toString().contains(".zip") || path.toString().contains(".rar")) {
+            // WAV audio file
+            intent.setDataAndType(uri, "application/x-wav");
+        } else if(path.toString().contains(".rtf")) {
+            // RTF file
+            intent.setDataAndType(uri, "application/rtf");
+        } else if(path.toString().contains(".wav") || path.toString().contains(".mp3")) {
+            // WAV audio file
+            intent.setDataAndType(uri, "audio/x-wav");
+        } else if(path.toString().contains(".gif")) {
+            // GIF file
+            intent.setDataAndType(uri, "image/gif");
+        } else if(path.toString().contains(".jpg") || path.toString().contains(".jpeg") || path.toString().contains(".png")) {
+            // JPG file
+            intent.setDataAndType(uri, "image/jpeg");
+        } else if(path.toString().contains(".txt")) {
+            // Text file
+            intent.setDataAndType(uri, "text/plain");
+        } else if(path.toString().contains(".3gp") || path.toString().contains(".mpg") || path.toString().contains(".mpeg") || path.toString().contains(".mpe") || path.toString().contains(".mp4") || path.toString().contains(".avi")) {
+            // Video files
+            intent.setDataAndType(uri, "video/*");
+        } else {
+            //if you want you can also define the intent type for any other file
+
+            //additionally use else clause below, to manage other unknown extensions
+            //in this case, Android will show all applications installed on the device
+            //so you can choose which application to use
+            intent.setDataAndType(uri, "*/*");
+        }
+
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
-//        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-//        Uri uri = Uri.parse(Environment.getExternalStorageDirectory().getPath()
-//                + "/HCircle/");
-//        intent.setDataAndType(uri, "*/*");
-//        Activity my_activity = new Activity(){
-//            @Override
-//            public void onActivityResult(int requestCode, int resultCode, Intent data){
-//                if(data==null) return;
-//                Uri fileUri = data.getData();
-//                //ReadFile readFile = new ReadFile();
-//                switch(requestCode){
-//                    case 1: //file_path = readFile.getFilePath(fileUri,context);
-//                        String file_path = ReadFile.getPath(fileUri, context);
-//                        if(file_path!=null){
-//
-//                        }
-//                        break;
-//                    default:
-//                        Toast.makeText(context, "Invalid request code. You haven't selected any file", Toast.LENGTH_SHORT).show();
-//                }
-//            }
-//        };
-//        context.startActivity(Intent.createChooser(intent, "Open folder"));
     }
 
     @Override

@@ -33,6 +33,7 @@ import java.util.regex.Pattern;
 import connectServer.CheckInternetConnection;
 import connectServer.ConnectServer;
 import customDialogManager.CustomDialogManager;
+import gcm.RegistrationIntentService;
 import sharePreference.SharedPreference;
 
 public class MainActivity extends Activity {
@@ -270,6 +271,8 @@ public class MainActivity extends Activity {
                                 //Toast.makeText(MainActivity.this,"Token ID: "+TokenId,Toast.LENGTH_SHORT).show();
                                 sp.saveTokenPreference(context, TokenId);
                             }
+                            Intent intent = new Intent(getApplicationContext(), RegistrationIntentService.class);
+                            startService(intent);
                             System.out.println(jObj.getString("id"));
                             switch (jObj.getString("roles")) {
                                 case "system_admin":

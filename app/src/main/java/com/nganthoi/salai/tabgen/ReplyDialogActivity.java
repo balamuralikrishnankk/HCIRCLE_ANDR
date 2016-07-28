@@ -198,8 +198,13 @@ public class ReplyDialogActivity extends AppCompatActivity implements View.OnCli
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
                 if (s.length() > 0) {
-                    imgSentMessages.setVisibility(View.VISIBLE);
-                    writeImageButton.setVisibility(View.GONE);
+                    if(isWhitespace(s.toString())){
+                        writeImageButton.setVisibility(View.VISIBLE);
+                        imgSentMessages.setVisibility(View.GONE);
+                    }else{
+                        imgSentMessages.setVisibility(View.VISIBLE);
+                        writeImageButton.setVisibility(View.GONE);
+                    }
                 } else {
                     writeImageButton.setVisibility(View.VISIBLE);
                     imgSentMessages.setVisibility(View.GONE);
@@ -210,8 +215,13 @@ public class ReplyDialogActivity extends AppCompatActivity implements View.OnCli
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (s.length() > 0) {
-                    imgSentMessages.setVisibility(View.VISIBLE);
-                    writeImageButton.setVisibility(View.GONE);
+                    if(isWhitespace(s.toString())){
+                        writeImageButton.setVisibility(View.VISIBLE);
+                        imgSentMessages.setVisibility(View.GONE);
+                    }else{
+                        imgSentMessages.setVisibility(View.VISIBLE);
+                        writeImageButton.setVisibility(View.GONE);
+                    }
                 } else {
                     writeImageButton.setVisibility(View.VISIBLE);
                     imgSentMessages.setVisibility(View.GONE);
@@ -221,8 +231,13 @@ public class ReplyDialogActivity extends AppCompatActivity implements View.OnCli
             @Override
             public void afterTextChanged(Editable s) {
                 if (s.length() > 0) {
-                    imgSentMessages.setVisibility(View.VISIBLE);
-                    writeImageButton.setVisibility(View.GONE);
+                    if(isWhitespace(s.toString())){
+                        writeImageButton.setVisibility(View.VISIBLE);
+                        imgSentMessages.setVisibility(View.GONE);
+                    }else{
+                        imgSentMessages.setVisibility(View.VISIBLE);
+                        writeImageButton.setVisibility(View.GONE);
+                    }
                 } else {
                     writeImageButton.setVisibility(View.VISIBLE);
                     imgSentMessages.setVisibility(View.GONE);
@@ -231,6 +246,19 @@ public class ReplyDialogActivity extends AppCompatActivity implements View.OnCli
             }
         });
 
+    }
+
+    public static boolean isWhitespace(String str) {
+        if (str == null) {
+            return false;
+        }
+        int sz = str.length();
+        for (int i = 0; i < sz; i++) {
+            if ((Character.isWhitespace(str.charAt(i)) == false)) {
+                return false;
+            }
+        }
+        return true;
     }
     @Override
     public void onClick(View v) {
@@ -270,6 +298,7 @@ public class ReplyDialogActivity extends AppCompatActivity implements View.OnCli
                     jsonObject.put("parent_id", "" + post_id);
                     jsonObject.put("Message", messageEditText.getText().toString() + "");
                     jsonObject.put("user_id", "" + preferenceHelper.getString("USER_ID"));
+                    Log.v("JSON_OBJECT","JSON_OBJECT:::"+jsonObject);
                     sendMyMessage(jsonObject);
                     messageEditText.setText("");
                     filenames=null;

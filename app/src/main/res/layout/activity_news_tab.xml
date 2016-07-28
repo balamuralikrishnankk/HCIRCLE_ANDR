@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:fitsSystemWindows="true"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context="activity.NewsTabActivity"
+    >
+    <android.support.design.widget.AppBarLayout
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:theme="@style/AppTheme.AppBarOverlay">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbarConversation"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            app:popupTheme="@style/AppTheme.PopupOverlay">
+        </android.support.v7.widget.Toolbar>
+    </android.support.design.widget.AppBarLayout>
+    <ExpandableListView
+        android:id="@+id/expandableListViewCME"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:transcriptMode="alwaysScroll"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:headerDividersEnabled="true"
+        android:footerDividersEnabled="true"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:listSelector="#f9ce20"
+        android:nestedScrollingEnabled="true"
+        android:scrollIndicators="right"
+        android:indicatorRight="@dimen/abc_action_bar_default_height_material" />
+</LinearLayout>

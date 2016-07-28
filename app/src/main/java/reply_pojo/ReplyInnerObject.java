@@ -48,6 +48,21 @@ public class ReplyInnerObject implements Serializable {
     @SerializedName("isLikedByYou")
     private boolean isLikedByYou;
 
+    public boolean isBookmarkedByYou() {
+        return isBookmarkedByYou;
+    }
+
+    public void setBookmarkedByYou(boolean bookmarkedByYou) {
+        isBookmarkedByYou = bookmarkedByYou;
+    }
+
+    public void setLikedByYou(boolean likedByYou) {
+        isLikedByYou = likedByYou;
+    }
+
+    @SerializedName("isBookmarkedByYou")
+    private boolean isBookmarkedByYou;
+
     public boolean isProfile() {
         return profile;
     }

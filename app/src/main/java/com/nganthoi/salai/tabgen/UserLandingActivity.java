@@ -31,12 +31,18 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import Utils.PreferenceHelper;
+import activity.CmeLandingActivity;
+import activity.NewsFlipperActivity;
+import activity.NewsTabActivity;
+import activity.ViewFlipperActivity;
 import sharePreference.SharedPreference;
 
 
 public class UserLandingActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     SharedPreference sp;
+    PreferenceHelper preferenceHelper;
     String role;//user role
     Context _context=this;
     List<String> list;
@@ -53,6 +59,7 @@ public class UserLandingActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        preferenceHelper=new PreferenceHelper(this);
         setContentView(R.layout.activity_user_landing);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -89,10 +96,12 @@ public class UserLandingActivity extends AppCompatActivity
         cme.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                    Intent intent = new Intent(_context,UserActivity.class);
-                    intent.putStringArrayListExtra(templateListExtra,stringArray);
-                    intent.putExtra(tabPosition, 2);
-                    startActivity(intent);
+                Intent intent=new Intent(_context, CmeLandingActivity.class);
+                startActivity(intent);
+//                    Intent intent = new Intent(_context,UserActivity.class);
+//                    intent.putStringArrayListExtra(templateListExtra,stringArray);
+//                    intent.putExtra(tabPosition, 2);
+//                    startActivity(intent);
             }
         });
 
@@ -100,10 +109,12 @@ public class UserLandingActivity extends AppCompatActivity
         news.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                    Intent intent = new Intent(_context,UserActivity.class);
-                    intent.putStringArrayListExtra(templateListExtra,stringArray);
-                    intent.putExtra(tabPosition, 3);
-                    startActivity(intent);
+                Intent intent=new Intent(_context, NewsTabActivity.class);
+                startActivity(intent);
+//                    Intent intent = new Intent(_context,UserActivity.class);
+//                    intent.putStringArrayListExtra(templateListExtra,stringArray);
+//                    intent.putExtra(tabPosition, 3);
+//                    startActivity(intent);
             }
         });
         sp = new SharedPreference();
@@ -115,6 +126,7 @@ public class UserLandingActivity extends AppCompatActivity
             usermail.setText(jsonObject.getString("email"));
             role = jsonObject.getString("roles");
             user_id=jsonObject.getString("id");
+            preferenceHelper.addString("LOGIN_USER_ID",user_id);
             userrole.setText(role);
             team = sp.getTeamNamePreference(_context);
             System.out.println("Team Name: " + team + "\n");

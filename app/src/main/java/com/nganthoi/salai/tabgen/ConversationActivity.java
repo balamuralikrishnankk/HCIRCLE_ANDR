@@ -17,6 +17,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -48,6 +49,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.squareup.picasso.Picasso;
+
+import org.java_websocket.client.WebSocketClient;
+import org.java_websocket.handshake.ServerHandshake;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import java.io.BufferedInputStream;
@@ -61,6 +65,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -126,6 +132,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
     PreferenceHelper preferenceHelper;
     InputMethodManager inputManager;
     SwipeRefreshLayout swipeRefreshLayout;
+    WebSocketClient mWebSocketClient=null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -137,6 +144,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.back);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         Intent intent = getIntent();
+        connectWebSocket();
         channel_title = intent.getStringExtra(ChatFragment.CHANNEL_NAME);
         preferenceHelper.addString("CHANNEL_NAME",channel_title+"");
         String team_name = intent.getStringExtra(ChatFragment.TEAM_NAME);
@@ -152,11 +160,14 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
         try{
             JSONObject jObj = new JSONObject(user_details);
             user_id=jObj.getString("id");
+            Log.v("USER_ID","USER_ID:::"+user_id);
             preferenceHelper.addString("USER_ID",user_id);
         }catch(Exception e){
         }
         ip = sharedPreference.getServerIP_Preference(context);//getting ip
         preferenceHelper.addString("APPLICATION_IP",ip);
+
+        //connect with websocket
         //last_timetamp="1456185600000";
         Thread loadHistory = new Thread(){
             @Override
@@ -269,28 +280,46 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
                 if(s.length()>0){
-                    imgSentMessages.setVisibility(View.VISIBLE);
-                    writeImageButton.setVisibility(View.GONE);
+                    if(isWhitespace(s.toString())){
+                        writeImageButton.setVisibility(View.VISIBLE);
+                        imgSentMessages.setVisibility(View.GONE);
+                    }else{
+                        imgSentMessages.setVisibility(View.VISIBLE);
+                        writeImageButton.setVisibility(View.GONE);
+                    }
                 }else{
                     writeImageButton.setVisibility(View.VISIBLE);
                     imgSentMessages.setVisibility(View.GONE);
                 }
+
             }
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
+
                 if(s.length()>0){
-                    imgSentMessages.setVisibility(View.VISIBLE);
-                    writeImageButton.setVisibility(View.GONE);
+                    if(isWhitespace(s.toString())){
+                        writeImageButton.setVisibility(View.VISIBLE);
+                        imgSentMessages.setVisibility(View.GONE);
+                    }else{
+                        imgSentMessages.setVisibility(View.VISIBLE);
+                        writeImageButton.setVisibility(View.GONE);
+                    }
                 }else{
                     writeImageButton.setVisibility(View.VISIBLE);
                     imgSentMessages.setVisibility(View.GONE);
                 }
+
             }
             @Override
             public void afterTextChanged(Editable s) {
                 if(s.length()>0){
-                    imgSentMessages.setVisibility(View.VISIBLE);
-                    writeImageButton.setVisibility(View.GONE);
+                    if(isWhitespace(s.toString())){
+                        writeImageButton.setVisibility(View.VISIBLE);
+                        imgSentMessages.setVisibility(View.GONE);
+                    }else{
+                        imgSentMessages.setVisibility(View.VISIBLE);
+                        writeImageButton.setVisibility(View.GONE);
+                    }
                 }else{
                     writeImageButton.setVisibility(View.VISIBLE);
                     imgSentMessages.setVisibility(View.GONE);
@@ -298,6 +327,19 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
 
             }
         });
+    }
+
+    public static boolean isWhitespace(String str) {
+        if (str == null) {
+            return false;
+        }
+        int sz = str.length();
+        for (int i = 0; i < sz; i++) {
+            if ((Character.isWhitespace(str.charAt(i)) == false)) {
+                return false;
+            }
+        }
+        return true;
     }
     //----OnClick Listeners
     @Override
@@ -540,68 +582,87 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
             Uri fileUri;
             switch (requestCode) {
                 case REQUEST_CODE: //file_path = readFile.getFilePath(fileUri,context);
-                    if (data.getData() != null) {
-                        fileUri = data.getData();
-                        file_path = ReadFile.getPath(fileUri, context);
-                        String mimetype = getMimeType(file_path);
+//                    try {
+                        if (data.getData() != null) {
+                            fileUri = data.getData();
+                            file_path = ReadFile.getPath(fileUri, context);
+                            String mimetype = getMimeType(file_path);
+                           if(mimetype!=null) {
+                               if (file_path != null) {
 
-                        Methods.toastShort(mimetype, this);
-                        if (file_path != null) {
+                                   if (file_path.contains(".mp3")) {
+                                       new Thread(new Runnable() {
+                                           public void run() {
+                                               runOnUiThread(new Runnable() {
+                                                   @Override
+                                                   public void run() {
+                                                       UploadFile uploadFile = new UploadFile(file_path, "http://" + ip + ":8065/api/v1/files/upload");
+                                                       uploadFile.execute();
 
-                            if (file_path.contains(".mp3")) {
-                                new Thread(new Runnable() {
-                                    public void run() {
-                                        runOnUiThread(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                UploadFile uploadFile = new UploadFile(file_path, "http://" + ip + ":8065/api/v1/files/upload");
-                                                uploadFile.execute();
+                                                   }
+                                               });
+                                           }
+                                       }).start();
 
-                                            }
-                                        });
-                                    }
-                                }).start();
+                                   } else if (mimetype.contains("image/")) {
 
-                            } else if (mimetype.contains("application/")) {
-                                new Thread(new Runnable() {
-                                    public void run() {
-                                        runOnUiThread(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                UploadFile uploadFile = new UploadFile(file_path, "http://" + ip + ":8065/api/v1/files/upload");
-                                                uploadFile.execute();
+                                       Intent intent = new Intent(ConversationActivity.this, UploadActivity.class);
+                                       Bundle bundle = new Bundle();
+                                       bundle.putString("IP_VALUE", ip);
+                                       bundle.putString("FILE_PATH", file_path);
+                                       bundle.putString("TOKEN", token);
+                                       bundle.putString("CHANNEL_ID", channel_id);
+                                       bundle.putString("TYPE", "IMAGE");
+                                       intent.putExtras(bundle);
+                                       startActivityForResult(intent, UPLOAD_REQUEST_CODE);
+                                   } else if (mimetype.contains("video/")) {
+                                       new Thread(new Runnable() {
+                                           public void run() {
+                                               runOnUiThread(new Runnable() {
+                                                   @Override
+                                                   public void run() {
+                                                       UploadFile uploadFile = new UploadFile(file_path, "http://" + ip + ":8065/api/v1/files/upload");
+                                                       uploadFile.execute();
 
-                                            }
-                                        });
-                                    }
-                                }).start();
-                            } else if (mimetype.contains("image/")) {
+                                                   }
+                                               });
+                                           }
+                                       }).start();
+                                   } else {
+                                       new Thread(new Runnable() {
+                                           public void run() {
+                                               runOnUiThread(new Runnable() {
+                                                   @Override
+                                                   public void run() {
+                                                       UploadFile uploadFile = new UploadFile(file_path, "http://" + ip + ":8065/api/v1/files/upload");
+                                                       uploadFile.execute();
 
-                                Intent intent = new Intent(ConversationActivity.this, UploadActivity.class);
-                                Bundle bundle = new Bundle();
-                                bundle.putString("IP_VALUE", ip);
-                                bundle.putString("FILE_PATH", file_path);
-                                bundle.putString("TOKEN", token);
-                                bundle.putString("CHANNEL_ID", channel_id);
-                                bundle.putString("TYPE", "IMAGE");
-                                intent.putExtras(bundle);
-                                startActivityForResult(intent, UPLOAD_REQUEST_CODE);
-                            } else if (mimetype.contains("video/")) {
-                                new Thread(new Runnable() {
-                                    public void run() {
-                                        runOnUiThread(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                UploadFile uploadFile = new UploadFile(file_path, "http://" + ip + ":8065/api/v1/files/upload");
-                                                uploadFile.execute();
+                                                   }
+                                               });
+                                           }
+                                       }).start();
+                                   }
+                               }
+                           }else {
+                               new Thread(new Runnable() {
+                                   public void run() {
+                                       runOnUiThread(new Runnable() {
+                                           @Override
+                                           public void run() {
+                                               UploadFile uploadFile = new UploadFile(file_path, "http://" + ip + ":8065/api/v1/files/upload");
+                                               uploadFile.execute();
 
-                                            }
-                                        });
-                                    }
-                                }).start();
-                            }
+                                           }
+                                       });
+                                   }
+                               }).start();
+                           }
+                        }else{
+                            Log.v("ELSE","ELSE:::");
                         }
-                    }
+//                    }catch (Exception e){
+//                        Log.v("Exception","Exception::::"+e.toString());
+//                    }
                     break;
                 case PICK_CONTACT:
                     String phone=null,name=null;
@@ -671,7 +732,8 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
                     Toast.makeText(context, "Invalid request code. You haven't selected any file", Toast.LENGTH_SHORT).show();
             }
         }catch (Exception e){
-            Methods.toastShort("Oops! Something went wrong..",this);
+
+            Methods.toastShort("Oops! Something went wrong.."+e.toString(),this);
         }
     }
 
@@ -720,7 +782,6 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
                         Long timestamp = Long.parseLong(last_timetamp);
                         Date date = new Date(timestamp);
                         chatMessage.setDate(simpleDateFormat.format(date));
-
                         JSONArray files = json_obj.getJSONArray("filenames");
                         if(files.length()!=0){
                             chatMessage.setFileList(files.getString(0));
@@ -920,7 +981,6 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
         return result;
     }
 
-
     public class UploadFile extends AsyncTask<Void, String, String>{
         URL connectURL;
         String serverRespMsg,file_upload_uri=null;
@@ -975,7 +1035,6 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
                     OutputStreamWriter osw = new OutputStreamWriter(httpURLConn.getOutputStream());
                     osw.write("files=" + fileLocation + "&channel_id=" + channel_id);
                     dos = new DataOutputStream(httpURLConn.getOutputStream());
-
                     dos.writeBytes(twoHyphens+boundary+lineEnd);
                     dos.writeBytes("Content-Disposition: form-data; name=\"channel_id\""+lineEnd+lineEnd);
                     dos.writeBytes(channel_id+lineEnd);
@@ -1003,9 +1062,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
                     serverRespCode = httpURLConn.getResponseCode();
                     serverRespMsg = httpURLConn.getResponseMessage();
                     System.out.println("File Upload Response: " + serverRespCode + " " + serverRespMsg);
-
                     if(serverRespCode==200){
-                        //Toast.makeText(context,"Your file upload is successfully completed",Toast.LENGTH_LONG).show();
                         System.out.println("Your file upload is successfully completed");
                         isr = new BufferedInputStream(httpURLConn.getInputStream());
                         progressDialog.setCancelable(true);
@@ -1020,7 +1077,10 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
                     osw.close();
 
                 }catch(Exception e){
+                    Log.v("UPLOAD","UPLOAD FILE:::"+e.toString());
+
                     e.printStackTrace();
+
                     System.out.println("File Upload Exception here: " + e.toString());
                     progressDialog.setCancelable(true);
                     return null;
@@ -1059,6 +1119,25 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
                                 System.out.print("Message Sending failed: " + e.toString());
                             }
                         }else if(file_path.contains(".mp4")){
+                            try{
+                                filenames=fileObject.getJSONArray("filenames");
+                                JSONObject jsonObject = new JSONObject();
+
+                                if(filenames!=null && filenames.length()>0){
+                                    jsonObject.put("filenames",filenames);
+                                }
+                                jsonObject.put("channel_id", channel_id);
+                                jsonObject.put("root_id", "");
+                                jsonObject.put("parent_id","");
+                                jsonObject.put("Message", " ");
+
+                                sendMyMessage(jsonObject);
+                                filenames=null;
+                            } catch (Exception e) {
+                                Log.v("MESSAGE","Message Sending failed");
+                                System.out.print("Message Sending failed: " + e.toString());
+                            }
+                        }else{
                             try{
                                 filenames=fileObject.getJSONArray("filenames");
                                 JSONObject jsonObject = new JSONObject();
@@ -1242,6 +1321,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
         }
         @Override
         protected void onPostExecute(String resp) {
+            Log.v("HISTORY","HISTORY:::"+resp);
             List<ChatMessage> msgList = new ArrayList<ChatMessage>();
             if(resp!=null && responseCode==200) {
                 try {
@@ -1268,7 +1348,6 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
                                 if(jObj3.getString("root_id").equals("")) {
                                     ChatMessage currentMsg = new ChatMessage();
                                     currentMsg.setId(jObj3.getString("id"));
-
                                     currentMsg.setMessage("" + jObj3.getString("message"));
                                     Long timeStamp = Long.parseLong(messageDate);
                                     Date date = new Date(timeStamp);
@@ -1408,6 +1487,50 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
         }
 
     }
+    private void connectWebSocket() {
+        URI uri;
+        try {
 
+            uri = new URI("ws://"+ip+":8065/api/v1/users/websocket");
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+            Log.v("URISyntaxException","URISyntaxException::"+e.toString());
+            return;
+        }
+
+        mWebSocketClient = new WebSocketClient(uri) {
+            @Override
+            public void onOpen(ServerHandshake serverHandshake) {
+                Log.v("Websocket", "Opened::::"+serverHandshake.getHttpStatusMessage());
+
+                mWebSocketClient.send("Hello from " + Build.MANUFACTURER + " " + Build.MODEL);
+            }
+
+            @Override
+            public void onMessage(final String s) {
+                final String message = s;
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                            Log.v("OnMAESSAGE","OnMAESSAGE::"+s);
+//                        adapter.add();
+//                        TextView textView = (TextView)findViewById(R.id.messages);
+//                        textView.setText(textView.getText() + "\n" + message);
+                    }
+                });
+            }
+
+            @Override
+            public void onClose(int i, String s, boolean b) {
+                Log.v("Websocket", "Closed " + s);
+            }
+
+            @Override
+            public void onError(Exception e) {
+                Log.v("Websocket", "Error " + e.getMessage());
+            }
+        };
+        mWebSocketClient.connect();
+    }
 
 }

@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -70,7 +71,6 @@ public class ChatFragment extends Fragment {
         expandableListTitle = new ArrayList<String>(expandableListDetail.keySet());
         expandableListAdapter= new ExpandableListAdapter(chatView.getContext(),expandableListTitle,expandableListDetail);
         expandableListView.setAdapter(expandableListAdapter);
-        //layoutGroupHeader = layoutInflater.inflate(R.layout.list_group, null);
         expandableListView.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
             @Override
             public void onGroupExpand(int groupPosition) {

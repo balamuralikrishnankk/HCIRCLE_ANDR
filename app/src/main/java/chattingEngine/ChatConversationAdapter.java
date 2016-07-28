@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.StrictMode;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -42,6 +43,7 @@ import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
 import org.json.JSONObject;
+import org.ocpsoft.pretty.time.PrettyTime;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -49,8 +51,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -77,6 +81,7 @@ import sharePreference.SharedPreference;
  */
 public class ChatConversationAdapter extends RecyclerView.Adapter<ChatConversationAdapter.ChatViewHolder> implements DownloadListeners, LikeAndDislikeListener {
     private List<ChatMessage> chatMessages;
+    private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy' at 'h:mm a");
     private Activity context;
     ViewHolder viewHolder;
     private String fileInfo;
@@ -99,6 +104,7 @@ public class ChatConversationAdapter extends RecyclerView.Adapter<ChatConversati
         ip = sp.getServerIP_Preference(context);
         token = sp.getTokenPreference(context);
         preferenceHelper=new PreferenceHelper(context);
+        preferenceHelper.addString("TOKEN_ID",token);
     }
 
     @Override
@@ -196,7 +202,7 @@ public class ChatConversationAdapter extends RecyclerView.Adapter<ChatConversati
         return new ChatViewHolder(itemView);
     }
     public static boolean validateFileExtn(String name){
-        Pattern fileExtnPtrn = Pattern.compile("([^\\s]+(\\.(?i)(txt|doc|csv|pdf))$)");
+        Pattern fileExtnPtrn = Pattern.compile("([^\\s]+(\\.(?i)(txt|doc|csv|pdf|docx|ppt|pptx|xls|xlsx|rtf|wav|rar|zip|txt))$)");
         Matcher mtch = fileExtnPtrn.matcher(name);
         if(mtch.matches()){
             return true;
@@ -240,9 +246,17 @@ public class ChatConversationAdapter extends RecyclerView.Adapter<ChatConversati
         }else{
             holder.imgBookmark.setImageResource(R.drawable.icon_my_bookmark_gray);
         }
+        try {
+            Date date = simpleDateFormat.parse(chatMessages.get(position).getDate());
+            PrettyTime prettyTime = new PrettyTime();
+            Log.v("DATE","DATE:::"+prettyTime.format(date));
+            holder.txtdateInfo.setText(""+prettyTime.format(date));
+        }catch (Exception e){
+
+        }
+
         if(chatMessages.get(position).getNo_of_reply()!=null){
             if(Integer.parseInt(chatMessages.get(position).getNo_of_reply())>0){
-
                 holder.txtReplyCount.setVisibility(View.VISIBLE);
                 holder.txtReplyCount.setTextColor(Color.parseColor("#1a89c6"));
                 holder.txtReplyCount.setText(chatMessages.get(position).getNo_of_reply() + "");
@@ -296,10 +310,12 @@ public class ChatConversationAdapter extends RecyclerView.Adapter<ChatConversati
                 }
             }
         });
+        Log.v("EMOJI","EMOJI::"+chatMessages.get(position).getMessage());
         holder.txtsender.setText(chatMessages.get(position).getSenderName());
-        holder.txtMessage.setText(chatMessages.get(position).getMessage());
-        holder.txtdateInfo.setText(chatMessages.get(position).getDate());
+        holder.txtMessage.setText(" "+chatMessages.get(position).getMessage());
+//        holder.txtdateInfo.setText(chatMessages.get(position).getDate());
         if(chatMessages.get(position).getFileList()!=null){
+            Log.v("FILE","FILE:::"+chatMessages.get(position).getFileList());
             String[] name=chatMessages.get(position).getFileList().split("/");
             if(validateFileExtn(chatMessages.get(position).getFileList())){
                 holder.rlDocumentFile.setVisibility(View.VISIBLE);

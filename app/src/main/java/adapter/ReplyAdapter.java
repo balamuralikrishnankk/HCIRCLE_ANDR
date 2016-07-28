@@ -33,6 +33,7 @@ import com.squareup.picasso.Picasso;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.ocpsoft.pretty.time.PrettyTime;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -223,17 +224,26 @@ public class ReplyAdapter extends RecyclerView.Adapter<ReplyAdapter.ChatViewHold
                     .error(R.drawable.username)
                     .into(holder.imgProfile);
         }
-        if(String.valueOf(replyMessages.get(position).getNo_of_likes())!=null){
-            if(replyMessages.get(position).getNo_of_likes()>0){
+        if(String.valueOf(replyMessages.get(position+1).getNo_of_likes())!=null){
+            if(replyMessages.get(position+1).getNo_of_likes()>0){
                 holder.txtLikeCount.setVisibility(View.VISIBLE);
                 holder.txtLikeCount.setTextColor(Color.parseColor("#1a89c6"));
-                holder.txtLikeCount.setText(""+replyMessages.get(position).getNo_of_likes());
+                holder.txtLikeCount.setText(""+replyMessages.get(position+1).getNo_of_likes());
             }else{
                 holder.txtLikeCount.setTextColor(Color.BLACK);
                 holder.txtLikeCount.setVisibility(View.GONE);
             }
         }
+        try {
+            Long timeStamp = Long.parseLong(""+replyMessages.get(position+1).getCreateAt());
+            Date date = new Date(timeStamp);
+            String datetime= simpleDateFormat.format(date);
+            Date date1 = simpleDateFormat.parse(datetime);
+            PrettyTime prettyTime = new PrettyTime();
+            holder.txtdateInfo.setText(""+prettyTime.format(date));
+        }catch (Exception e){
 
+        }
         if(replyMessages.get(position).isLikedByYou()){
             holder.imgFavorite.setImageResource(R.drawable.icon_love);
         }else{
@@ -244,7 +254,7 @@ public class ReplyAdapter extends RecyclerView.Adapter<ReplyAdapter.ChatViewHold
             public void onClick(View v) {
                 if (NetworkHelper.isOnline(context)) {
                     WebServiceHelper webServiceHelper = new WebServiceHelper();
-                    webServiceHelper.updateLike(context, ip, preferenceHelper.getString("USER_ID"), replyMessages.get(position).getId(), ReplyAdapter.this);
+                    webServiceHelper.updateLike(context, ip, preferenceHelper.getString("USER_ID"), replyMessages.get(position+1).getId(), ReplyAdapter.this);
                 }
             }
         });
@@ -258,13 +268,6 @@ public class ReplyAdapter extends RecyclerView.Adapter<ReplyAdapter.ChatViewHold
         }else{
 
         }
-
-//        if(replyMessages.get(position+1).getUserId()!=null){
-//            holder.txtsender.setText(getUsernameById(replyMessages.get(position+1).getUserId())+"");
-//        }else{
-//            holder.txtsender.setText("");
-//        }
-
         holder.txtMessage.setText(replyMessages.get(position+1).getMessage()+"");
         if(replyMessages.get(position+1).getFilenames()!=null && replyMessages.get(position+1).getFilenames().size()>0){
             String[] name=replyMessages.get(position+1).getFilenames().get(0).split("/");
